@@ -16,3 +16,11 @@ create table tag (
     , created_at text not null default current_timestamp
     , updated_at text not null default current_timestamp
 );
+
+create table source (
+    id           int  primary key
+    , name       text not null unique
+    , link       text
+    , created_at text not null default current_timestamp
+    , updated_at text not null default current_timestamp
+);
