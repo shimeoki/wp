@@ -3,6 +3,7 @@ create table status (
     , name text not null unique
 );
 
+
 create table alias (
     id integer primary key
     , name       text not null
@@ -24,6 +25,7 @@ begin
     where id = new.id;
 end;
 
+
 create table tag (
     id integer primary key
     , name       text not null unique
@@ -44,6 +46,7 @@ begin
     set updated_at = current_timestamp
     where id = new.id;
 end;
+
 
 create table source (
     id integer primary key
@@ -67,6 +70,7 @@ begin
     where id = new.id;
 end;
 
+
 create table wallpaper (
     id integer primary key
     , hash       text not null unique
@@ -89,6 +93,7 @@ begin
     where id = new.id;
 end;
 
+
 create table wallpaper_alias (
     wallpaper_id integer,
     alias_id     integer,
@@ -103,6 +108,7 @@ create table wallpaper_alias (
         on update cascade
         on delete cascade
 );
+
 
 create table wallpaper_tag (
     wallpaper_id integer,
@@ -119,6 +125,7 @@ create table wallpaper_tag (
         on delete cascade
 );
 
+
 create table wallpaper_source (
     wallpaper_id integer,
     source_id    integer,
@@ -133,6 +140,7 @@ create table wallpaper_source (
         on update cascade
         on delete cascade
 );
+
 
 create table queue (
     id integer primary key
