@@ -47,3 +47,18 @@ create table wallpaper_alias (
         on update cascade
         on delete cascade
 );
+
+create table wallpaper_tag (
+    wallpaper_id int,
+    tag_id       int,
+
+    primary key (wallpaper_id, tag_id)
+
+    , foreign key (wallpaper_id) references wallpaper (id)
+        on update cascade
+        on delete cascade
+
+    , foreign key (tag_id) references tag (id)
+        on update cascade
+        on delete cascade
+);
