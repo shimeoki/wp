@@ -10,6 +10,20 @@ create table alias (
     , updated_at text not null default current_timestamp
 );
 
+create trigger alias_keep_ts
+update of created_at on alias
+begin
+    select raise(abort, '''created_at'' shouldn''t be updated');
+end;
+
+create trigger alias_update_ts
+after update of id, name on alias
+begin
+    update alias
+    set updated_at = current_timestamp
+    where id = new.id;
+end;
+
 create table tag (
     id integer primary key
     , name       text not null unique
