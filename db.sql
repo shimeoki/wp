@@ -5,7 +5,7 @@ create table status (
 
 create table alias (
     id           int  primary key
-    , name       text not null unique
+    , name       text not null
     , created_at text not null default current_timestamp
     , updated_at text not null default current_timestamp
 );
@@ -19,7 +19,7 @@ create table tag (
 
 create table source (
     id           int  primary key
-    , name       text not null unique
+    , name       text not null
     , link       text
     , created_at text not null default current_timestamp
     , updated_at text not null default current_timestamp
