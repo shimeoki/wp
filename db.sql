@@ -75,6 +75,20 @@ create table wallpaper (
     , updated_at text not null default current_timestamp
 );
 
+create trigger wallpaper_keep_ts
+update of created_at on wallpaper
+begin
+    select raise(abort, '''created_at'' shouldn''t be updated');
+end;
+
+create trigger wallpaper_update_ts
+after update of id, hash, extension on wallpaper
+begin
+    update wallpaper
+    set updated_at = current_timestamp
+    where id = new.id;
+end;
+
 create table wallpaper_alias (
     wallpaper_id integer,
     alias_id     integer,
