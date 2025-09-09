@@ -9,3 +9,10 @@ create table alias (
     , created_at text not null default current_timestamp
     , updated_at text not null default current_timestamp
 );
+
+create table tag (
+    id           int  primary key
+    , name       text not null unique
+    , created_at text not null default current_timestamp
+    , updated_at text not null default current_timestamp
+);
