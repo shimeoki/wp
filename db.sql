@@ -24,3 +24,11 @@ create table source (
     , created_at text not null default current_timestamp
     , updated_at text not null default current_timestamp
 );
+
+create table wallpaper (
+    id           int  primary key,
+    , hash       text not null unique
+    , extension  text not null
+    , created_at text not null default current_timestamp
+    , updated_at text not null default current_timestamp
+);
