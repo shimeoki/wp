@@ -31,6 +31,20 @@ create table tag (
     , updated_at text not null default current_timestamp
 );
 
+create trigger tag_keep_ts
+update of created_at on tag
+begin
+    select raise(abort, '''created_at'' shouldn''t be updated');
+end;
+
+create trigger tag_update_ts
+after update of id, name on tag
+begin
+    update tag
+    set updated_at = current_timestamp
+    where id = new.id;
+end;
+
 create table source (
     id integer primary key
     , name       text not null
