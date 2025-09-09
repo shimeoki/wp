@@ -53,6 +53,20 @@ create table source (
     , updated_at text not null default current_timestamp
 );
 
+create trigger source_keep_ts
+update of created_at on source
+begin
+    select raise(abort, '''created_at'' shouldn''t be updated');
+end;
+
+create trigger source_update_ts
+after update of id, name, link on source
+begin
+    update source
+    set updated_at = current_timestamp
+    where id = new.id;
+end;
+
 create table wallpaper (
     id integer primary key
     , hash       text not null unique
