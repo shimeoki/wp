@@ -77,3 +77,20 @@ create table wallpaper_source (
         on update cascade
         on delete cascade
 );
+
+create table queue (
+    id             int  primary key
+    , wallpaper_id int  not null
+    , status_id    int  not null
+    , priority     int  not null
+    , created_at   text not null default current_timestamp
+    , updated_at   text not null default current_timestamp
+
+    , foreign key (wallpaper_id) references wallpaper (id)
+        on update cascade
+        on delete cascade
+
+    , foreign key (status_id) references status (id)
+        on update cascade
+        on delete cascade
+);
