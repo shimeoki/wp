@@ -26,7 +26,7 @@ create table source (
 );
 
 create table wallpaper (
-    id           int  primary key,
+    id           int  primary key
     , hash       text not null unique
     , extension  text not null
     , created_at text not null default current_timestamp
@@ -37,7 +37,7 @@ create table wallpaper_alias (
     wallpaper_id int,
     alias_id     int,
 
-    primary key (wallpaper_id, alias_id),
+    primary key (wallpaper_id, alias_id)
 
     , foreign key (wallpaper_id) references wallpaper (id)
         on update cascade
