@@ -150,3 +150,17 @@ create table queue (
         on update cascade
         on delete cascade
 );
+
+create trigger queue_keep_ts
+update of created_at on queue
+begin
+    select raise(abort, '''created_at'' shouldn''t be updated');
+end;
+
+create trigger queue_update_ts
+after update of id, wallpaper_id, status_id, priority on queue
+begin
+    update queue
+    set updated_at = current_timestamp
+    where id = new.id;
+end;
