@@ -62,3 +62,18 @@ create table wallpaper_tag (
         on update cascade
         on delete cascade
 );
+
+create table wallpaper_source (
+    wallpaper_id int,
+    source_id    int,
+
+    primary key (wallpaper_id, source_id)
+
+    , foreign key (wallpaper_id) references wallpaper (id)
+        on update cascade
+        on delete cascade
+
+    , foreign key (source_id) references source (id)
+        on update cascade
+        on delete cascade
+);
