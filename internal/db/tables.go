@@ -2,11 +2,6 @@ package db
 
 import "time"
 
-type Status struct {
-	ID   int
-	Name string
-}
-
 type Alias struct {
 	ID        int
 	Name      string
