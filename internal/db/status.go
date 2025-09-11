@@ -16,5 +16,5 @@ type StatusRepo interface {
 
 	Update(ctx context.Context, s *Status) error
 
-	Delete(ctx context.Context, s *Status) error
+	Delete(ctx context.Context, id int) error
 }
