@@ -2,14 +2,6 @@ package db
 
 import "time"
 
-type Source struct {
-	ID        int
-	Name      string
-	Link      *string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
 type Wallpaper struct {
 	ID        int
 	Hash      string
