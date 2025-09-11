@@ -13,12 +13,10 @@ type Alias struct {
 }
 
 type AliasRepo interface {
-	Create(ctx context.Context, a *Alias) error
-
 	GetAll(ctx context.Context) ([]*Alias, error)
 	GetByID(ctx context.Context, id int) (*Alias, error)
 
+	Create(ctx context.Context, a *Alias) error
 	Update(ctx context.Context, a *Alias) error
-
 	Delete(ctx context.Context, id int) error
 }
