@@ -14,9 +14,9 @@ type Alias struct {
 
 type AliasRepo interface {
 	GetAll(ctx context.Context) ([]*Alias, error)
-	GetByID(ctx context.Context, id int) (*Alias, error)
+	GetByID(ctx context.Context, ids ...int) ([]*Alias, error)
 
-	Create(ctx context.Context, a *Alias) error
-	Update(ctx context.Context, a *Alias) error
-	Delete(ctx context.Context, id int) error
+	Create(ctx context.Context, as ...*Alias) error
+	Update(ctx context.Context, as ...*Alias) error
+	Delete(ctx context.Context, ids ...int) error
 }

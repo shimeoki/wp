@@ -14,10 +14,10 @@ type Tag struct {
 
 type TagRepo interface {
 	GetAll(ctx context.Context) ([]*Tag, error)
-	GetByID(ctx context.Context, id int) (*Tag, error)
-	GetByName(ctx context.Context, name string) (*Tag, error)
+	GetByID(ctx context.Context, ids ...int) ([]*Tag, error)
+	GetByName(ctx context.Context, names ...string) ([]*Tag, error)
 
-	Create(ctx context.Context, t *Tag) error
-	Update(ctx context.Context, t *Tag) error
-	Delete(ctx context.Context, id int) error
+	Create(ctx context.Context, ts ...*Tag) error
+	Update(ctx context.Context, ts ...*Tag) error
+	Delete(ctx context.Context, ids ...int) error
 }
