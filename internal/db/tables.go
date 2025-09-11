@@ -2,13 +2,6 @@ package db
 
 import "time"
 
-type Alias struct {
-	ID        int
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
 type Tag struct {
 	ID        int
 	Name      string
