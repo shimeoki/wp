@@ -59,3 +59,15 @@ func (r *sqliteStatusRepo) GetByID(
 
 	return &s, err
 }
+
+func (r *sqliteStatusRepo) GetByName(
+	ctx context.Context,
+	name string,
+) (*Status, error) {
+	sql := "select id, name from status where name = ?"
+
+	var s Status
+	err := r.db.QueryRowContext(ctx, sql, name).Scan(&s.ID, &s.Name)
+
+	return &s, err
+}
