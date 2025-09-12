@@ -36,18 +36,14 @@ func (r *sqliteStatusRepo) GetAll(ctx context.Context) ([]*Status, error) {
 	var ss []*Status
 
 	for rows.Next() {
-		s := &Status{}
+		var s Status
 
 		if err := rows.Scan(&s.ID, &s.Name); err != nil {
 			return nil, err
 		}
 
-		ss = append(ss, s)
+		ss = append(ss, &s)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return ss, nil
+	return ss, rows.Err()
 }
