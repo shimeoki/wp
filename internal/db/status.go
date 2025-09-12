@@ -87,3 +87,19 @@ func (r *sqliteStatusRepo) Create(ctx context.Context, s *Status) error {
 
 	return nil
 }
+
+func (r *sqliteStatusRepo) Update(ctx context.Context, s *Status) error {
+	sql := "update status set name = ? where id = ?"
+
+	_, err := r.db.ExecContext(ctx, sql, s.Name, s.ID)
+
+	return err
+}
+
+func (r *sqliteStatusRepo) Delete(ctx context.Context, id int64) error {
+	sql := "delete from status where id = ?"
+
+	_, err := r.db.ExecContext(ctx, sql, id)
+
+	return err
+}
