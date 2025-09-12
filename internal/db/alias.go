@@ -6,7 +6,7 @@ import (
 )
 
 type Alias struct {
-	ID        int
+	ID        int64 // primary key
 	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -14,9 +14,9 @@ type Alias struct {
 
 type AliasRepo interface {
 	GetAll(ctx context.Context) ([]*Alias, error)
-	GetByID(ctx context.Context, ids ...int) ([]*Alias, error)
+	GetByID(ctx context.Context, id int64) (*Alias, error)
 
-	Create(ctx context.Context, as ...*Alias) error
-	Update(ctx context.Context, as ...*Alias) error
-	Delete(ctx context.Context, ids ...int) error
+	Create(ctx context.Context, a *Alias) error
+	Update(ctx context.Context, a *Alias) error
+	Delete(ctx context.Context, id int64) error
 }
