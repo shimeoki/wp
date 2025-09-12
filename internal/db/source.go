@@ -7,8 +7,8 @@ import (
 )
 
 type Source struct {
-	ID        int64  // primary key
-	Name      string // unique
+	ID        int64 // primary key
+	Name      string
 	Link      *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
