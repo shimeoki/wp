@@ -47,3 +47,15 @@ func (r *sqliteStatusRepo) GetAll(ctx context.Context) ([]*Status, error) {
 
 	return ss, rows.Err()
 }
+
+func (r *sqliteStatusRepo) GetByID(
+	ctx context.Context,
+	id int,
+) (*Status, error) {
+	sql := "select id, name from status where id = ?"
+
+	var s Status
+	err := r.db.QueryRowContext(ctx, sql, id).Scan(&s.ID, &s.Name)
+
+	return &s, err
+}
