@@ -16,11 +16,11 @@ type Source struct {
 
 type SourceRepo interface {
 	GetAll(ctx context.Context) ([]*Source, error)
-	GetByID(ctx context.Context, id int) (*Source, error)
+	GetByID(ctx context.Context, id int64) (*Source, error)
 
 	Create(ctx context.Context, s *Source) error
 	Update(ctx context.Context, s *Source) error
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int64) error
 }
 
 type sqliteSourceRepo struct {
