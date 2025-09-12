@@ -1,6 +1,10 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
+
+	_ "modernc.org/sqlite"
+)
 
 // todo: import driver
 
