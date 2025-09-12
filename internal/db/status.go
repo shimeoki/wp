@@ -71,3 +71,20 @@ func (r *sqliteStatusRepo) GetByName(
 
 	return &s, err
 }
+
+func (r *sqliteStatusRepo) Create(ctx context.Context, s *Status) error {
+	sql := "insert into status(name) values (?)"
+
+	result, err := r.db.ExecContext(ctx, sql, s.Name)
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	s.ID = int(id)
+	return nil
+}
