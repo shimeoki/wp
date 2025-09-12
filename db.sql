@@ -1,3 +1,5 @@
+pragma foreign_keys = on;
+
 create table status (
     id integer primary key
     , name text not null unique
