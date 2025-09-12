@@ -6,8 +6,8 @@ import (
 )
 
 type Status struct {
-	ID   int
-	Name string
+	ID   int    // primary key
+	Name string // unique
 }
 
 type StatusRepo interface {
