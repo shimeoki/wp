@@ -12,12 +12,12 @@ type Status struct {
 
 type StatusRepo interface {
 	GetAll(ctx context.Context) ([]*Status, error)
-	GetByID(ctx context.Context, ids ...int) ([]*Status, error)
-	GetByName(ctx context.Context, names ...string) ([]*Status, error)
+	GetByID(ctx context.Context, id int) (*Status, error)
+	GetByName(ctx context.Context, name string) (*Status, error)
 
-	Create(ctx context.Context, ss ...*Status) error
-	Update(ctx context.Context, ss ...*Status) error
-	Delete(ctx context.Context, ids ...int) error
+	Create(ctx context.Context, s *Status) error
+	Update(ctx context.Context, s *Status) error
+	Delete(ctx context.Context, id int) error
 }
 
 type sqliteStatusRepo struct {
