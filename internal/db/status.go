@@ -6,18 +6,18 @@ import (
 )
 
 type Status struct {
-	ID   int    // primary key
+	ID   int64  // primary key
 	Name string // unique
 }
 
 type StatusRepo interface {
 	GetAll(ctx context.Context) ([]*Status, error)
-	GetByID(ctx context.Context, id int) (*Status, error)
+	GetByID(ctx context.Context, id int64) (*Status, error)
 	GetByName(ctx context.Context, name string) (*Status, error)
 
 	Create(ctx context.Context, s *Status) error
 	Update(ctx context.Context, s *Status) error
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int64) error
 }
 
 type sqliteStatusRepo struct {
@@ -50,7 +50,7 @@ func (r *sqliteStatusRepo) GetAll(ctx context.Context) ([]*Status, error) {
 
 func (r *sqliteStatusRepo) GetByID(
 	ctx context.Context,
-	id int,
+	id int64,
 ) (*Status, error) {
 	sql := "select id, name from status where id = ?"
 
@@ -80,11 +80,10 @@ func (r *sqliteStatusRepo) Create(ctx context.Context, s *Status) error {
 		return err
 	}
 
-	id, err := result.LastInsertId()
+	s.ID, err = result.LastInsertId()
 	if err != nil {
 		return err
 	}
 
-	s.ID = int(id)
 	return nil
 }
