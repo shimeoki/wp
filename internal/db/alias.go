@@ -27,7 +27,7 @@ type sqliteAliasRepo struct {
 }
 
 func (r *sqliteAliasRepo) GetAll(ctx context.Context) ([]*Alias, error) {
-	sql := "select id, name, created_at, updated_at"
+	sql := "select id, name, created_at, updated_at from alias"
 
 	rows, err := r.db.QueryContext(ctx, sql)
 	if err != nil {

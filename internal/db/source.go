@@ -58,7 +58,7 @@ func (r *sqliteSourceRepo) GetByID(
 ) (*Source, error) {
 	sql := `
 		select
-			id,
+			id
 			, name
 			, link
 			, created_at

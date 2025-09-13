@@ -92,7 +92,7 @@ func (r *sqliteWallpaperRepo) GetByID(
 ) (*Wallpaper, error) {
 	sql := `
 		select
-			id,
+			id
 			, hash
 			, extension
 			, created_at
@@ -118,7 +118,7 @@ func (r *sqliteWallpaperRepo) GetByHash(
 ) (*Wallpaper, error) {
 	sql := `
 		select
-			id,
+			id
 			, hash
 			, extension
 			, created_at
@@ -187,7 +187,7 @@ func (r *sqliteWallpaperRepo) RemoveAlias(
 	ctx context.Context,
 	join *WallpaperAlias,
 ) error {
-	sql := "delete from wallpaper_alias where wallpaper_id = ?, alias_id = ?"
+	sql := "delete from wallpaper_alias where wallpaper_id = ? and alias_id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, join.WallpaperID, join.AliasID)
 
@@ -211,7 +211,7 @@ func (r *sqliteWallpaperRepo) RemoveTag(
 	ctx context.Context,
 	join *WallpaperTag,
 ) error {
-	sql := "delete from wallpaper_tag where wallpaper_id = ?, tag_id = ?"
+	sql := "delete from wallpaper_tag where wallpaper_id = ? and tag_id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, join.WallpaperID, join.TagID)
 
@@ -235,7 +235,7 @@ func (r *sqliteWallpaperRepo) RemoveSource(
 	ctx context.Context,
 	join *WallpaperSource,
 ) error {
-	sql := "delete from wallpaper_source where wallpaper_id = ?, source_id = ?"
+	sql := "delete from wallpaper_source where wallpaper_id = ? and source_id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, join.WallpaperID, join.SourceID)
 
