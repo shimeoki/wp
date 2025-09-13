@@ -7,20 +7,32 @@ import (
 )
 
 type Queue struct {
-	ID          int64 // primary key
-	WallpaperID int64 // foreign key
-	StatusID    int64 // foreign key
+	ID          int64
+	WallpaperID int64
+	Status      *Status
 	Priority    int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type QueueCreate struct {
+	WallpaperID int64
+	StatusID    int64
+	Priority    int
+}
+
+type QueueUpdate struct {
+	ID       int64
+	StatusID int64
+	Priority int
 }
 
 type QueueRepo interface {
 	GetAll(ctx context.Context) ([]*Queue, error)
 	GetByID(ctx context.Context, id int64) (*Queue, error)
 
-	Create(ctx context.Context, q *Queue) error
-	Update(ctx context.Context, q *Queue) error
+	Create(ctx context.Context, q *QueueCreate) (int64, error)
+	Update(ctx context.Context, q *QueueUpdate) error
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -31,13 +43,15 @@ type sqliteQueueRepo struct {
 func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 	sql := `
 		select
-			id,
-			wallpaper_id,
-			status_id,
-			priority,
-			created_at,
-			updated_at
-		from queue`
+			q.id
+			, q.wallpaper_id
+			, q.priority
+			, q.created_at
+			, q.updated_at
+			, s.id
+			, s.name
+		from queue as q
+		left join status as s on q.status_id = s.id`
 
 	rows, err := r.db.QueryContext(ctx, sql)
 	if err != nil {
@@ -48,15 +62,17 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 	var qs []*Queue
 
 	for rows.Next() {
-		var q Queue
+		var s Status
+		q := Queue{Status: &s}
 
 		err := rows.Scan(
 			&q.ID,
 			&q.WallpaperID,
-			&q.StatusID,
 			&q.Priority,
 			&q.CreatedAt,
 			&q.UpdatedAt,
+			&s.ID,
+			&s.Name,
 		)
 
 		if err != nil {
@@ -75,29 +91,38 @@ func (r *sqliteQueueRepo) GetByID(
 ) (*Queue, error) {
 	sql := `
 		select
-			id,
-			wallpaper_id,
-			status_id,
-			priority,
-			created_at,
-			updated_at
-		from queue where id = ?`
+			q.id
+			, q.wallpaper_id
+			, q.priority
+			, q.created_at
+			, q.updated_at
+			, s.id
+			, s.name
+		from queue as q
+		left join status as s on q.status_id = s.id
+		where id = ?`
 
-	var q Queue
+	var s Status
+	q := Queue{Status: &s}
+
 	err := r.db.QueryRowContext(ctx, sql, id).
 		Scan(
 			&q.ID,
 			&q.WallpaperID,
-			&q.StatusID,
 			&q.Priority,
 			&q.CreatedAt,
 			&q.UpdatedAt,
+			&s.ID,
+			&s.Name,
 		)
 
 	return &q, err
 }
 
-func (r *sqliteQueueRepo) Create(ctx context.Context, q *Queue) error {
+func (r *sqliteQueueRepo) Create(
+	ctx context.Context,
+	q *QueueCreate,
+) (int64, error) {
 	sql := `
 		insert into queue(wallpaper_id, status_id, priority)
 		values(?, ?, ?)`
@@ -111,29 +136,23 @@ func (r *sqliteQueueRepo) Create(ctx context.Context, q *Queue) error {
 	)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	q.ID, err = result.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
-func (r *sqliteQueueRepo) Update(ctx context.Context, q *Queue) error {
-	sql := `
-		update queue set
-			wallpaper_id = ?,
-			status_id = ?,
-			priority = ?
-		where id = ?`
+func (r *sqliteQueueRepo) Update(ctx context.Context, q *QueueUpdate) error {
+	sql := `update queue set status_id = ?, priority = ? where id = ?`
 
 	_, err := r.db.ExecContext(
 		ctx,
 		sql,
-		q.WallpaperID,
 		q.StatusID,
 		q.Priority,
 		q.ID,
