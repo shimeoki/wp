@@ -7,19 +7,30 @@ import (
 )
 
 type Source struct {
-	ID        int64 // primary key
+	ID        int64
 	Name      string
 	Link      *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
+type SourceCreate struct {
+	Name string
+	Link *string
+}
+
+type SourceUpdate struct {
+	ID   int64
+	Name string
+	Link *string
+}
+
 type SourceRepo interface {
 	GetAll(ctx context.Context) ([]*Source, error)
 	GetByID(ctx context.Context, id int64) (*Source, error)
 
-	Create(ctx context.Context, s *Source) error
-	Update(ctx context.Context, s *Source) error
+	Create(ctx context.Context, s *SourceCreate) (int64, error)
+	Update(ctx context.Context, s *SourceUpdate) error
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -72,23 +83,26 @@ func (r *sqliteSourceRepo) GetByID(
 	return &s, err
 }
 
-func (r *sqliteSourceRepo) Create(ctx context.Context, s *Source) error {
+func (r *sqliteSourceRepo) Create(
+	ctx context.Context,
+	s *SourceCreate,
+) (int64, error) {
 	sql := "insert into source(name, link) values(?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, s.Name, s.Link)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	s.ID, err = result.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
-func (r *sqliteSourceRepo) Update(ctx context.Context, s *Source) error {
+func (r *sqliteSourceRepo) Update(ctx context.Context, s *SourceUpdate) error {
 	sql := "update source set name = ?, link = ? where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, s.Name, s.Link, s.ID)
