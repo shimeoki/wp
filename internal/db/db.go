@@ -1,7 +1,9 @@
 package db
 
 import (
+	"context"
 	"database/sql"
+	"time"
 
 	_ "modernc.org/sqlite"
 )
@@ -32,6 +34,11 @@ func NewSQLiteRepo(dsn string) (Repo, error) {
 		return nil, err
 	}
 
+	err = ping(db)
+	if err != nil {
+		return nil, err
+	}
+
 	r := &sqliteRepo{
 		wallpapers: &sqliteWallpaperRepo{db: db},
 		tags:       &sqliteTagRepo{db: db},
@@ -42,6 +49,12 @@ func NewSQLiteRepo(dsn string) (Repo, error) {
 	}
 
 	return r, nil
+}
+
+func ping(db *sql.DB) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	return db.PingContext(ctx)
 }
 
 func (r *sqliteRepo) Wallpapers() WallpaperRepo {
