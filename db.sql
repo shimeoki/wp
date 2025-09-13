@@ -8,9 +8,14 @@ create table status (
 
 create table alias (
     id integer primary key
-    , name       text not null
-    , created_at text not null default current_timestamp
-    , updated_at text not null default current_timestamp
+    , wallpaper_id integer not null
+    , name         text    not null
+    , created_at   text    not null default current_timestamp
+    , updated_at   text    not null default current_timestamp
+
+    , foreign key (wallpaper_id) references wallpaper (id)
+        on update cascade
+        on delete cascade
 );
 
 create trigger alias_keep_ts
@@ -94,22 +99,6 @@ begin
     set updated_at = current_timestamp
     where id = new.id;
 end;
-
-
-create table wallpaper_alias (
-    wallpaper_id integer,
-    alias_id     integer,
-
-    primary key (wallpaper_id, alias_id)
-
-    , foreign key (wallpaper_id) references wallpaper (id)
-        on update cascade
-        on delete cascade
-
-    , foreign key (alias_id) references alias (id)
-        on update cascade
-        on delete cascade
-);
 
 
 create table wallpaper_tag (
