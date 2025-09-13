@@ -6,8 +6,17 @@ import (
 )
 
 type Status struct {
-	ID   int64  // primary key
-	Name string // unique
+	ID   int64
+	Name string
+}
+
+type StatusCreate struct {
+	Name string
+}
+
+type StatusUpdate struct {
+	ID   int64
+	Name string
 }
 
 type StatusRepo interface {
@@ -15,8 +24,8 @@ type StatusRepo interface {
 	GetByID(ctx context.Context, id int64) (*Status, error)
 	GetByName(ctx context.Context, name string) (*Status, error)
 
-	Create(ctx context.Context, s *Status) error
-	Update(ctx context.Context, s *Status) error
+	Create(ctx context.Context, s *StatusCreate) (int64, error)
+	Update(ctx context.Context, s *StatusUpdate) error
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -72,23 +81,26 @@ func (r *sqliteStatusRepo) GetByName(
 	return &s, err
 }
 
-func (r *sqliteStatusRepo) Create(ctx context.Context, s *Status) error {
+func (r *sqliteStatusRepo) Create(
+	ctx context.Context,
+	s *StatusCreate,
+) (int64, error) {
 	sql := "insert into status(name) values (?)"
 
 	result, err := r.db.ExecContext(ctx, sql, s.Name)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	s.ID, err = result.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
-func (r *sqliteStatusRepo) Update(ctx context.Context, s *Status) error {
+func (r *sqliteStatusRepo) Update(ctx context.Context, s *StatusUpdate) error {
 	sql := "update status set name = ? where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, s.Name, s.ID)
