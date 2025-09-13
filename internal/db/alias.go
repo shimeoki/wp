@@ -7,18 +7,29 @@ import (
 )
 
 type Alias struct {
-	ID        int64 // primary key
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID          int64
+	WallpaperID int64
+	Name        string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
+
+type AliasCreate struct {
+	WallpaperID int64
+	Name        string
+}
+
+type AliasUpdate struct {
+	ID   int64
+	Name string
 }
 
 type AliasRepo interface {
 	GetAll(ctx context.Context) ([]*Alias, error)
 	GetByID(ctx context.Context, id int64) (*Alias, error)
 
-	Create(ctx context.Context, a *Alias) error
-	Update(ctx context.Context, a *Alias) error
+	Create(ctx context.Context, a *AliasCreate) (int64, error)
+	Update(ctx context.Context, a *AliasUpdate) error
 	Delete(ctx context.Context, id int64) error
 }
 
@@ -27,7 +38,7 @@ type sqliteAliasRepo struct {
 }
 
 func (r *sqliteAliasRepo) GetAll(ctx context.Context) ([]*Alias, error) {
-	sql := "select id, name, created_at, updated_at from alias"
+	sql := "select id, wallpaper_id, name, created_at, updated_at from alias"
 
 	rows, err := r.db.QueryContext(ctx, sql)
 	if err != nil {
@@ -40,7 +51,14 @@ func (r *sqliteAliasRepo) GetAll(ctx context.Context) ([]*Alias, error) {
 	for rows.Next() {
 		var a Alias
 
-		err := rows.Scan(&a.ID, &a.Name, &a.CreatedAt, &a.UpdatedAt)
+		err := rows.Scan(
+			&a.ID,
+			&a.WallpaperID,
+			&a.Name,
+			&a.CreatedAt,
+			&a.UpdatedAt,
+		)
+
 		if err != nil {
 			return nil, err
 		}
@@ -55,32 +73,42 @@ func (r *sqliteAliasRepo) GetByID(
 	ctx context.Context,
 	id int64,
 ) (*Alias, error) {
-	sql := "select id, name, created_at, updated_at from alias where id = ?"
+	sql := `
+		select
+			id
+			, wallpaper_id
+			, name
+			, created_at
+			, updated_at
+		from alias where id = ?`
 
 	var a Alias
 	err := r.db.QueryRowContext(ctx, sql, id).
-		Scan(&a.ID, &a.Name, &a.CreatedAt, &a.UpdatedAt)
+		Scan(&a.ID, &a.WallpaperID, &a.Name, &a.CreatedAt, &a.UpdatedAt)
 
 	return &a, err
 }
 
-func (r *sqliteAliasRepo) Create(ctx context.Context, a *Alias) error {
-	sql := "insert into alias(name) values(?)"
+func (r *sqliteAliasRepo) Create(
+	ctx context.Context,
+	a *AliasCreate,
+) (int64, error) {
+	sql := "insert into alias(name, wallpaper_id) values(?)"
 
-	result, err := r.db.ExecContext(ctx, sql, a.Name)
+	result, err := r.db.ExecContext(ctx, sql, a.Name, a.WallpaperID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	a.ID, err = result.LastInsertId()
+	id, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
-func (r *sqliteAliasRepo) Update(ctx context.Context, a *Alias) error {
+func (r *sqliteAliasRepo) Update(ctx context.Context, a *AliasUpdate) error {
 	sql := "update alias set name = ? where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, a.Name, a.ID)
