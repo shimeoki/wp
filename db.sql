@@ -8,10 +8,10 @@ create table status (
 
 create table alias (
     id integer primary key
-    , wallpaper_id integer not null
-    , name         text    not null
-    , created_at   text    not null default current_timestamp
-    , updated_at   text    not null default current_timestamp
+    , wallpaper_id integer   not null
+    , name         text      not null
+    , created_at   timestamp not null default current_timestamp
+    , updated_at   timestamp not null default current_timestamp
 
     , foreign key (wallpaper_id) references wallpaper (id)
         on update cascade
@@ -35,9 +35,9 @@ end;
 
 create table tag (
     id integer primary key
-    , name       text not null unique
-    , created_at text not null default current_timestamp
-    , updated_at text not null default current_timestamp
+    , name       text      not null unique
+    , created_at timestamp not null default current_timestamp
+    , updated_at timestamp not null default current_timestamp
 );
 
 create trigger tag_keep_ts
@@ -57,10 +57,10 @@ end;
 
 create table source (
     id integer primary key
-    , name       text not null
+    , name       text      not null
     , link       text
-    , created_at text not null default current_timestamp
-    , updated_at text not null default current_timestamp
+    , created_at timestamp not null default current_timestamp
+    , updated_at timestamp not null default current_timestamp
 );
 
 create trigger source_keep_ts
@@ -80,9 +80,9 @@ end;
 
 create table wallpaper (
     id integer primary key
-    , hash       text not null unique
-    , extension  text not null
-    , created_at text not null default current_timestamp
+    , hash       text      not null unique
+    , extension  text      not null
+    , created_at timestamp not null default current_timestamp
 );
 
 create trigger wallpaper_keep_ts
@@ -126,11 +126,11 @@ create table wallpaper_source (
 
 create table queue (
     id integer primary key
-    , wallpaper_id integer not null
-    , status_id    integer not null
-    , priority     integer not null
-    , created_at   text    not null default current_timestamp
-    , updated_at   text    not null default current_timestamp
+    , wallpaper_id integer   not null
+    , status_id    integer   not null
+    , priority     integer   not null
+    , created_at   timestamp not null default current_timestamp
+    , updated_at   timestamp not null default current_timestamp
 
     , foreign key (wallpaper_id) references wallpaper (id)
         on update cascade
