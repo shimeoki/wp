@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -87,8 +88,32 @@ type wallpaperRow struct {
 	source    Source
 }
 
-func (r *sqliteWallpaperRepo) scanRow(rows *sql.Rows, row *wallpaperRow) error {
-	err := rows.Scan(
+type sqliteWallpaperScanner struct {
+	rows             *sql.Rows
+	wallpapers       map[int64]*Wallpaper
+	tags             map[int64]*Tag
+	sources          map[int64]*Source
+	aliases          map[int64]bool
+	wallpaperTags    map[WallpaperTag]bool
+	wallpaperSources map[WallpaperSource]bool
+}
+
+func (r *sqliteWallpaperRepo) newScanner(
+	rows *sql.Rows,
+) *sqliteWallpaperScanner {
+	return &sqliteWallpaperScanner{
+		rows:             rows,
+		wallpapers:       make(map[int64]*Wallpaper),
+		tags:             make(map[int64]*Tag),
+		sources:          make(map[int64]*Source),
+		aliases:          make(map[int64]bool),
+		wallpaperTags:    make(map[WallpaperTag]bool),
+		wallpaperSources: make(map[WallpaperSource]bool),
+	}
+}
+
+func (s *sqliteWallpaperScanner) scanRow(row *wallpaperRow) error {
+	err := s.rows.Scan(
 		row.wallpaper.ID,
 		row.wallpaper.Hash,
 		row.wallpaper.Extension,
@@ -112,6 +137,82 @@ func (r *sqliteWallpaperRepo) scanRow(rows *sql.Rows, row *wallpaperRow) error {
 	return err
 }
 
+func (s *sqliteWallpaperScanner) scanRows() ([]*Wallpaper, error) {
+	var ws []*Wallpaper
+
+	for s.rows.Next() {
+		var row wallpaperRow
+
+		err := s.scanRow(&row)
+		if err != nil {
+			return nil, err
+		}
+
+		wid := row.wallpaper.ID
+
+		if s.wallpapers[wid] == nil {
+			s.wallpapers[wid] = &row.wallpaper
+			ws = append(ws, &row.wallpaper)
+		}
+
+		s.scanAliases(wid, &row)
+		s.scanTags(wid, &row)
+		s.scanSources(wid, &row)
+	}
+
+	return ws, nil
+}
+
+func (s *sqliteWallpaperScanner) scanAliases(wid int64, row *wallpaperRow) {
+	aid := row.alias.ID
+	if aid == 0 || s.aliases[aid] {
+		return
+	}
+
+	w := s.wallpapers[wid]
+
+	s.aliases[aid] = true
+	w.Aliases = append(w.Aliases, &row.alias)
+}
+
+func (s *sqliteWallpaperScanner) scanTags(wid int64, row *wallpaperRow) {
+	tid := row.tag.ID
+	if tid == 0 {
+		return
+	}
+
+	w := s.wallpapers[wid]
+
+	if s.tags[tid] == nil {
+		s.tags[tid] = &row.tag
+	}
+
+	wt := WallpaperTag{WallpaperID: wid, TagID: tid}
+	if !s.wallpaperTags[wt] {
+		s.wallpaperTags[wt] = true
+		w.Tags = append(w.Tags, s.tags[tid])
+	}
+}
+
+func (s *sqliteWallpaperScanner) scanSources(wid int64, row *wallpaperRow) {
+	sid := row.source.ID
+	if sid == 0 {
+		return
+	}
+
+	w := s.wallpapers[wid]
+
+	if s.sources[sid] == nil {
+		s.sources[sid] = &row.source
+	}
+
+	ws := WallpaperSource{WallpaperID: wid, SourceID: sid}
+	if !s.wallpaperSources[ws] {
+		s.wallpaperSources[ws] = true
+		w.Sources = append(w.Sources, s.sources[sid])
+	}
+}
+
 func (r *sqliteWallpaperRepo) GetAll(
 	ctx context.Context,
 ) ([]*Wallpaper, error) {
@@ -123,62 +224,11 @@ func (r *sqliteWallpaperRepo) GetAll(
 	}
 
 	defer rows.Close()
-	var ws []*Wallpaper
+	s := r.newScanner(rows)
 
-	wallpapers := make(map[int64]*Wallpaper)
-	tags := make(map[int64]*Tag)
-	wallpaperTags := make(map[WallpaperTag]bool)
-	sources := make(map[int64]*Source)
-	wallpaperSources := make(map[WallpaperSource]bool)
-	aliases := make(map[int64]bool) // is many-to-one, above are many-to-many
-
-	for rows.Next() {
-		var row wallpaperRow
-
-		err := r.scanRow(rows, &row)
-		if err != nil {
-			return nil, err
-		}
-
-		wid := row.wallpaper.ID
-		if wallpapers[wid] == nil {
-			wallpapers[wid] = &row.wallpaper
-			ws = append(ws, &row.wallpaper)
-		}
-
-		w := wallpapers[wid]
-
-		aid := row.alias.ID
-		if aid != 0 && !aliases[aid] {
-			aliases[aid] = true
-			w.Aliases = append(w.Aliases, &row.alias)
-		}
-
-		tid := row.tag.ID
-		if tid != 0 {
-			if tags[tid] == nil {
-				tags[tid] = &row.tag
-			}
-
-			wt := WallpaperTag{WallpaperID: wid, TagID: tid}
-			if !wallpaperTags[wt] {
-				wallpaperTags[wt] = true
-				w.Tags = append(w.Tags, tags[tid])
-			}
-		}
-
-		sid := row.source.ID
-		if sid != 0 {
-			if sources[sid] == nil {
-				sources[sid] = &row.source
-			}
-
-			ws := WallpaperSource{WallpaperID: wid, SourceID: sid}
-			if !wallpaperSources[ws] {
-				wallpaperSources[ws] = true
-				w.Sources = append(w.Sources, sources[sid])
-			}
-		}
+	ws, err := s.scanRows()
+	if err != nil {
+		return nil, err
 	}
 
 	return ws, rows.Err()
@@ -196,41 +246,18 @@ func (r *sqliteWallpaperRepo) GetByID(
 	}
 
 	defer rows.Close()
-	var w Wallpaper
+	s := r.newScanner(rows)
 
-	as := make(map[int64]bool)
-	ts := make(map[int64]bool)
-	ss := make(map[int64]bool)
-
-	for rows.Next() {
-		var row wallpaperRow
-
-		err := r.scanRow(rows, &row)
-		if err != nil {
-			return nil, err
-		}
-
-		if w.ID == 0 {
-			w = row.wallpaper
-		}
-
-		if row.alias.ID != 0 && !as[row.alias.ID] {
-			as[row.alias.ID] = true
-			w.Aliases = append(w.Aliases, &row.alias)
-		}
-
-		if row.tag.ID != 0 && !ts[row.tag.ID] {
-			ts[row.tag.ID] = true
-			w.Tags = append(w.Tags, &row.tag)
-		}
-
-		if row.source.ID != 0 && !ss[row.source.ID] {
-			ss[row.source.ID] = true
-			w.Sources = append(w.Sources, &row.source)
-		}
+	ws, err := s.scanRows()
+	if err != nil {
+		return nil, err
 	}
 
-	return &w, rows.Err()
+	if len(ws) != 1 {
+		return nil, errors.New("no or multiple wallpapers with provided id")
+	}
+
+	return ws[0], rows.Err()
 }
 
 func (r *sqliteWallpaperRepo) GetByHash(
@@ -245,41 +272,18 @@ func (r *sqliteWallpaperRepo) GetByHash(
 	}
 
 	defer rows.Close()
-	var w Wallpaper
+	s := r.newScanner(rows)
 
-	as := make(map[int64]bool)
-	ts := make(map[int64]bool)
-	ss := make(map[int64]bool)
-
-	for rows.Next() {
-		var row wallpaperRow
-
-		err := r.scanRow(rows, &row)
-		if err != nil {
-			return nil, err
-		}
-
-		if w.ID == 0 {
-			w = row.wallpaper
-		}
-
-		if row.alias.ID != 0 && !as[row.alias.ID] {
-			as[row.alias.ID] = true
-			w.Aliases = append(w.Aliases, &row.alias)
-		}
-
-		if row.tag.ID != 0 && !ts[row.tag.ID] {
-			ts[row.tag.ID] = true
-			w.Tags = append(w.Tags, &row.tag)
-		}
-
-		if row.source.ID != 0 && !ss[row.source.ID] {
-			ss[row.source.ID] = true
-			w.Sources = append(w.Sources, &row.source)
-		}
+	ws, err := s.scanRows()
+	if err != nil {
+		return nil, err
 	}
 
-	return &w, rows.Err()
+	if len(ws) != 1 {
+		return nil, errors.New("no or multiple wallpapers with provided hash")
+	}
+
+	return ws[0], rows.Err()
 }
 
 func (r *sqliteWallpaperRepo) Create(
