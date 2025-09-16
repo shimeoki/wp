@@ -19,32 +19,32 @@ type jsonWallpaper struct {
 	Sources   []jsonWallpaperSource `json:"sources"`
 }
 
-type jsonExport struct {
+type jsonFile struct {
 	Version    int                       `json:"version"`
 	Wallpapers map[string]*jsonWallpaper `json:"wallpapers"`
 }
 
-type JSONExporter struct {
+type JSONer struct {
 	repo Repo
 }
 
-func NewJSONExporter(r Repo) *JSONExporter {
-	return &JSONExporter{repo: r}
+func NewJSONer(r Repo) *JSONer {
+	return &JSONer{repo: r}
 }
 
-func (e *JSONExporter) Export(ctx context.Context, out io.Writer) error {
-	ws, err := e.repo.Wallpapers().GetAll(ctx)
+func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
+	ws, err := j.repo.Wallpapers().GetAll(ctx)
 	if err != nil {
 		return err
 	}
 
-	export := &jsonExport{
+	file := &jsonFile{
 		Version:    1,
 		Wallpapers: make(map[string]*jsonWallpaper),
 	}
 
 	for _, w := range ws {
-		if export.Wallpapers[w.Hash] != nil {
+		if file.Wallpapers[w.Hash] != nil {
 			return errors.New("duplicate hashes in database")
 		}
 
@@ -70,8 +70,8 @@ func (e *JSONExporter) Export(ctx context.Context, out io.Writer) error {
 			Sources:   sources,
 		}
 
-		export.Wallpapers[w.Hash] = jw
+		file.Wallpapers[w.Hash] = jw
 	}
 
-	return json.NewEncoder(out).Encode(export)
+	return json.NewEncoder(out).Encode(file)
 }
