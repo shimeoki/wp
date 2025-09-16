@@ -7,10 +7,6 @@ import (
 	"io"
 )
 
-type Exporter interface {
-	Export(ctx context.Context, out io.Writer) error
-}
-
 type jsonWallpaperSource struct {
 	Name string  `json:"name"`
 	Link *string `json:"link,omitempty"`

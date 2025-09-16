@@ -3,10 +3,19 @@ package db
 import (
 	"context"
 	"database/sql"
+	"io"
 	"time"
 
 	_ "modernc.org/sqlite"
 )
+
+type Exporter interface {
+	Export(ctx context.Context, out io.Writer) error
+}
+
+type Importer interface {
+	Import(ctx context.Context, in io.Reader) error
+}
 
 type Repo interface {
 	Wallpapers() WallpaperRepo
