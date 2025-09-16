@@ -303,11 +303,14 @@ func (r *sqliteWallpaperRepo) GetByID(
 		return nil, err
 	}
 
-	if len(ws) != 1 {
+	switch len(ws) {
+	case 0:
+		return nil, rows.Err()
+	case 1:
+		return ws[0], rows.Err()
+	default:
 		return nil, errors.New("no or multiple wallpapers with provided id")
 	}
-
-	return ws[0], rows.Err()
 }
 
 func (r *sqliteWallpaperRepo) GetByHash(
@@ -329,11 +332,14 @@ func (r *sqliteWallpaperRepo) GetByHash(
 		return nil, err
 	}
 
-	if len(ws) != 1 {
+	switch len(ws) {
+	case 0:
+		return nil, rows.Err()
+	case 1:
+		return ws[0], rows.Err()
+	default:
 		return nil, errors.New("no or multiple wallpapers with provided hash")
 	}
-
-	return ws[0], rows.Err()
 }
 
 func (r *sqliteWallpaperRepo) Create(
