@@ -238,7 +238,7 @@ func (r *sqliteWallpaperRepo) GetByID(
 	ctx context.Context,
 	id int64,
 ) (*Wallpaper, error) {
-	sql := fmt.Sprintf("%s where id = ?", r.query())
+	sql := fmt.Sprintf("%s where w.id = ?", r.query())
 
 	rows, err := r.db.QueryContext(ctx, sql, id)
 	if err != nil {
@@ -264,7 +264,7 @@ func (r *sqliteWallpaperRepo) GetByHash(
 	ctx context.Context,
 	hash string,
 ) (*Wallpaper, error) {
-	sql := fmt.Sprintf("%s where hash = ?", r.query())
+	sql := fmt.Sprintf("%s where w.hash = ?", r.query())
 
 	rows, err := r.db.QueryContext(ctx, sql, hash)
 	if err != nil {
