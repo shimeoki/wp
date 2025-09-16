@@ -8,8 +8,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// todo: import driver
-
 type Repo interface {
 	Wallpapers() WallpaperRepo
 	Tags() TagRepo
