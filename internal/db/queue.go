@@ -60,6 +60,7 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 
 	defer rows.Close()
 	var qs []*Queue
+	statuses := make(map[int64]*Status)
 
 	for rows.Next() {
 		var s Status
@@ -79,6 +80,11 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 			return nil, err
 		}
 
+		if statuses[q.Status.ID] == nil {
+			statuses[q.Status.ID] = q.Status
+		}
+
+		q.Status = statuses[q.Status.ID] // reuse same structs
 		qs = append(qs, &q)
 	}
 
@@ -100,7 +106,7 @@ func (r *sqliteQueueRepo) GetByID(
 			, s.name
 		from queue as q
 		left join status as s on q.status_id = s.id
-		where id = ?`
+		where q.id = ?`
 
 	row := r.db.QueryRowContext(ctx, sql, id)
 	var s Status
