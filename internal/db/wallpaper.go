@@ -83,9 +83,23 @@ func (r *sqliteWallpaperRepo) query() string {
 
 type wallpaperRow struct {
 	wallpaper Wallpaper
-	alias     Alias
-	tag       Tag
-	source    Source
+
+	aliasID          *int64
+	aliasWallpaperID *int64
+	aliasName        *string
+	aliasCreatedAt   *time.Time
+	aliasUpdatedAt   *time.Time
+
+	tagID        *int64
+	tagName      *string
+	tagCreatedAt *time.Time
+	tagUpdatedAt *time.Time
+
+	sourceID        *int64
+	sourceName      *string
+	sourceLink      *string
+	sourceCreatedAt *time.Time
+	sourceUpdatedAt *time.Time
 }
 
 type sqliteWallpaperScanner struct {
@@ -114,24 +128,28 @@ func (r *sqliteWallpaperRepo) newScanner(
 
 func (s *sqliteWallpaperScanner) scanRow(row *wallpaperRow) error {
 	err := s.rows.Scan(
-		row.wallpaper.ID,
-		row.wallpaper.Hash,
-		row.wallpaper.Extension,
-		row.wallpaper.CreatedAt,
-		row.alias.ID,
-		row.alias.WallpaperID,
-		row.alias.Name,
-		row.alias.CreatedAt,
-		row.alias.UpdatedAt,
-		row.tag.ID,
-		row.tag.Name,
-		row.tag.CreatedAt,
-		row.tag.UpdatedAt,
-		row.source.ID,
-		row.source.Name,
-		row.source.Link,
-		row.source.CreatedAt,
-		row.source.UpdatedAt,
+		// wallpaper fields are guaranteed to be not null
+		&row.wallpaper.ID,
+		&row.wallpaper.Hash,
+		&row.wallpaper.Extension,
+		&row.wallpaper.CreatedAt,
+
+		&row.aliasID,
+		&row.aliasWallpaperID,
+		&row.aliasName,
+		&row.aliasCreatedAt,
+		&row.aliasUpdatedAt,
+
+		&row.tagID,
+		&row.tagName,
+		&row.tagCreatedAt,
+		&row.tagUpdatedAt,
+
+		&row.sourceID,
+		&row.sourceName,
+		&row.sourceLink,
+		&row.sourceCreatedAt,
+		&row.sourceUpdatedAt,
 	)
 
 	return err
@@ -155,36 +173,57 @@ func (s *sqliteWallpaperScanner) scanRows() ([]*Wallpaper, error) {
 			ws = append(ws, &row.wallpaper)
 		}
 
-		s.scanAliases(wid, &row)
-		s.scanTags(wid, &row)
-		s.scanSources(wid, &row)
+		s.scanAlias(wid, &row)
+		s.scanTag(wid, &row)
+		s.scanSource(wid, &row)
 	}
 
 	return ws, nil
 }
 
-func (s *sqliteWallpaperScanner) scanAliases(wid int64, row *wallpaperRow) {
-	aid := row.alias.ID
+func (s *sqliteWallpaperScanner) scanAlias(wid int64, row *wallpaperRow) {
+	if row.aliasID == nil {
+		return
+	}
+
+	aid := *row.aliasID
 	if aid == 0 || s.aliases[aid] {
 		return
 	}
 
 	w := s.wallpapers[wid]
+	alias := &Alias{
+		ID:          aid,
+		WallpaperID: *row.aliasWallpaperID,
+		Name:        *row.aliasName,
+		CreatedAt:   *row.aliasCreatedAt,
+		UpdatedAt:   *row.aliasUpdatedAt,
+	}
 
 	s.aliases[aid] = true
-	w.Aliases = append(w.Aliases, &row.alias)
+	w.Aliases = append(w.Aliases, alias)
 }
 
-func (s *sqliteWallpaperScanner) scanTags(wid int64, row *wallpaperRow) {
-	tid := row.tag.ID
+func (s *sqliteWallpaperScanner) scanTag(wid int64, row *wallpaperRow) {
+	if row.tagID == nil {
+		return
+	}
+
+	tid := *row.tagID
 	if tid == 0 {
 		return
 	}
 
 	w := s.wallpapers[wid]
+	tag := &Tag{
+		ID:        tid,
+		Name:      *row.tagName,
+		CreatedAt: *row.tagCreatedAt,
+		UpdatedAt: *row.tagUpdatedAt,
+	}
 
 	if s.tags[tid] == nil {
-		s.tags[tid] = &row.tag
+		s.tags[tid] = tag
 	}
 
 	wt := WallpaperTag{WallpaperID: wid, TagID: tid}
@@ -194,16 +233,27 @@ func (s *sqliteWallpaperScanner) scanTags(wid int64, row *wallpaperRow) {
 	}
 }
 
-func (s *sqliteWallpaperScanner) scanSources(wid int64, row *wallpaperRow) {
-	sid := row.source.ID
+func (s *sqliteWallpaperScanner) scanSource(wid int64, row *wallpaperRow) {
+	if row.sourceID == nil {
+		return
+	}
+
+	sid := *row.sourceID
 	if sid == 0 {
 		return
 	}
 
 	w := s.wallpapers[wid]
+	source := &Source{
+		ID:        sid,
+		Name:      *row.sourceName,
+		Link:      row.sourceLink,
+		CreatedAt: *row.sourceCreatedAt,
+		UpdatedAt: *row.sourceUpdatedAt,
+	}
 
 	if s.sources[sid] == nil {
-		s.sources[sid] = &row.source
+		s.sources[sid] = source
 	}
 
 	ws := WallpaperSource{WallpaperID: wid, SourceID: sid}
