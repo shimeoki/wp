@@ -1,0 +1,2 @@
+# to not accidentally commit a db file
+*.sqlite
