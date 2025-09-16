@@ -102,21 +102,25 @@ func (r *sqliteQueueRepo) GetByID(
 		left join status as s on q.status_id = s.id
 		where id = ?`
 
+	row := r.db.QueryRowContext(ctx, sql, id)
 	var s Status
 	q := Queue{Status: &s}
 
-	err := r.db.QueryRowContext(ctx, sql, id).
-		Scan(
-			&q.ID,
-			&q.WallpaperID,
-			&q.Priority,
-			&q.CreatedAt,
-			&q.UpdatedAt,
-			&s.ID,
-			&s.Name,
-		)
+	err := row.Scan(
+		&q.ID,
+		&q.WallpaperID,
+		&q.Priority,
+		&q.CreatedAt,
+		&q.UpdatedAt,
+		&s.ID,
+		&s.Name,
+	)
 
-	return &q, err
+	if err != nil {
+		return nil, err
+	}
+
+	return &q, nil
 }
 
 func (r *sqliteQueueRepo) Create(

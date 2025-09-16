@@ -76,11 +76,15 @@ func (r *sqliteSourceRepo) GetByID(
 			, updated_at
 		from source where id = ?`
 
+	row := r.db.QueryRowContext(ctx, sql, id)
 	var s Source
-	err := r.db.QueryRowContext(ctx, sql, id).
-		Scan(&s.ID, &s.Name, &s.Link, &s.CreatedAt, &s.UpdatedAt)
 
-	return &s, err
+	err := row.Scan(&s.ID, &s.Name, &s.Link, &s.CreatedAt, &s.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &s, nil
 }
 
 func (r *sqliteSourceRepo) Create(

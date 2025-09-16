@@ -83,10 +83,14 @@ func (r *sqliteAliasRepo) GetByID(
 		from alias where id = ?`
 
 	var a Alias
-	err := r.db.QueryRowContext(ctx, sql, id).
-		Scan(&a.ID, &a.WallpaperID, &a.Name, &a.CreatedAt, &a.UpdatedAt)
+	row := r.db.QueryRowContext(ctx, sql, id)
 
-	return &a, err
+	err := row.Scan(&a.ID, &a.WallpaperID, &a.Name, &a.CreatedAt, &a.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &a, nil
 }
 
 func (r *sqliteAliasRepo) Create(

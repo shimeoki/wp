@@ -63,10 +63,15 @@ func (r *sqliteStatusRepo) GetByID(
 ) (*Status, error) {
 	sql := "select id, name from status where id = ?"
 
+	row := r.db.QueryRowContext(ctx, sql, id)
 	var s Status
-	err := r.db.QueryRowContext(ctx, sql, id).Scan(&s.ID, &s.Name)
 
-	return &s, err
+	err := row.Scan(&s.ID, &s.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &s, nil
 }
 
 func (r *sqliteStatusRepo) GetByName(
@@ -75,10 +80,15 @@ func (r *sqliteStatusRepo) GetByName(
 ) (*Status, error) {
 	sql := "select id, name from status where name = ?"
 
+	row := r.db.QueryRowContext(ctx, sql, name)
 	var s Status
-	err := r.db.QueryRowContext(ctx, sql, name).Scan(&s.ID, &s.Name)
 
-	return &s, err
+	err := row.Scan(&s.ID, &s.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &s, nil
 }
 
 func (r *sqliteStatusRepo) Create(
