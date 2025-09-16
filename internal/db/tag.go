@@ -64,11 +64,14 @@ func (r *sqliteTagRepo) GetAll(ctx context.Context) ([]*Tag, error) {
 func (r *sqliteTagRepo) GetByID(ctx context.Context, id int64) (*Tag, error) {
 	sql := "select id, name, created_at, updated_at from tag where id = ?"
 
+	row := r.db.QueryRowContext(ctx, sql, id)
 	var t Tag
-	err := r.db.QueryRowContext(ctx, sql, id).
-		Scan(&t.ID, &t.Name, &t.CreatedAt, &t.UpdatedAt)
 
-	return &t, err
+	if err := row.Scan(&t.ID, &t.Name, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 
 func (r *sqliteTagRepo) GetByName(
@@ -77,11 +80,14 @@ func (r *sqliteTagRepo) GetByName(
 ) (*Tag, error) {
 	sql := "select id, name, created_at, updated_at from tag where name = ?"
 
+	row := r.db.QueryRowContext(ctx, sql, name)
 	var t Tag
-	err := r.db.QueryRowContext(ctx, sql, name).
-		Scan(&t.ID, &t.Name, &t.CreatedAt, &t.UpdatedAt)
 
-	return &t, err
+	if err := row.Scan(&t.ID, &t.Name, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		return nil, err
+	}
+
+	return &t, nil
 }
 
 func (r *sqliteTagRepo) Create(
