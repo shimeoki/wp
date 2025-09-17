@@ -75,3 +75,46 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 
 	return json.NewEncoder(out).Encode(file)
 }
+
+func (j *JSONer) createWallpaper(
+	ctx context.Context,
+	hash, extension string,
+) (int64, error) {
+	ws := j.repo.Wallpapers()
+
+	w, _ := ws.GetByHash(ctx, hash)
+	if w != nil {
+		return w.ID, nil
+	}
+
+	return ws.Create(
+		ctx,
+		&WallpaperCreate{Hash: hash, Extension: extension},
+	)
+}
+
+// todo: use a single transaction
+func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
+	file := &jsonFile{}
+
+	if err := json.NewDecoder(in).Decode(file); err != nil {
+		return err
+	}
+
+	if file.Version != 1 {
+		return errors.New("unexpected version")
+	}
+
+	for hash, jw := range file.Wallpapers {
+		_, err := j.createWallpaper(ctx, hash, jw.Extension)
+		if err != nil {
+			return err
+		}
+
+		// todo: aliases
+		// todo: tags
+		// todo: sources
+	}
+
+	return nil
+}
