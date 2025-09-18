@@ -75,3 +75,147 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 
 	return json.NewEncoder(out).Encode(file)
 }
+
+func (j *JSONer) importWallpaper(
+	ctx context.Context,
+	hash, extension string,
+) (int64, error) {
+	ws := j.repo.Wallpapers()
+
+	w, _ := ws.GetByHash(ctx, hash)
+	if w != nil {
+		return w.ID, nil
+	}
+
+	return ws.Create(
+		ctx,
+		&WallpaperCreate{Hash: hash, Extension: extension},
+	)
+}
+
+func (j *JSONer) importAliases(
+	ctx context.Context,
+	aliases []string,
+	wid int64,
+) error {
+	as := j.repo.Aliases()
+
+	for _, alias := range aliases {
+		_, err := as.Create(ctx, &AliasCreate{WallpaperID: wid, Name: alias})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (j *JSONer) importSources(
+	ctx context.Context,
+	sources []jsonWallpaperSource,
+	wid int64,
+) error {
+	ss := j.repo.Sources()
+	ws := j.repo.Wallpapers()
+
+	for _, source := range sources {
+		id, err := ss.Create(
+			ctx,
+			&SourceCreate{Name: source.Name, Link: source.Link},
+		)
+
+		if err != nil {
+			return err
+		}
+
+		err = ws.AddSource(
+			ctx,
+			&WallpaperSource{WallpaperID: wid, SourceID: id},
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+type jsonTagger struct {
+	jsoner *JSONer
+	tags   map[string]int64
+}
+
+func (t *jsonTagger) importTags(
+	ctx context.Context,
+	tags []string,
+	wid int64,
+) error {
+	ts := t.jsoner.repo.Tags()
+	ws := t.jsoner.repo.Wallpapers()
+
+	for _, name := range tags {
+		if t.tags[name] == 0 {
+			tag, _ := ts.GetByName(ctx, name)
+			if tag != nil {
+				t.tags[name] = tag.ID
+			}
+		}
+
+		if t.tags[name] == 0 {
+			id, err := ts.Create(ctx, &TagCreate{Name: name})
+			if err != nil {
+				return err
+			}
+
+			t.tags[name] = id
+		}
+
+		err := ws.AddTag(
+			ctx,
+			&WallpaperTag{WallpaperID: wid, TagID: t.tags[name]},
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// todo: use a single transaction
+func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
+	file := &jsonFile{}
+
+	if err := json.NewDecoder(in).Decode(file); err != nil {
+		return err
+	}
+
+	if file.Version != 1 {
+		return errors.New("unexpected version")
+	}
+
+	tagger := &jsonTagger{jsoner: j, tags: make(map[string]int64)}
+
+	for hash, jw := range file.Wallpapers {
+		id, err := j.importWallpaper(ctx, hash, jw.Extension)
+		if err != nil {
+			return err
+		}
+
+		if err := j.importAliases(ctx, jw.Aliases, id); err != nil {
+			return err
+		}
+
+		if err := tagger.importTags(ctx, jw.Tags, id); err != nil {
+			return err
+		}
+
+		if err := j.importSources(ctx, jw.Sources, id); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
