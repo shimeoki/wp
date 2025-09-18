@@ -156,12 +156,10 @@ func (t *jsonTagger) importTags(
 
 	for _, name := range tags {
 		if t.tags[name] == 0 {
-			tag, err := ts.GetByName(ctx, name)
-			if err != nil {
-				return err
+			tag, _ := ts.GetByName(ctx, name)
+			if tag != nil {
+				t.tags[name] = tag.ID
 			}
-
-			t.tags[name] = tag.ID
 		}
 
 		if t.tags[name] == 0 {
