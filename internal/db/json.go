@@ -76,7 +76,7 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 	return json.NewEncoder(out).Encode(file)
 }
 
-func (j *JSONer) createWallpaper(
+func (j *JSONer) importWallpaper(
 	ctx context.Context,
 	hash, extension string,
 ) (int64, error) {
@@ -93,7 +93,7 @@ func (j *JSONer) createWallpaper(
 	)
 }
 
-func (j *JSONer) createAliases(
+func (j *JSONer) importAliases(
 	ctx context.Context,
 	aliases []string,
 	wid int64,
@@ -110,7 +110,7 @@ func (j *JSONer) createAliases(
 	return nil
 }
 
-func (j *JSONer) createSources(
+func (j *JSONer) importSources(
 	ctx context.Context,
 	sources []jsonWallpaperSource,
 	wid int64,
@@ -146,7 +146,7 @@ type jsonTagger struct {
 	tags   map[string]int64
 }
 
-func (t *jsonTagger) createTags(
+func (t *jsonTagger) importTags(
 	ctx context.Context,
 	tags []string,
 	wid int64,
@@ -201,20 +201,20 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 	tagger := &jsonTagger{jsoner: j, tags: make(map[string]int64)}
 
 	for hash, jw := range file.Wallpapers {
-		id, err := j.createWallpaper(ctx, hash, jw.Extension)
+		id, err := j.importWallpaper(ctx, hash, jw.Extension)
 		if err != nil {
 			return err
 		}
 
-		if err := j.createAliases(ctx, jw.Aliases, id); err != nil {
+		if err := j.importAliases(ctx, jw.Aliases, id); err != nil {
 			return err
 		}
 
-		if err := tagger.createTags(ctx, jw.Tags, id); err != nil {
+		if err := tagger.importTags(ctx, jw.Tags, id); err != nil {
 			return err
 		}
 
-		if err := j.createSources(ctx, jw.Sources, id); err != nil {
+		if err := j.importSources(ctx, jw.Sources, id); err != nil {
 			return err
 		}
 	}
