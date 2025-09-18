@@ -1,2 +1,5 @@
 # to not accidentally commit a db file
 *.sqlite
+
+# flake
+/.pre-commit-config.yaml
