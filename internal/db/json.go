@@ -110,6 +110,37 @@ func (j *JSONer) createAliases(
 	return nil
 }
 
+func (j *JSONer) createSources(
+	ctx context.Context,
+	sources []jsonWallpaperSource,
+	wid int64,
+) error {
+	ss := j.repo.Sources()
+	ws := j.repo.Wallpapers()
+
+	for _, source := range sources {
+		id, err := ss.Create(
+			ctx,
+			&SourceCreate{Name: source.Name, Link: source.Link},
+		)
+
+		if err != nil {
+			return err
+		}
+
+		err = ws.AddSource(
+			ctx,
+			&WallpaperSource{WallpaperID: wid, SourceID: id},
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type jsonTagger struct {
 	jsoner *JSONer
 	tags   map[string]int64
@@ -183,7 +214,9 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 			return err
 		}
 
-		// todo: sources
+		if err := j.createSources(ctx, jw.Sources, id); err != nil {
+			return err
+		}
 	}
 
 	return nil
