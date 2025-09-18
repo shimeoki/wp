@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/shimeoki/wp/internal/config"
 	_ "modernc.org/sqlite"
 )
 
@@ -35,8 +36,8 @@ type sqliteRepo struct {
 	queues     QueueRepo
 }
 
-func NewSQLiteRepo(dsn string) (Repo, error) {
-	db, err := sql.Open("sqlite", dsn)
+func NewSQLiteRepo(config *config.DB) (Repo, error) {
+	db, err := sql.Open("sqlite", config.DataSourceName)
 	if err != nil {
 		return nil, err
 	}
