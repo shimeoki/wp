@@ -93,6 +93,23 @@ func (j *JSONer) createWallpaper(
 	)
 }
 
+func (j *JSONer) createAliases(
+	ctx context.Context,
+	aliases []string,
+	wid int64,
+) error {
+	ts := j.repo.Aliases()
+
+	for _, alias := range aliases {
+		_, err := ts.Create(ctx, &AliasCreate{WallpaperID: wid, Name: alias})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // todo: use a single transaction
 func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 	file := &jsonFile{}
@@ -106,12 +123,12 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 	}
 
 	for hash, jw := range file.Wallpapers {
-		_, err := j.createWallpaper(ctx, hash, jw.Extension)
+		id, err := j.createWallpaper(ctx, hash, jw.Extension)
 		if err != nil {
 			return err
 		}
 
-		// todo: aliases
+		j.createAliases(ctx, jw.Aliases, id)
 		// todo: tags
 		// todo: sources
 	}
