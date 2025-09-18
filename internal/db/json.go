@@ -128,7 +128,10 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 			return err
 		}
 
-		j.createAliases(ctx, jw.Aliases, id)
+		if err := j.createAliases(ctx, jw.Aliases, id); err != nil {
+			return err
+		}
+
 		// todo: tags
 		// todo: sources
 	}
