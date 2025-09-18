@@ -1,12 +1,12 @@
 pragma foreign_keys = on;
 
-create table status (
+create table if not exists status (
     id integer primary key
     , name text not null unique
 );
 
 
-create table alias (
+create table if not exists alias (
     id integer primary key
     , wallpaper_id integer   not null
     , name         text      not null
@@ -18,13 +18,13 @@ create table alias (
         on delete cascade
 );
 
-create trigger alias_keep_ts
+create trigger if not exists alias_keep_ts
 update of created_at on alias
 begin
     select raise(abort, '''created_at'' shouldn''t be updated');
 end;
 
-create trigger alias_update_ts
+create trigger if not exists alias_update_ts
 after update of id, name on alias
 begin
     update alias
@@ -33,20 +33,20 @@ begin
 end;
 
 
-create table tag (
+create table if not exists tag (
     id integer primary key
     , name       text      not null unique
     , created_at timestamp not null default current_timestamp
     , updated_at timestamp not null default current_timestamp
 );
 
-create trigger tag_keep_ts
+create trigger if not exists tag_keep_ts
 update of created_at on tag
 begin
     select raise(abort, '''created_at'' shouldn''t be updated');
 end;
 
-create trigger tag_update_ts
+create trigger if not exists tag_update_ts
 after update of id, name on tag
 begin
     update tag
@@ -55,7 +55,7 @@ begin
 end;
 
 
-create table source (
+create table if not exists source (
     id integer primary key
     , name       text      not null
     , link       text
@@ -63,13 +63,13 @@ create table source (
     , updated_at timestamp not null default current_timestamp
 );
 
-create trigger source_keep_ts
+create trigger if not exists source_keep_ts
 update of created_at on source
 begin
     select raise(abort, '''created_at'' shouldn''t be updated');
 end;
 
-create trigger source_update_ts
+create trigger if not exists source_update_ts
 after update of id, name, link on source
 begin
     update source
@@ -78,21 +78,21 @@ begin
 end;
 
 
-create table wallpaper (
+create table if not exists wallpaper (
     id integer primary key
     , hash       text      not null unique
     , extension  text      not null
     , created_at timestamp not null default current_timestamp
 );
 
-create trigger wallpaper_keep_ts
+create trigger if not exists wallpaper_keep_ts
 update of created_at on wallpaper
 begin
     select raise(abort, '''created_at'' shouldn''t be updated');
 end;
 
 
-create table wallpaper_tag (
+create table if not exists wallpaper_tag (
     wallpaper_id integer,
     tag_id       integer,
 
@@ -108,7 +108,7 @@ create table wallpaper_tag (
 );
 
 
-create table wallpaper_source (
+create table if not exists wallpaper_source (
     wallpaper_id integer,
     source_id    integer,
 
@@ -124,7 +124,7 @@ create table wallpaper_source (
 );
 
 
-create table queue (
+create table if not exists queue (
     id integer primary key
     , wallpaper_id integer   not null
     , status_id    integer   not null
@@ -141,13 +141,13 @@ create table queue (
         on delete cascade
 );
 
-create trigger queue_keep_ts
+create trigger if not exists queue_keep_ts
 update of created_at on queue
 begin
     select raise(abort, '''created_at'' shouldn''t be updated');
 end;
 
-create trigger queue_update_ts
+create trigger if not exists queue_update_ts
 after update of id, wallpaper_id, status_id, priority on queue
 begin
     update queue

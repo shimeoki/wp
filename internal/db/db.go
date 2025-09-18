@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	_ "embed"
 	"io"
 	"time"
 
@@ -27,6 +28,9 @@ type Repo interface {
 	Queues() QueueRepo
 }
 
+//go:embed sqlite.sql
+var sqliteSql string
+
 type sqliteRepo struct {
 	wallpapers WallpaperRepo
 	tags       TagRepo
@@ -44,6 +48,10 @@ func NewSQLiteRepo(config *config.DB) (Repo, error) {
 
 	err = ping(db)
 	if err != nil {
+		return nil, err
+	}
+
+	if _, err := db.Exec(sqliteSql); err != nil {
 		return nil, err
 	}
 
