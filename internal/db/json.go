@@ -110,6 +110,51 @@ func (j *JSONer) createAliases(
 	return nil
 }
 
+type jsonTagger struct {
+	jsoner *JSONer
+	tags   map[string]int64
+}
+
+func (t *jsonTagger) createTags(
+	ctx context.Context,
+	tags []string,
+	wid int64,
+) error {
+	ts := t.jsoner.repo.Tags()
+	ws := t.jsoner.repo.Wallpapers()
+
+	for _, name := range tags {
+		if t.tags[name] == 0 {
+			tag, err := ts.GetByName(ctx, name)
+			if err != nil {
+				return err
+			}
+
+			t.tags[name] = tag.ID
+		}
+
+		if t.tags[name] == 0 {
+			id, err := ts.Create(ctx, &TagCreate{Name: name})
+			if err != nil {
+				return err
+			}
+
+			t.tags[name] = id
+		}
+
+		err := ws.AddTag(
+			ctx,
+			&WallpaperTag{WallpaperID: wid, TagID: t.tags[name]},
+		)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // todo: use a single transaction
 func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 	file := &jsonFile{}
@@ -122,6 +167,8 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 		return errors.New("unexpected version")
 	}
 
+	tagger := &jsonTagger{jsoner: j, tags: make(map[string]int64)}
+
 	for hash, jw := range file.Wallpapers {
 		id, err := j.createWallpaper(ctx, hash, jw.Extension)
 		if err != nil {
@@ -132,7 +179,10 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 			return err
 		}
 
-		// todo: tags
+		if err := tagger.createTags(ctx, jw.Tags, id); err != nil {
+			return err
+		}
+
 		// todo: sources
 	}
 
