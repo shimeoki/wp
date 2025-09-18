@@ -98,10 +98,10 @@ func (j *JSONer) createAliases(
 	aliases []string,
 	wid int64,
 ) error {
-	ts := j.repo.Aliases()
+	as := j.repo.Aliases()
 
 	for _, alias := range aliases {
-		_, err := ts.Create(ctx, &AliasCreate{WallpaperID: wid, Name: alias})
+		_, err := as.Create(ctx, &AliasCreate{WallpaperID: wid, Name: alias})
 		if err != nil {
 			return err
 		}
