@@ -27,6 +27,7 @@ type AliasUpdate struct {
 type AliasRepo interface {
 	GetAll(ctx context.Context) ([]*Alias, error)
 	GetByID(ctx context.Context, id int64) (*Alias, error)
+	GetByName(ctx context.Context, name string, wid int64) (*Alias, error)
 
 	Create(ctx context.Context, a *AliasCreate) (int64, error)
 	Update(ctx context.Context, a *AliasUpdate) error
@@ -84,6 +85,31 @@ func (r *sqliteAliasRepo) GetByID(
 
 	var a Alias
 	row := r.db.QueryRowContext(ctx, sql, id)
+
+	err := row.Scan(&a.ID, &a.WallpaperID, &a.Name, &a.CreatedAt, &a.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &a, nil
+}
+
+func (r *sqliteAliasRepo) GetByName(
+	ctx context.Context,
+	name string,
+	wid int64,
+) (*Alias, error) {
+	sql := `
+		select
+			id
+			, wallpaper_id
+			, name
+			, created_at
+			, updated_at
+		from alias where name = ? and wallpaper_id = ?`
+
+	var a Alias
+	row := r.db.QueryRowContext(ctx, sql, name, wid)
 
 	err := row.Scan(&a.ID, &a.WallpaperID, &a.Name, &a.CreatedAt, &a.UpdatedAt)
 	if err != nil {
