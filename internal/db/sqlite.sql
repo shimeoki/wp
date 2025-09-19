@@ -13,6 +13,8 @@ create table if not exists alias (
     , created_at   timestamp not null default current_timestamp
     , updated_at   timestamp not null default current_timestamp
 
+    , unique (wallpaper_id, name)
+
     , foreign key (wallpaper_id) references wallpaper (id)
         on update cascade
         on delete cascade
