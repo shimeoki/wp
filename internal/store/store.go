@@ -46,6 +46,7 @@ func (s *LocalStore) Create(img io.ReadCloser) (string, error) {
 		return "", err
 	}
 
+	defer file.Close()
 	if _, err := io.Copy(file, &b); err != nil {
 		return "", err
 	}
