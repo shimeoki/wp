@@ -2,7 +2,6 @@ package store
 
 import (
 	"bytes"
-	"errors"
 	"io"
 	"os"
 )
@@ -60,7 +59,7 @@ func (s *LocalStore) Remove(hash string) error {
 
 func (s *LocalStore) Get(hash string) (io.ReadCloser, error) {
 	if !s.hasher.Valid(hash) {
-		return nil, errors.New("invalid hash")
+		return nil, InvalidHash
 	}
 
 	return s.root.Open(hash)

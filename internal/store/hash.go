@@ -2,10 +2,13 @@ package store
 
 import (
 	"crypto/sha256"
+	"errors"
 	"hash"
 	"io"
 	"regexp"
 )
+
+var InvalidHash = errors.New("invalid hash")
 
 type Hasher interface {
 	Compute(r io.Reader) (hash string, err error)
