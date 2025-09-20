@@ -8,7 +8,7 @@ import (
 
 type Store interface {
 	Get(hash string) (img io.ReadCloser, err error)
-	Create(img io.ReadCloser) (hash string, err error)
+	Create(img io.Reader) (hash string, err error)
 	Remove(hash string) error
 }
 
@@ -26,7 +26,7 @@ func NewLocalStore(path string, hasher Hasher) (*LocalStore, error) {
 	return &LocalStore{hasher: hasher, root: root}, nil
 }
 
-func (s *LocalStore) Create(img io.ReadCloser) (string, error) {
+func (s *LocalStore) Create(img io.Reader) (string, error) {
 	var b bytes.Buffer
 	r := io.TeeReader(img, &b)
 
