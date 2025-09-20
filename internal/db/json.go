@@ -13,10 +13,10 @@ type jsonWallpaperSource struct {
 }
 
 type jsonWallpaper struct {
-	Extension string                `json:"extension"`
-	Aliases   []string              `json:"aliases"`
-	Tags      []string              `json:"tags"`
-	Sources   []jsonWallpaperSource `json:"sources"`
+	Format  string                `json:"format"`
+	Aliases []string              `json:"aliases"`
+	Tags    []string              `json:"tags"`
+	Sources []jsonWallpaperSource `json:"sources"`
 }
 
 type jsonFile struct {
@@ -64,10 +64,10 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 		}
 
 		jw := &jsonWallpaper{
-			Extension: w.Extension,
-			Aliases:   aliases,
-			Tags:      tags,
-			Sources:   sources,
+			Format:  w.Format,
+			Aliases: aliases,
+			Tags:    tags,
+			Sources: sources,
 		}
 
 		file.Wallpapers[w.Hash] = jw
@@ -78,7 +78,7 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 
 func (j *JSONer) importWallpaper(
 	ctx context.Context,
-	hash, extension string,
+	hash, format string,
 ) (int64, error) {
 	ws := j.repo.Wallpapers()
 
@@ -89,7 +89,7 @@ func (j *JSONer) importWallpaper(
 
 	return ws.Create(
 		ctx,
-		&WallpaperCreate{Hash: hash, Extension: extension},
+		&WallpaperCreate{Hash: hash, Format: format},
 	)
 }
 
@@ -199,7 +199,7 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 	tagger := &jsonTagger{jsoner: j, tags: make(map[string]int64)}
 
 	for hash, jw := range file.Wallpapers {
-		id, err := j.importWallpaper(ctx, hash, jw.Extension)
+		id, err := j.importWallpaper(ctx, hash, jw.Format)
 		if err != nil {
 			return err
 		}
