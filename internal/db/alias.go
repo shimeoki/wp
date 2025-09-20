@@ -123,7 +123,7 @@ func (r *sqliteAliasRepo) Create(
 	ctx context.Context,
 	a *AliasCreate,
 ) (int64, error) {
-	sql := "insert into alias(name, wallpaper_id) values(?)"
+	sql := "insert into alias(name, wallpaper_id) values(?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, a.Name, a.WallpaperID)
 	if err != nil {
