@@ -11,7 +11,7 @@ import (
 type Wallpaper struct {
 	ID        int64
 	Hash      string
-	Extension string
+	Format    string
 	CreatedAt time.Time
 	Aliases   []*Alias
 	Tags      []*Tag
@@ -19,8 +19,8 @@ type Wallpaper struct {
 }
 
 type WallpaperCreate struct {
-	Hash      string
-	Extension string
+	Hash   string
+	Format string
 }
 
 type WallpaperTag struct {
@@ -57,7 +57,7 @@ func (r *sqliteWallpaperRepo) query() string {
 		select
 			w.id
 			, w.hash
-			, w.extension
+			, w.format
 			, w.created_at
 			, a.id
 			, a.wallpaper_id
@@ -131,7 +131,7 @@ func (s *sqliteWallpaperScanner) scanRow(row *wallpaperRow) error {
 		// wallpaper fields are guaranteed to be not null
 		&row.wallpaper.ID,
 		&row.wallpaper.Hash,
-		&row.wallpaper.Extension,
+		&row.wallpaper.Format,
 		&row.wallpaper.CreatedAt,
 
 		&row.aliasID,
@@ -346,9 +346,9 @@ func (r *sqliteWallpaperRepo) Create(
 	ctx context.Context,
 	w *WallpaperCreate,
 ) (int64, error) {
-	sql := "insert into wallpaper(hash, extension) values (?, ?)"
+	sql := "insert into wallpaper(hash, format) values (?, ?)"
 
-	result, err := r.db.ExecContext(ctx, sql, w.Hash, w.Extension)
+	result, err := r.db.ExecContext(ctx, sql, w.Hash, w.Format)
 	if err != nil {
 		return 0, err
 	}

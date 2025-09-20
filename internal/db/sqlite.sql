@@ -83,7 +83,7 @@ end;
 create table if not exists wallpaper (
     id integer primary key
     , hash       text      not null unique
-    , extension  text      not null
+    , format     text      not null
     , created_at timestamp not null default current_timestamp
 );
 

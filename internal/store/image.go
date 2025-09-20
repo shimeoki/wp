@@ -7,34 +7,34 @@ import (
 	"path/filepath"
 )
 
-type Extension string
+type Format string
 
 const (
-	JPEG Extension = "jpg"
-	PNG  Extension = "png"
+	JPEG Format = "jpg"
+	PNG  Format = "png"
 )
 
-var InvalidExtension = errors.New("invalid extension")
+var InvalidFormat = errors.New("invalid format")
 
 type Image interface {
 	io.ReadCloser
-	Extension() Extension
+	Format() Format
 }
 
 type LocalImage struct {
-	file      *os.File
-	extension Extension
+	file   *os.File
+	format Format
 }
 
 func NewLocalImage(path string) (*LocalImage, error) {
-	var extension Extension
+	var format Format
 	switch filepath.Ext(path) {
 	case "jpg", "jpeg":
-		extension = JPEG
+		format = JPEG
 	case "png":
-		extension = PNG
+		format = PNG
 	default:
-		return nil, InvalidExtension
+		return nil, InvalidFormat
 	}
 
 	file, err := os.Open(filepath.Clean(path))
@@ -42,11 +42,11 @@ func NewLocalImage(path string) (*LocalImage, error) {
 		return nil, err
 	}
 
-	return &LocalImage{file: file, extension: extension}, nil
+	return &LocalImage{file: file, format: format}, nil
 }
 
-func (i *LocalImage) Extension() Extension {
-	return i.extension
+func (i *LocalImage) Format() Format {
+	return i.format
 }
 
 func (i *LocalImage) Read(p []byte) (int, error) {
