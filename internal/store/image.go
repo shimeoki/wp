@@ -1,9 +1,25 @@
-package img
+package store
 
 import (
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 )
+
+type Extension string
+
+const (
+	JPEG Extension = "jpg"
+	PNG  Extension = "png"
+)
+
+var InvalidExtension = errors.New("invalid extension")
+
+type Image interface {
+	io.ReadCloser
+	Extension() Extension
+}
 
 type LocalImage struct {
 	file      *os.File
