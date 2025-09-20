@@ -29,7 +29,7 @@ type Repo interface {
 }
 
 //go:embed sqlite.sql
-var sqliteSql string
+var sqliteScheme string
 
 type sqliteRepo struct {
 	wallpapers WallpaperRepo
@@ -51,7 +51,7 @@ func NewSQLiteRepo(config *config.DB) (Repo, error) {
 		return nil, err
 	}
 
-	if _, err := db.Exec(sqliteSql); err != nil {
+	if _, err := db.Exec(sqliteScheme); err != nil {
 		return nil, err
 	}
 
