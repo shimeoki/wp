@@ -1,7 +1,6 @@
 package store
 
 import (
-	"bytes"
 	"io"
 	"os"
 )
@@ -27,8 +26,12 @@ func NewLocalStore(path string, hasher Hasher) (*LocalStore, error) {
 }
 
 func (s *LocalStore) Create(img io.Reader) (string, error) {
-	var b bytes.Buffer
-	r := io.TeeReader(img, &b)
+	tmp, err := os.CreateTemp("", "wp-local-store")
+	if err != nil {
+		return "", err
+	}
+
+	r := io.TeeReader(img, tmp)
 
 	hash, err := s.hasher.Compute(r)
 	if err != nil {
@@ -47,7 +50,7 @@ func (s *LocalStore) Create(img io.Reader) (string, error) {
 	}
 
 	defer file.Close()
-	if _, err := io.Copy(file, &b); err != nil {
+	if _, err := io.Copy(file, tmp); err != nil {
 		return "", err
 	}
 
