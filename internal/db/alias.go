@@ -7,20 +7,20 @@ import (
 )
 
 type Alias struct {
-	ID          int64
-	WallpaperID int64
+	ID
+	WallpaperID ID
 	Name        string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
 
 type AliasCreate struct {
-	WallpaperID int64
+	WallpaperID ID
 	Name        string
 }
 
 type AliasUpdate struct {
-	ID   int64
+	ID
 	Name string
 }
 

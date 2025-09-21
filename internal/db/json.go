@@ -101,7 +101,10 @@ func (j *JSONer) importAliases(
 	as := j.repo.Aliases()
 
 	for _, alias := range aliases {
-		_, err := as.Create(ctx, &AliasCreate{WallpaperID: wid, Name: alias})
+		_, err := as.Create(
+			ctx,
+			&AliasCreate{WallpaperID: ID(wid), Name: alias},
+		)
 		if err != nil {
 			return err
 		}

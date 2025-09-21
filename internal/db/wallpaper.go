@@ -193,8 +193,8 @@ func (s *sqliteWallpaperScanner) scanAlias(wid int64, row *wallpaperRow) {
 
 	w := s.wallpapers[wid]
 	alias := &Alias{
-		ID:          aid,
-		WallpaperID: *row.aliasWallpaperID,
+		ID:          ID(aid),
+		WallpaperID: ID(*row.aliasWallpaperID),
 		Name:        *row.aliasName,
 		CreatedAt:   *row.aliasCreatedAt,
 		UpdatedAt:   *row.aliasUpdatedAt,

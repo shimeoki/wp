@@ -11,6 +11,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+type ID int64
+
 type Exporter interface {
 	Export(ctx context.Context, out io.Writer) error
 }
