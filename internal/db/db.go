@@ -11,16 +11,18 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+type Ctx = context.Context
+
 type ID int64
 type Hash string
 type Name string
 
 type Exporter interface {
-	Export(ctx context.Context, out io.Writer) error
+	Export(ctx Ctx, out io.Writer) error
 }
 
 type Importer interface {
-	Import(ctx context.Context, in io.Reader) error
+	Import(ctx Ctx, in io.Reader) error
 }
 
 type Repo interface {

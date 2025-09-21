@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"time"
 )
@@ -26,19 +25,19 @@ type SourceUpdate struct {
 }
 
 type SourceRepo interface {
-	GetAll(ctx context.Context) ([]*Source, error)
-	GetByID(ctx context.Context, id ID) (*Source, error)
+	GetAll(ctx Ctx) ([]*Source, error)
+	GetByID(ctx Ctx, id ID) (*Source, error)
 
-	Create(ctx context.Context, s *SourceCreate) (ID, error)
-	Update(ctx context.Context, s *SourceUpdate) error
-	Delete(ctx context.Context, id ID) error
+	Create(ctx Ctx, s *SourceCreate) (ID, error)
+	Update(ctx Ctx, s *SourceUpdate) error
+	Delete(ctx Ctx, id ID) error
 }
 
 type sqliteSourceRepo struct {
 	db *sql.DB
 }
 
-func (r *sqliteSourceRepo) GetAll(ctx context.Context) ([]*Source, error) {
+func (r *sqliteSourceRepo) GetAll(ctx Ctx) ([]*Source, error) {
 	sql := "select id, name, link, created_at, updated_at from source"
 
 	rows, err := r.db.QueryContext(ctx, sql)
@@ -63,10 +62,7 @@ func (r *sqliteSourceRepo) GetAll(ctx context.Context) ([]*Source, error) {
 	return ss, rows.Err()
 }
 
-func (r *sqliteSourceRepo) GetByID(
-	ctx context.Context,
-	id ID,
-) (*Source, error) {
+func (r *sqliteSourceRepo) GetByID(ctx Ctx, id ID) (*Source, error) {
 	sql := `
 		select
 			id
@@ -87,10 +83,7 @@ func (r *sqliteSourceRepo) GetByID(
 	return &s, nil
 }
 
-func (r *sqliteSourceRepo) Create(
-	ctx context.Context,
-	s *SourceCreate,
-) (ID, error) {
+func (r *sqliteSourceRepo) Create(ctx Ctx, s *SourceCreate) (ID, error) {
 	sql := "insert into source(name, link) values(?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, s.Name, s.Link)
@@ -106,7 +99,7 @@ func (r *sqliteSourceRepo) Create(
 	return ID(id), nil
 }
 
-func (r *sqliteSourceRepo) Update(ctx context.Context, s *SourceUpdate) error {
+func (r *sqliteSourceRepo) Update(ctx Ctx, s *SourceUpdate) error {
 	sql := "update source set name = ?, link = ? where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, s.Name, s.Link, s.ID)
@@ -114,7 +107,7 @@ func (r *sqliteSourceRepo) Update(ctx context.Context, s *SourceUpdate) error {
 	return err
 }
 
-func (r *sqliteSourceRepo) Delete(ctx context.Context, id ID) error {
+func (r *sqliteSourceRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from source where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)

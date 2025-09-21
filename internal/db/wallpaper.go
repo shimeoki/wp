@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -34,18 +33,18 @@ type WallpaperSource struct {
 }
 
 type WallpaperRepo interface {
-	GetAll(ctx context.Context) ([]*Wallpaper, error)
-	GetByID(ctx context.Context, id ID) (*Wallpaper, error)
-	GetByHash(ctx context.Context, h Hash) (*Wallpaper, error)
+	GetAll(ctx Ctx) ([]*Wallpaper, error)
+	GetByID(ctx Ctx, id ID) (*Wallpaper, error)
+	GetByHash(ctx Ctx, h Hash) (*Wallpaper, error)
 
-	Create(ctx context.Context, w *WallpaperCreate) (ID, error)
-	Delete(ctx context.Context, id ID) error
+	Create(ctx Ctx, w *WallpaperCreate) (ID, error)
+	Delete(ctx Ctx, id ID) error
 
-	AddTag(ctx context.Context, w *WallpaperTag) error
-	RemoveTag(ctx context.Context, w *WallpaperTag) error
+	AddTag(ctx Ctx, w *WallpaperTag) error
+	RemoveTag(ctx Ctx, w *WallpaperTag) error
 
-	AddSource(ctx context.Context, w *WallpaperSource) error
-	RemoveSource(ctx context.Context, w *WallpaperSource) error
+	AddSource(ctx Ctx, w *WallpaperSource) error
+	RemoveSource(ctx Ctx, w *WallpaperSource) error
 }
 
 type sqliteWallpaperRepo struct {
@@ -263,9 +262,7 @@ func (s *sqliteWallpaperScanner) scanSource(wid ID, row *wallpaperRow) {
 	}
 }
 
-func (r *sqliteWallpaperRepo) GetAll(
-	ctx context.Context,
-) ([]*Wallpaper, error) {
+func (r *sqliteWallpaperRepo) GetAll(ctx Ctx) ([]*Wallpaper, error) {
 	sql := r.query()
 
 	rows, err := r.db.QueryContext(ctx, sql)
@@ -284,10 +281,7 @@ func (r *sqliteWallpaperRepo) GetAll(
 	return ws, rows.Err()
 }
 
-func (r *sqliteWallpaperRepo) GetByID(
-	ctx context.Context,
-	id ID,
-) (*Wallpaper, error) {
+func (r *sqliteWallpaperRepo) GetByID(ctx Ctx, id ID) (*Wallpaper, error) {
 	sql := fmt.Sprintf("%s where w.id = ?", r.query())
 
 	rows, err := r.db.QueryContext(ctx, sql, id)
@@ -313,10 +307,7 @@ func (r *sqliteWallpaperRepo) GetByID(
 	}
 }
 
-func (r *sqliteWallpaperRepo) GetByHash(
-	ctx context.Context,
-	h Hash,
-) (*Wallpaper, error) {
+func (r *sqliteWallpaperRepo) GetByHash(ctx Ctx, h Hash) (*Wallpaper, error) {
 	sql := fmt.Sprintf("%s where w.hash = ?", r.query())
 
 	rows, err := r.db.QueryContext(ctx, sql, h)
@@ -342,10 +333,7 @@ func (r *sqliteWallpaperRepo) GetByHash(
 	}
 }
 
-func (r *sqliteWallpaperRepo) Create(
-	ctx context.Context,
-	w *WallpaperCreate,
-) (ID, error) {
+func (r *sqliteWallpaperRepo) Create(ctx Ctx, w *WallpaperCreate) (ID, error) {
 	sql := "insert into wallpaper(hash, format) values (?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, w.Hash, w.Format)
@@ -361,7 +349,7 @@ func (r *sqliteWallpaperRepo) Create(
 	return ID(id), nil
 }
 
-func (r *sqliteWallpaperRepo) Delete(ctx context.Context, id ID) error {
+func (r *sqliteWallpaperRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from wallpaper where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
@@ -369,10 +357,7 @@ func (r *sqliteWallpaperRepo) Delete(ctx context.Context, id ID) error {
 	return err
 }
 
-func (r *sqliteWallpaperRepo) AddTag(
-	ctx context.Context,
-	join *WallpaperTag,
-) error {
+func (r *sqliteWallpaperRepo) AddTag(ctx Ctx, join *WallpaperTag) error {
 	sql := `
 		insert into wallpaper_tag(wallpaper_id, tag_id)
 		values(?, ?)`
@@ -382,10 +367,7 @@ func (r *sqliteWallpaperRepo) AddTag(
 	return err
 }
 
-func (r *sqliteWallpaperRepo) RemoveTag(
-	ctx context.Context,
-	join *WallpaperTag,
-) error {
+func (r *sqliteWallpaperRepo) RemoveTag(ctx Ctx, join *WallpaperTag) error {
 	sql := "delete from wallpaper_tag where wallpaper_id = ? and tag_id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, join.WallpaperID, join.TagID)
@@ -393,10 +375,7 @@ func (r *sqliteWallpaperRepo) RemoveTag(
 	return err
 }
 
-func (r *sqliteWallpaperRepo) AddSource(
-	ctx context.Context,
-	join *WallpaperSource,
-) error {
+func (r *sqliteWallpaperRepo) AddSource(ctx Ctx, join *WallpaperSource) error {
 	sql := `
 		insert into wallpaper_source(wallpaper_id, source_id)
 		values(?, ?)`
@@ -407,7 +386,7 @@ func (r *sqliteWallpaperRepo) AddSource(
 }
 
 func (r *sqliteWallpaperRepo) RemoveSource(
-	ctx context.Context,
+	ctx Ctx,
 	join *WallpaperSource,
 ) error {
 	sql := `

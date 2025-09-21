@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"time"
 )
@@ -28,19 +27,19 @@ type QueueUpdate struct {
 }
 
 type QueueRepo interface {
-	GetAll(ctx context.Context) ([]*Queue, error)
-	GetByID(ctx context.Context, id ID) (*Queue, error)
+	GetAll(ctx Ctx) ([]*Queue, error)
+	GetByID(ctx Ctx, id ID) (*Queue, error)
 
-	Create(ctx context.Context, q *QueueCreate) (ID, error)
-	Update(ctx context.Context, q *QueueUpdate) error
-	Delete(ctx context.Context, id ID) error
+	Create(ctx Ctx, q *QueueCreate) (ID, error)
+	Update(ctx Ctx, q *QueueUpdate) error
+	Delete(ctx Ctx, id ID) error
 }
 
 type sqliteQueueRepo struct {
 	db *sql.DB
 }
 
-func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
+func (r *sqliteQueueRepo) GetAll(ctx Ctx) ([]*Queue, error) {
 	sql := `
 		select
 			q.id
@@ -91,10 +90,7 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 	return qs, rows.Err()
 }
 
-func (r *sqliteQueueRepo) GetByID(
-	ctx context.Context,
-	id ID,
-) (*Queue, error) {
+func (r *sqliteQueueRepo) GetByID(ctx Ctx, id ID) (*Queue, error) {
 	sql := `
 		select
 			q.id
@@ -129,10 +125,7 @@ func (r *sqliteQueueRepo) GetByID(
 	return &q, nil
 }
 
-func (r *sqliteQueueRepo) Create(
-	ctx context.Context,
-	q *QueueCreate,
-) (ID, error) {
+func (r *sqliteQueueRepo) Create(ctx Ctx, q *QueueCreate) (ID, error) {
 	sql := `
 		insert into queue(wallpaper_id, status_id, priority)
 		values(?, ?, ?)`
@@ -157,7 +150,7 @@ func (r *sqliteQueueRepo) Create(
 	return ID(id), nil
 }
 
-func (r *sqliteQueueRepo) Update(ctx context.Context, q *QueueUpdate) error {
+func (r *sqliteQueueRepo) Update(ctx Ctx, q *QueueUpdate) error {
 	sql := `update queue set status_id = ?, priority = ? where id = ?`
 
 	_, err := r.db.ExecContext(
@@ -171,7 +164,7 @@ func (r *sqliteQueueRepo) Update(ctx context.Context, q *QueueUpdate) error {
 	return err
 }
 
-func (r *sqliteQueueRepo) Delete(ctx context.Context, id ID) error {
+func (r *sqliteQueueRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from queue where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)

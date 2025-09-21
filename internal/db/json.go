@@ -1,14 +1,13 @@
 package db
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"io"
 )
 
 type jsonWallpaperSource struct {
-	Name `json:"name"`
+	Name `        json:"name"`
 	Link *string `json:"link,omitempty"`
 }
 
@@ -32,7 +31,7 @@ func NewJSONer(r Repo) *JSONer {
 	return &JSONer{repo: r}
 }
 
-func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
+func (j *JSONer) Export(ctx Ctx, out io.Writer) error {
 	ws, err := j.repo.Wallpapers().GetAll(ctx)
 	if err != nil {
 		return err
@@ -77,8 +76,9 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 }
 
 func (j *JSONer) importWallpaper(
-	ctx context.Context,
-	hash Hash, format string,
+	ctx Ctx,
+	hash Hash,
+	format string,
 ) (ID, error) {
 	ws := j.repo.Wallpapers()
 
@@ -93,11 +93,7 @@ func (j *JSONer) importWallpaper(
 	)
 }
 
-func (j *JSONer) importAliases(
-	ctx context.Context,
-	aliases []Name,
-	wid ID,
-) error {
+func (j *JSONer) importAliases(ctx Ctx, aliases []Name, wid ID) error {
 	as := j.repo.Aliases()
 
 	for _, alias := range aliases {
@@ -114,7 +110,7 @@ func (j *JSONer) importAliases(
 }
 
 func (j *JSONer) importSources(
-	ctx context.Context,
+	ctx Ctx,
 	sources []jsonWallpaperSource,
 	wid ID,
 ) error {
@@ -149,11 +145,7 @@ type jsonTagger struct {
 	tags   map[Name]ID
 }
 
-func (t *jsonTagger) importTags(
-	ctx context.Context,
-	tags []Name,
-	wid ID,
-) error {
+func (t *jsonTagger) importTags(ctx Ctx, tags []Name, wid ID) error {
 	ts := t.jsoner.repo.Tags()
 	ws := t.jsoner.repo.Wallpapers()
 
@@ -188,7 +180,7 @@ func (t *jsonTagger) importTags(
 }
 
 // todo: use a single transaction
-func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
+func (j *JSONer) Import(ctx Ctx, in io.Reader) error {
 	file := &jsonFile{}
 
 	if err := json.NewDecoder(in).Decode(file); err != nil {

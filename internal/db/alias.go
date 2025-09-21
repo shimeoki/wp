@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"time"
 )
@@ -25,20 +24,20 @@ type AliasUpdate struct {
 }
 
 type AliasRepo interface {
-	GetAll(ctx context.Context) ([]*Alias, error)
-	GetByID(ctx context.Context, id ID) (*Alias, error)
-	GetByName(ctx context.Context, name Name, wid ID) (*Alias, error)
+	GetAll(ctx Ctx) ([]*Alias, error)
+	GetByID(ctx Ctx, id ID) (*Alias, error)
+	GetByName(ctx Ctx, name Name, wid ID) (*Alias, error)
 
-	Create(ctx context.Context, a *AliasCreate) (ID, error)
-	Update(ctx context.Context, a *AliasUpdate) error
-	Delete(ctx context.Context, id ID) error
+	Create(ctx Ctx, a *AliasCreate) (ID, error)
+	Update(ctx Ctx, a *AliasUpdate) error
+	Delete(ctx Ctx, id ID) error
 }
 
 type sqliteAliasRepo struct {
 	db *sql.DB
 }
 
-func (r *sqliteAliasRepo) GetAll(ctx context.Context) ([]*Alias, error) {
+func (r *sqliteAliasRepo) GetAll(ctx Ctx) ([]*Alias, error) {
 	sql := "select id, wallpaper_id, name, created_at, updated_at from alias"
 
 	rows, err := r.db.QueryContext(ctx, sql)
@@ -70,7 +69,7 @@ func (r *sqliteAliasRepo) GetAll(ctx context.Context) ([]*Alias, error) {
 	return as, rows.Err()
 }
 
-func (r *sqliteAliasRepo) GetByID(ctx context.Context, id ID) (*Alias, error) {
+func (r *sqliteAliasRepo) GetByID(ctx Ctx, id ID) (*Alias, error) {
 	sql := `
 		select
 			id
@@ -92,7 +91,7 @@ func (r *sqliteAliasRepo) GetByID(ctx context.Context, id ID) (*Alias, error) {
 }
 
 func (r *sqliteAliasRepo) GetByName(
-	ctx context.Context,
+	ctx Ctx,
 	name Name,
 	wid ID,
 ) (*Alias, error) {
@@ -116,10 +115,7 @@ func (r *sqliteAliasRepo) GetByName(
 	return &a, nil
 }
 
-func (r *sqliteAliasRepo) Create(
-	ctx context.Context,
-	a *AliasCreate,
-) (ID, error) {
+func (r *sqliteAliasRepo) Create(ctx Ctx, a *AliasCreate) (ID, error) {
 	sql := "insert into alias(name, wallpaper_id) values(?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, a.Name, a.WallpaperID)
@@ -135,7 +131,7 @@ func (r *sqliteAliasRepo) Create(
 	return ID(id), nil
 }
 
-func (r *sqliteAliasRepo) Update(ctx context.Context, a *AliasUpdate) error {
+func (r *sqliteAliasRepo) Update(ctx Ctx, a *AliasUpdate) error {
 	sql := "update alias set name = ? where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, a.Name, a.ID)
@@ -143,7 +139,7 @@ func (r *sqliteAliasRepo) Update(ctx context.Context, a *AliasUpdate) error {
 	return err
 }
 
-func (r *sqliteAliasRepo) Delete(ctx context.Context, id ID) error {
+func (r *sqliteAliasRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from alias where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)

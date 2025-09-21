@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 )
 
@@ -20,20 +19,20 @@ type StatusUpdate struct {
 }
 
 type StatusRepo interface {
-	GetAll(ctx context.Context) ([]*Status, error)
-	GetByID(ctx context.Context, id ID) (*Status, error)
-	GetByName(ctx context.Context, name Name) (*Status, error)
+	GetAll(ctx Ctx) ([]*Status, error)
+	GetByID(ctx Ctx, id ID) (*Status, error)
+	GetByName(ctx Ctx, name Name) (*Status, error)
 
-	Create(ctx context.Context, s *StatusCreate) (ID, error)
-	Update(ctx context.Context, s *StatusUpdate) error
-	Delete(ctx context.Context, id ID) error
+	Create(ctx Ctx, s *StatusCreate) (ID, error)
+	Update(ctx Ctx, s *StatusUpdate) error
+	Delete(ctx Ctx, id ID) error
 }
 
 type sqliteStatusRepo struct {
 	db *sql.DB
 }
 
-func (r *sqliteStatusRepo) GetAll(ctx context.Context) ([]*Status, error) {
+func (r *sqliteStatusRepo) GetAll(ctx Ctx) ([]*Status, error) {
 	sql := "select id, name from status"
 
 	rows, err := r.db.QueryContext(ctx, sql)
@@ -57,10 +56,7 @@ func (r *sqliteStatusRepo) GetAll(ctx context.Context) ([]*Status, error) {
 	return ss, rows.Err()
 }
 
-func (r *sqliteStatusRepo) GetByID(
-	ctx context.Context,
-	id ID,
-) (*Status, error) {
+func (r *sqliteStatusRepo) GetByID(ctx Ctx, id ID) (*Status, error) {
 	sql := "select id, name from status where id = ?"
 
 	row := r.db.QueryRowContext(ctx, sql, id)
@@ -74,10 +70,7 @@ func (r *sqliteStatusRepo) GetByID(
 	return &s, nil
 }
 
-func (r *sqliteStatusRepo) GetByName(
-	ctx context.Context,
-	name Name,
-) (*Status, error) {
+func (r *sqliteStatusRepo) GetByName(ctx Ctx, name Name) (*Status, error) {
 	sql := "select id, name from status where name = ?"
 
 	row := r.db.QueryRowContext(ctx, sql, name)
@@ -91,10 +84,7 @@ func (r *sqliteStatusRepo) GetByName(
 	return &s, nil
 }
 
-func (r *sqliteStatusRepo) Create(
-	ctx context.Context,
-	s *StatusCreate,
-) (ID, error) {
+func (r *sqliteStatusRepo) Create(ctx Ctx, s *StatusCreate) (ID, error) {
 	sql := "insert into status(name) values (?)"
 
 	result, err := r.db.ExecContext(ctx, sql, s.Name)
@@ -110,7 +100,7 @@ func (r *sqliteStatusRepo) Create(
 	return ID(id), nil
 }
 
-func (r *sqliteStatusRepo) Update(ctx context.Context, s *StatusUpdate) error {
+func (r *sqliteStatusRepo) Update(ctx Ctx, s *StatusUpdate) error {
 	sql := "update status set name = ? where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, s.Name, s.ID)
@@ -118,7 +108,7 @@ func (r *sqliteStatusRepo) Update(ctx context.Context, s *StatusUpdate) error {
 	return err
 }
 
-func (r *sqliteStatusRepo) Delete(ctx context.Context, id ID) error {
+func (r *sqliteStatusRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from status where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
