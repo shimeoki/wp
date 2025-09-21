@@ -8,24 +8,24 @@ import (
 
 type Tag struct {
 	ID
-	Name      string
+	Name
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 type TagCreate struct {
-	Name string
+	Name
 }
 
 type TagUpdate struct {
 	ID
-	Name string
+	Name
 }
 
 type TagRepo interface {
 	GetAll(ctx context.Context) ([]*Tag, error)
 	GetByID(ctx context.Context, id ID) (*Tag, error)
-	GetByName(ctx context.Context, name string) (*Tag, error)
+	GetByName(ctx context.Context, name Name) (*Tag, error)
 
 	Create(ctx context.Context, t *TagCreate) (ID, error)
 	Update(ctx context.Context, t *TagUpdate) error
@@ -76,7 +76,7 @@ func (r *sqliteTagRepo) GetByID(ctx context.Context, id ID) (*Tag, error) {
 
 func (r *sqliteTagRepo) GetByName(
 	ctx context.Context,
-	name string,
+	name Name,
 ) (*Tag, error) {
 	sql := "select id, name, created_at, updated_at from tag where name = ?"
 

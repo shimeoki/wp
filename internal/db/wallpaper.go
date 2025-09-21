@@ -86,17 +86,17 @@ type wallpaperRow struct {
 
 	aliasID          *ID
 	aliasWallpaperID *ID
-	aliasName        *string
+	aliasName        *Name
 	aliasCreatedAt   *time.Time
 	aliasUpdatedAt   *time.Time
 
 	tagID        *ID
-	tagName      *string
+	tagName      *Name
 	tagCreatedAt *time.Time
 	tagUpdatedAt *time.Time
 
 	sourceID        *ID
-	sourceName      *string
+	sourceName      *Name
 	sourceLink      *string
 	sourceCreatedAt *time.Time
 	sourceUpdatedAt *time.Time

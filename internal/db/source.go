@@ -8,20 +8,20 @@ import (
 
 type Source struct {
 	ID
-	Name      string
+	Name
 	Link      *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 type SourceCreate struct {
-	Name string
+	Name
 	Link *string
 }
 
 type SourceUpdate struct {
 	ID
-	Name string
+	Name
 	Link *string
 }
 

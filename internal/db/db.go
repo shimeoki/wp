@@ -13,6 +13,7 @@ import (
 
 type ID int64
 type Hash string
+type Name string
 
 type Exporter interface {
 	Export(ctx context.Context, out io.Writer) error

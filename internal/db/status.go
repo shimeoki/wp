@@ -7,22 +7,22 @@ import (
 
 type Status struct {
 	ID
-	Name string
+	Name
 }
 
 type StatusCreate struct {
-	Name string
+	Name
 }
 
 type StatusUpdate struct {
 	ID
-	Name string
+	Name
 }
 
 type StatusRepo interface {
 	GetAll(ctx context.Context) ([]*Status, error)
 	GetByID(ctx context.Context, id ID) (*Status, error)
-	GetByName(ctx context.Context, name string) (*Status, error)
+	GetByName(ctx context.Context, name Name) (*Status, error)
 
 	Create(ctx context.Context, s *StatusCreate) (ID, error)
 	Update(ctx context.Context, s *StatusUpdate) error
@@ -76,7 +76,7 @@ func (r *sqliteStatusRepo) GetByID(
 
 func (r *sqliteStatusRepo) GetByName(
 	ctx context.Context,
-	name string,
+	name Name,
 ) (*Status, error) {
 	sql := "select id, name from status where name = ?"
 

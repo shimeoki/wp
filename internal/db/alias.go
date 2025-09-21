@@ -8,26 +8,26 @@ import (
 
 type Alias struct {
 	ID
+	Name
 	WallpaperID ID
-	Name        string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
 
 type AliasCreate struct {
+	Name
 	WallpaperID ID
-	Name        string
 }
 
 type AliasUpdate struct {
 	ID
-	Name string
+	Name
 }
 
 type AliasRepo interface {
 	GetAll(ctx context.Context) ([]*Alias, error)
 	GetByID(ctx context.Context, id ID) (*Alias, error)
-	GetByName(ctx context.Context, name string, wid ID) (*Alias, error)
+	GetByName(ctx context.Context, name Name, wid ID) (*Alias, error)
 
 	Create(ctx context.Context, a *AliasCreate) (ID, error)
 	Update(ctx context.Context, a *AliasUpdate) error
@@ -93,7 +93,7 @@ func (r *sqliteAliasRepo) GetByID(ctx context.Context, id ID) (*Alias, error) {
 
 func (r *sqliteAliasRepo) GetByName(
 	ctx context.Context,
-	name string,
+	name Name,
 	wid ID,
 ) (*Alias, error) {
 	sql := `

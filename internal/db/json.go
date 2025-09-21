@@ -8,14 +8,14 @@ import (
 )
 
 type jsonWallpaperSource struct {
-	Name string  `json:"name"`
+	Name `json:"name"`
 	Link *string `json:"link,omitempty"`
 }
 
 type jsonWallpaper struct {
 	Format  string                `json:"format"`
-	Aliases []string              `json:"aliases"`
-	Tags    []string              `json:"tags"`
+	Aliases []Name                `json:"aliases"`
+	Tags    []Name                `json:"tags"`
 	Sources []jsonWallpaperSource `json:"sources"`
 }
 
@@ -48,12 +48,12 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 			return errors.New("duplicate hashes in database")
 		}
 
-		aliases := make([]string, len(w.Aliases))
+		aliases := make([]Name, len(w.Aliases))
 		for i, a := range w.Aliases {
 			aliases[i] = a.Name
 		}
 
-		tags := make([]string, len(w.Tags))
+		tags := make([]Name, len(w.Tags))
 		for i, t := range w.Tags {
 			tags[i] = t.Name
 		}
@@ -95,7 +95,7 @@ func (j *JSONer) importWallpaper(
 
 func (j *JSONer) importAliases(
 	ctx context.Context,
-	aliases []string,
+	aliases []Name,
 	wid ID,
 ) error {
 	as := j.repo.Aliases()
@@ -146,12 +146,12 @@ func (j *JSONer) importSources(
 
 type jsonTagger struct {
 	jsoner *JSONer
-	tags   map[string]ID
+	tags   map[Name]ID
 }
 
 func (t *jsonTagger) importTags(
 	ctx context.Context,
-	tags []string,
+	tags []Name,
 	wid ID,
 ) error {
 	ts := t.jsoner.repo.Tags()
@@ -199,7 +199,7 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 		return errors.New("unexpected version")
 	}
 
-	tagger := &jsonTagger{jsoner: j, tags: make(map[string]ID)}
+	tagger := &jsonTagger{jsoner: j, tags: make(map[Name]ID)}
 
 	for hash, jw := range file.Wallpapers {
 		id, err := j.importWallpaper(ctx, hash, jw.Format)
