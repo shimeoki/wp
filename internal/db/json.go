@@ -133,7 +133,7 @@ func (j *JSONer) importSources(
 
 		err = ws.AddSource(
 			ctx,
-			&WallpaperSource{WallpaperID: wid, SourceID: id},
+			&WallpaperSource{WallpaperID: wid, SourceID: int64(id)},
 		)
 
 		if err != nil {

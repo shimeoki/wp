@@ -245,7 +245,7 @@ func (s *sqliteWallpaperScanner) scanSource(wid int64, row *wallpaperRow) {
 
 	w := s.wallpapers[wid]
 	source := &Source{
-		ID:        sid,
+		ID:        ID(sid),
 		Name:      *row.sourceName,
 		Link:      row.sourceLink,
 		CreatedAt: *row.sourceCreatedAt,

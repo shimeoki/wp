@@ -7,7 +7,7 @@ import (
 )
 
 type Source struct {
-	ID        int64
+	ID
 	Name      string
 	Link      *string
 	CreatedAt time.Time
@@ -20,18 +20,18 @@ type SourceCreate struct {
 }
 
 type SourceUpdate struct {
-	ID   int64
+	ID
 	Name string
 	Link *string
 }
 
 type SourceRepo interface {
 	GetAll(ctx context.Context) ([]*Source, error)
-	GetByID(ctx context.Context, id int64) (*Source, error)
+	GetByID(ctx context.Context, id ID) (*Source, error)
 
-	Create(ctx context.Context, s *SourceCreate) (int64, error)
+	Create(ctx context.Context, s *SourceCreate) (ID, error)
 	Update(ctx context.Context, s *SourceUpdate) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id ID) error
 }
 
 type sqliteSourceRepo struct {
@@ -65,7 +65,7 @@ func (r *sqliteSourceRepo) GetAll(ctx context.Context) ([]*Source, error) {
 
 func (r *sqliteSourceRepo) GetByID(
 	ctx context.Context,
-	id int64,
+	id ID,
 ) (*Source, error) {
 	sql := `
 		select
@@ -90,7 +90,7 @@ func (r *sqliteSourceRepo) GetByID(
 func (r *sqliteSourceRepo) Create(
 	ctx context.Context,
 	s *SourceCreate,
-) (int64, error) {
+) (ID, error) {
 	sql := "insert into source(name, link) values(?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, s.Name, s.Link)
@@ -103,7 +103,7 @@ func (r *sqliteSourceRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
 func (r *sqliteSourceRepo) Update(ctx context.Context, s *SourceUpdate) error {
@@ -114,7 +114,7 @@ func (r *sqliteSourceRepo) Update(ctx context.Context, s *SourceUpdate) error {
 	return err
 }
 
-func (r *sqliteSourceRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteSourceRepo) Delete(ctx context.Context, id ID) error {
 	sql := "delete from source where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
