@@ -10,7 +10,7 @@ import (
 
 type Wallpaper struct {
 	ID
-	Hash      string
+	Hash
 	Format    string
 	CreatedAt time.Time
 	Aliases   []*Alias
@@ -19,7 +19,7 @@ type Wallpaper struct {
 }
 
 type WallpaperCreate struct {
-	Hash   string
+	Hash
 	Format string
 }
 
@@ -36,7 +36,7 @@ type WallpaperSource struct {
 type WallpaperRepo interface {
 	GetAll(ctx context.Context) ([]*Wallpaper, error)
 	GetByID(ctx context.Context, id ID) (*Wallpaper, error)
-	GetByHash(ctx context.Context, hash string) (*Wallpaper, error)
+	GetByHash(ctx context.Context, h Hash) (*Wallpaper, error)
 
 	Create(ctx context.Context, w *WallpaperCreate) (ID, error)
 	Delete(ctx context.Context, id ID) error
@@ -315,11 +315,11 @@ func (r *sqliteWallpaperRepo) GetByID(
 
 func (r *sqliteWallpaperRepo) GetByHash(
 	ctx context.Context,
-	hash string,
+	h Hash,
 ) (*Wallpaper, error) {
 	sql := fmt.Sprintf("%s where w.hash = ?", r.query())
 
-	rows, err := r.db.QueryContext(ctx, sql, hash)
+	rows, err := r.db.QueryContext(ctx, sql, h)
 	if err != nil {
 		return nil, err
 	}

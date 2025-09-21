@@ -20,8 +20,8 @@ type jsonWallpaper struct {
 }
 
 type jsonFile struct {
-	Version    int                       `json:"version"`
-	Wallpapers map[string]*jsonWallpaper `json:"wallpapers"`
+	Version    int                     `json:"version"`
+	Wallpapers map[Hash]*jsonWallpaper `json:"wallpapers"`
 }
 
 type JSONer struct {
@@ -40,7 +40,7 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 
 	file := &jsonFile{
 		Version:    1,
-		Wallpapers: make(map[string]*jsonWallpaper),
+		Wallpapers: make(map[Hash]*jsonWallpaper),
 	}
 
 	for _, w := range ws {
@@ -78,7 +78,7 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 
 func (j *JSONer) importWallpaper(
 	ctx context.Context,
-	hash, format string,
+	hash Hash, format string,
 ) (ID, error) {
 	ws := j.repo.Wallpapers()
 
