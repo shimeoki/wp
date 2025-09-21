@@ -60,7 +60,7 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 
 	defer rows.Close()
 	var qs []*Queue
-	statuses := make(map[int64]*Status)
+	statuses := make(map[ID]*Status)
 
 	for rows.Next() {
 		var s Status

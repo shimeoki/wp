@@ -6,7 +6,7 @@ import (
 )
 
 type Status struct {
-	ID   int64
+	ID
 	Name string
 }
 
@@ -15,18 +15,18 @@ type StatusCreate struct {
 }
 
 type StatusUpdate struct {
-	ID   int64
+	ID
 	Name string
 }
 
 type StatusRepo interface {
 	GetAll(ctx context.Context) ([]*Status, error)
-	GetByID(ctx context.Context, id int64) (*Status, error)
+	GetByID(ctx context.Context, id ID) (*Status, error)
 	GetByName(ctx context.Context, name string) (*Status, error)
 
-	Create(ctx context.Context, s *StatusCreate) (int64, error)
+	Create(ctx context.Context, s *StatusCreate) (ID, error)
 	Update(ctx context.Context, s *StatusUpdate) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id ID) error
 }
 
 type sqliteStatusRepo struct {
@@ -59,7 +59,7 @@ func (r *sqliteStatusRepo) GetAll(ctx context.Context) ([]*Status, error) {
 
 func (r *sqliteStatusRepo) GetByID(
 	ctx context.Context,
-	id int64,
+	id ID,
 ) (*Status, error) {
 	sql := "select id, name from status where id = ?"
 
@@ -94,7 +94,7 @@ func (r *sqliteStatusRepo) GetByName(
 func (r *sqliteStatusRepo) Create(
 	ctx context.Context,
 	s *StatusCreate,
-) (int64, error) {
+) (ID, error) {
 	sql := "insert into status(name) values (?)"
 
 	result, err := r.db.ExecContext(ctx, sql, s.Name)
@@ -107,7 +107,7 @@ func (r *sqliteStatusRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
 func (r *sqliteStatusRepo) Update(ctx context.Context, s *StatusUpdate) error {
@@ -118,7 +118,7 @@ func (r *sqliteStatusRepo) Update(ctx context.Context, s *StatusUpdate) error {
 	return err
 }
 
-func (r *sqliteStatusRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteStatusRepo) Delete(ctx context.Context, id ID) error {
 	sql := "delete from status where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
