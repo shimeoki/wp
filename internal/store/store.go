@@ -31,6 +31,9 @@ func (s *LocalStore) Create(img io.Reader) (string, error) {
 		return "", err
 	}
 
+	defer os.Remove(tmp.Name())
+	defer tmp.Close()
+
 	r := io.TeeReader(img, tmp)
 
 	hash, err := s.hasher.Compute(r)
