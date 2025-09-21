@@ -7,7 +7,7 @@ import (
 )
 
 type Tag struct {
-	ID        int64
+	ID
 	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -18,18 +18,18 @@ type TagCreate struct {
 }
 
 type TagUpdate struct {
-	ID   int64
+	ID
 	Name string
 }
 
 type TagRepo interface {
 	GetAll(ctx context.Context) ([]*Tag, error)
-	GetByID(ctx context.Context, id int64) (*Tag, error)
+	GetByID(ctx context.Context, id ID) (*Tag, error)
 	GetByName(ctx context.Context, name string) (*Tag, error)
 
-	Create(ctx context.Context, t *TagCreate) (int64, error)
+	Create(ctx context.Context, t *TagCreate) (ID, error)
 	Update(ctx context.Context, t *TagUpdate) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id ID) error
 }
 
 type sqliteTagRepo struct {
@@ -61,7 +61,7 @@ func (r *sqliteTagRepo) GetAll(ctx context.Context) ([]*Tag, error) {
 	return ts, rows.Err()
 }
 
-func (r *sqliteTagRepo) GetByID(ctx context.Context, id int64) (*Tag, error) {
+func (r *sqliteTagRepo) GetByID(ctx context.Context, id ID) (*Tag, error) {
 	sql := "select id, name, created_at, updated_at from tag where id = ?"
 
 	row := r.db.QueryRowContext(ctx, sql, id)
@@ -93,7 +93,7 @@ func (r *sqliteTagRepo) GetByName(
 func (r *sqliteTagRepo) Create(
 	ctx context.Context,
 	t *TagCreate,
-) (int64, error) {
+) (ID, error) {
 	sql := "insert into tag(name) values (?)"
 
 	result, err := r.db.ExecContext(ctx, sql, t.Name)
@@ -106,7 +106,7 @@ func (r *sqliteTagRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
 func (r *sqliteTagRepo) Update(ctx context.Context, t *TagUpdate) error {
@@ -117,7 +117,7 @@ func (r *sqliteTagRepo) Update(ctx context.Context, t *TagUpdate) error {
 	return err
 }
 
-func (r *sqliteTagRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteTagRepo) Delete(ctx context.Context, id ID) error {
 	sql := "delete from tag where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)

@@ -216,7 +216,7 @@ func (s *sqliteWallpaperScanner) scanTag(wid int64, row *wallpaperRow) {
 
 	w := s.wallpapers[wid]
 	tag := &Tag{
-		ID:        tid,
+		ID:        ID(tid),
 		Name:      *row.tagName,
 		CreatedAt: *row.tagCreatedAt,
 		UpdatedAt: *row.tagUpdatedAt,

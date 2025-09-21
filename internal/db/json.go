@@ -146,7 +146,7 @@ func (j *JSONer) importSources(
 
 type jsonTagger struct {
 	jsoner *JSONer
-	tags   map[string]int64
+	tags   map[string]ID
 }
 
 func (t *jsonTagger) importTags(
@@ -176,7 +176,7 @@ func (t *jsonTagger) importTags(
 
 		err := ws.AddTag(
 			ctx,
-			&WallpaperTag{WallpaperID: wid, TagID: t.tags[name]},
+			&WallpaperTag{WallpaperID: wid, TagID: int64(t.tags[name])},
 		)
 
 		if err != nil {
@@ -199,7 +199,7 @@ func (j *JSONer) Import(ctx context.Context, in io.Reader) error {
 		return errors.New("unexpected version")
 	}
 
-	tagger := &jsonTagger{jsoner: j, tags: make(map[string]int64)}
+	tagger := &jsonTagger{jsoner: j, tags: make(map[string]ID)}
 
 	for hash, jw := range file.Wallpapers {
 		id, err := j.importWallpaper(ctx, hash, jw.Format)
