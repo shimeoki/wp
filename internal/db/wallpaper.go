@@ -33,18 +33,18 @@ type WallpaperSource struct {
 }
 
 type WallpaperRepo interface {
-	GetAll(ctx Ctx) ([]*Wallpaper, error)
-	GetByID(ctx Ctx, id ID) (*Wallpaper, error)
-	GetByHash(ctx Ctx, h Hash) (*Wallpaper, error)
+	GetAll(Ctx) ([]*Wallpaper, error)
+	GetByID(Ctx, ID) (*Wallpaper, error)
+	GetByHash(Ctx, Hash) (*Wallpaper, error)
 
-	Create(ctx Ctx, w *WallpaperCreate) (ID, error)
-	Delete(ctx Ctx, id ID) error
+	Create(Ctx, *WallpaperCreate) (ID, error)
+	Delete(Ctx, ID) error
 
-	AddTag(ctx Ctx, w *WallpaperTag) error
-	RemoveTag(ctx Ctx, w *WallpaperTag) error
+	AddTag(Ctx, *WallpaperTag) error
+	RemoveTag(Ctx, *WallpaperTag) error
 
-	AddSource(ctx Ctx, w *WallpaperSource) error
-	RemoveSource(ctx Ctx, w *WallpaperSource) error
+	AddSource(Ctx, *WallpaperSource) error
+	RemoveSource(Ctx, *WallpaperSource) error
 }
 
 type sqliteWallpaperRepo struct {

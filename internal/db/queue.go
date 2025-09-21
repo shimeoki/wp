@@ -27,12 +27,12 @@ type QueueUpdate struct {
 }
 
 type QueueRepo interface {
-	GetAll(ctx Ctx) ([]*Queue, error)
-	GetByID(ctx Ctx, id ID) (*Queue, error)
+	GetAll(Ctx) ([]*Queue, error)
+	GetByID(Ctx, ID) (*Queue, error)
 
-	Create(ctx Ctx, q *QueueCreate) (ID, error)
-	Update(ctx Ctx, q *QueueUpdate) error
-	Delete(ctx Ctx, id ID) error
+	Create(Ctx, *QueueCreate) (ID, error)
+	Update(Ctx, *QueueUpdate) error
+	Delete(Ctx, ID) error
 }
 
 type sqliteQueueRepo struct {

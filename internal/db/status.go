@@ -19,13 +19,13 @@ type StatusUpdate struct {
 }
 
 type StatusRepo interface {
-	GetAll(ctx Ctx) ([]*Status, error)
-	GetByID(ctx Ctx, id ID) (*Status, error)
-	GetByName(ctx Ctx, name Name) (*Status, error)
+	GetAll(Ctx) ([]*Status, error)
+	GetByID(Ctx, ID) (*Status, error)
+	GetByName(Ctx, Name) (*Status, error)
 
-	Create(ctx Ctx, s *StatusCreate) (ID, error)
-	Update(ctx Ctx, s *StatusUpdate) error
-	Delete(ctx Ctx, id ID) error
+	Create(Ctx, *StatusCreate) (ID, error)
+	Update(Ctx, *StatusUpdate) error
+	Delete(Ctx, ID) error
 }
 
 type sqliteStatusRepo struct {

@@ -18,11 +18,11 @@ type Hash string
 type Name string
 
 type Exporter interface {
-	Export(ctx Ctx, out io.Writer) error
+	Export(Ctx, io.Writer) error
 }
 
 type Importer interface {
-	Import(ctx Ctx, in io.Reader) error
+	Import(Ctx, io.Reader) error
 }
 
 type Repo interface {

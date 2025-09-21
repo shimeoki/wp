@@ -22,13 +22,13 @@ type TagUpdate struct {
 }
 
 type TagRepo interface {
-	GetAll(ctx Ctx) ([]*Tag, error)
-	GetByID(ctx Ctx, id ID) (*Tag, error)
-	GetByName(ctx Ctx, name Name) (*Tag, error)
+	GetAll(Ctx) ([]*Tag, error)
+	GetByID(Ctx, ID) (*Tag, error)
+	GetByName(Ctx, Name) (*Tag, error)
 
-	Create(ctx Ctx, t *TagCreate) (ID, error)
-	Update(ctx Ctx, t *TagUpdate) error
-	Delete(ctx Ctx, id ID) error
+	Create(Ctx, *TagCreate) (ID, error)
+	Update(Ctx, *TagUpdate) error
+	Delete(Ctx, ID) error
 }
 
 type sqliteTagRepo struct {

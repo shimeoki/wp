@@ -25,12 +25,12 @@ type SourceUpdate struct {
 }
 
 type SourceRepo interface {
-	GetAll(ctx Ctx) ([]*Source, error)
-	GetByID(ctx Ctx, id ID) (*Source, error)
+	GetAll(Ctx) ([]*Source, error)
+	GetByID(Ctx, ID) (*Source, error)
 
-	Create(ctx Ctx, s *SourceCreate) (ID, error)
-	Update(ctx Ctx, s *SourceUpdate) error
-	Delete(ctx Ctx, id ID) error
+	Create(Ctx, *SourceCreate) (ID, error)
+	Update(Ctx, *SourceUpdate) error
+	Delete(Ctx, ID) error
 }
 
 type sqliteSourceRepo struct {

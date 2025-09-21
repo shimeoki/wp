@@ -24,13 +24,13 @@ type AliasUpdate struct {
 }
 
 type AliasRepo interface {
-	GetAll(ctx Ctx) ([]*Alias, error)
-	GetByID(ctx Ctx, id ID) (*Alias, error)
-	GetByName(ctx Ctx, name Name, wid ID) (*Alias, error)
+	GetAll(Ctx) ([]*Alias, error)
+	GetByID(Ctx, ID) (*Alias, error)
+	GetByName(ctx Ctx, name Name, wallpaperID ID) (*Alias, error)
 
-	Create(ctx Ctx, a *AliasCreate) (ID, error)
-	Update(ctx Ctx, a *AliasUpdate) error
-	Delete(ctx Ctx, id ID) error
+	Create(Ctx, *AliasCreate) (ID, error)
+	Update(Ctx, *AliasUpdate) error
+	Delete(Ctx, ID) error
 }
 
 type sqliteAliasRepo struct {
