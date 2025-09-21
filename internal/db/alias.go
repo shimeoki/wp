@@ -26,12 +26,12 @@ type AliasUpdate struct {
 
 type AliasRepo interface {
 	GetAll(ctx context.Context) ([]*Alias, error)
-	GetByID(ctx context.Context, id int64) (*Alias, error)
-	GetByName(ctx context.Context, name string, wid int64) (*Alias, error)
+	GetByID(ctx context.Context, id ID) (*Alias, error)
+	GetByName(ctx context.Context, name string, wid ID) (*Alias, error)
 
-	Create(ctx context.Context, a *AliasCreate) (int64, error)
+	Create(ctx context.Context, a *AliasCreate) (ID, error)
 	Update(ctx context.Context, a *AliasUpdate) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id ID) error
 }
 
 type sqliteAliasRepo struct {
@@ -70,10 +70,7 @@ func (r *sqliteAliasRepo) GetAll(ctx context.Context) ([]*Alias, error) {
 	return as, rows.Err()
 }
 
-func (r *sqliteAliasRepo) GetByID(
-	ctx context.Context,
-	id int64,
-) (*Alias, error) {
+func (r *sqliteAliasRepo) GetByID(ctx context.Context, id ID) (*Alias, error) {
 	sql := `
 		select
 			id
@@ -97,7 +94,7 @@ func (r *sqliteAliasRepo) GetByID(
 func (r *sqliteAliasRepo) GetByName(
 	ctx context.Context,
 	name string,
-	wid int64,
+	wid ID,
 ) (*Alias, error) {
 	sql := `
 		select
@@ -122,7 +119,7 @@ func (r *sqliteAliasRepo) GetByName(
 func (r *sqliteAliasRepo) Create(
 	ctx context.Context,
 	a *AliasCreate,
-) (int64, error) {
+) (ID, error) {
 	sql := "insert into alias(name, wallpaper_id) values(?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, a.Name, a.WallpaperID)
@@ -135,7 +132,7 @@ func (r *sqliteAliasRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
 func (r *sqliteAliasRepo) Update(ctx context.Context, a *AliasUpdate) error {
@@ -146,7 +143,7 @@ func (r *sqliteAliasRepo) Update(ctx context.Context, a *AliasUpdate) error {
 	return err
 }
 
-func (r *sqliteAliasRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteAliasRepo) Delete(ctx context.Context, id ID) error {
 	sql := "delete from alias where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
