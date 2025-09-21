@@ -79,7 +79,7 @@ func (j *JSONer) Export(ctx context.Context, out io.Writer) error {
 func (j *JSONer) importWallpaper(
 	ctx context.Context,
 	hash, format string,
-) (int64, error) {
+) (ID, error) {
 	ws := j.repo.Wallpapers()
 
 	w, _ := ws.GetByHash(ctx, hash)
@@ -96,7 +96,7 @@ func (j *JSONer) importWallpaper(
 func (j *JSONer) importAliases(
 	ctx context.Context,
 	aliases []string,
-	wid int64,
+	wid ID,
 ) error {
 	as := j.repo.Aliases()
 
@@ -116,7 +116,7 @@ func (j *JSONer) importAliases(
 func (j *JSONer) importSources(
 	ctx context.Context,
 	sources []jsonWallpaperSource,
-	wid int64,
+	wid ID,
 ) error {
 	ss := j.repo.Sources()
 	ws := j.repo.Wallpapers()
@@ -133,7 +133,7 @@ func (j *JSONer) importSources(
 
 		err = ws.AddSource(
 			ctx,
-			&WallpaperSource{WallpaperID: wid, SourceID: int64(id)},
+			&WallpaperSource{WallpaperID: wid, SourceID: id},
 		)
 
 		if err != nil {
@@ -152,7 +152,7 @@ type jsonTagger struct {
 func (t *jsonTagger) importTags(
 	ctx context.Context,
 	tags []string,
-	wid int64,
+	wid ID,
 ) error {
 	ts := t.jsoner.repo.Tags()
 	ws := t.jsoner.repo.Wallpapers()
@@ -176,7 +176,7 @@ func (t *jsonTagger) importTags(
 
 		err := ws.AddTag(
 			ctx,
-			&WallpaperTag{WallpaperID: wid, TagID: int64(t.tags[name])},
+			&WallpaperTag{WallpaperID: wid, TagID: t.tags[name]},
 		)
 
 		if err != nil {
