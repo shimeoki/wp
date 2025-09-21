@@ -7,8 +7,8 @@ import (
 )
 
 type Queue struct {
-	ID          int64
-	WallpaperID int64
+	ID
+	WallpaperID ID
 	Status      *Status
 	Priority    int
 	CreatedAt   time.Time
@@ -16,24 +16,24 @@ type Queue struct {
 }
 
 type QueueCreate struct {
-	WallpaperID int64
-	StatusID    int64
+	WallpaperID ID
+	StatusID    ID
 	Priority    int
 }
 
 type QueueUpdate struct {
-	ID       int64
-	StatusID int64
+	ID
+	StatusID ID
 	Priority int
 }
 
 type QueueRepo interface {
 	GetAll(ctx context.Context) ([]*Queue, error)
-	GetByID(ctx context.Context, id int64) (*Queue, error)
+	GetByID(ctx context.Context, id ID) (*Queue, error)
 
-	Create(ctx context.Context, q *QueueCreate) (int64, error)
+	Create(ctx context.Context, q *QueueCreate) (ID, error)
 	Update(ctx context.Context, q *QueueUpdate) error
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id ID) error
 }
 
 type sqliteQueueRepo struct {
@@ -93,7 +93,7 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 
 func (r *sqliteQueueRepo) GetByID(
 	ctx context.Context,
-	id int64,
+	id ID,
 ) (*Queue, error) {
 	sql := `
 		select
@@ -132,7 +132,7 @@ func (r *sqliteQueueRepo) GetByID(
 func (r *sqliteQueueRepo) Create(
 	ctx context.Context,
 	q *QueueCreate,
-) (int64, error) {
+) (ID, error) {
 	sql := `
 		insert into queue(wallpaper_id, status_id, priority)
 		values(?, ?, ?)`
@@ -154,7 +154,7 @@ func (r *sqliteQueueRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
 func (r *sqliteQueueRepo) Update(ctx context.Context, q *QueueUpdate) error {
@@ -171,7 +171,7 @@ func (r *sqliteQueueRepo) Update(ctx context.Context, q *QueueUpdate) error {
 	return err
 }
 
-func (r *sqliteQueueRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteQueueRepo) Delete(ctx context.Context, id ID) error {
 	sql := "delete from queue where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
