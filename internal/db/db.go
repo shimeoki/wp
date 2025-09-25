@@ -49,8 +49,7 @@ func NewSQLiteRepo(config *config.DB) (Repo, error) {
 		return nil, err
 	}
 
-	err = ping(db)
-	if err != nil {
+	if err := ping(db); err != nil {
 		return nil, err
 	}
 
