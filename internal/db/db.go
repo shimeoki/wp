@@ -16,6 +16,12 @@ type ID int64
 type Hash string
 type Name string
 
+type DB interface {
+	ExecContext(ctx Ctx, query string, args ...any) (sql.Result, error)
+	QueryContext(ctx Ctx, query string, args ...any) (*sql.Rows, error)
+	QueryRowContext(ctx Ctx, query string, args ...any) *sql.Row
+}
+
 type Repo interface {
 	Wallpapers() WallpaperRepo
 	Tags() TagRepo
