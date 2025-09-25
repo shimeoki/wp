@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -34,7 +33,7 @@ type AliasRepo interface {
 }
 
 type sqliteAliasRepo struct {
-	db *sql.DB
+	db DB
 }
 
 func (r *sqliteAliasRepo) GetAll(ctx Ctx) ([]*Alias, error) {

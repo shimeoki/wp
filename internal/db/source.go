@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -34,7 +33,7 @@ type SourceRepo interface {
 }
 
 type sqliteSourceRepo struct {
-	db *sql.DB
+	db DB
 }
 
 func (r *sqliteSourceRepo) GetAll(ctx Ctx) ([]*Source, error) {

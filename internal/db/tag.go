@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -32,7 +31,7 @@ type TagRepo interface {
 }
 
 type sqliteTagRepo struct {
-	db *sql.DB
+	db DB
 }
 
 func (r *sqliteTagRepo) GetAll(ctx Ctx) ([]*Tag, error) {

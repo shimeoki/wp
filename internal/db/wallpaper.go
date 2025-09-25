@@ -48,7 +48,7 @@ type WallpaperRepo interface {
 }
 
 type sqliteWallpaperRepo struct {
-	db *sql.DB
+	db DB
 }
 
 func (r *sqliteWallpaperRepo) query() string {

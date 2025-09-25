@@ -1,7 +1,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -36,7 +35,7 @@ type QueueRepo interface {
 }
 
 type sqliteQueueRepo struct {
-	db *sql.DB
+	db DB
 }
 
 func (r *sqliteQueueRepo) GetAll(ctx Ctx) ([]*Queue, error) {
