@@ -1,9 +1,5 @@
 package db
 
-import (
-	"database/sql"
-)
-
 type Status struct {
 	ID
 	Name
@@ -29,7 +25,7 @@ type StatusRepo interface {
 }
 
 type sqliteStatusRepo struct {
-	db *sql.DB
+	db DB
 }
 
 func (r *sqliteStatusRepo) GetAll(ctx Ctx) ([]*Status, error) {
