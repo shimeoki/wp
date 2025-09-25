@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
+	"errors"
 	"time"
 
 	"github.com/shimeoki/wp/internal/config"
@@ -31,6 +32,8 @@ type Repo interface {
 	Queues() QueueRepo
 }
 
+var InvalidTx = errors.New("invalid transaction")
+
 type TxOptions = sql.TxOptions
 
 type Tx interface {
@@ -55,7 +58,10 @@ type RepoTxer interface {
 //go:embed sqlite.sql
 var sqliteScheme string
 
-type sqliteRepo struct {
+type SQLiteRepo struct {
+	db *sql.DB
+	tx *sql.Tx
+
 	wallpapers WallpaperRepo
 	tags       TagRepo
 	sources    SourceRepo
@@ -64,7 +70,7 @@ type sqliteRepo struct {
 	queues     QueueRepo
 }
 
-func NewSQLiteRepo(config *config.DB) (Repo, error) {
+func NewSQLiteRepo(config *config.DB) (*SQLiteRepo, error) {
 	db, err := sql.Open("sqlite", config.DataSourceName)
 	if err != nil {
 		return nil, err
@@ -78,14 +84,8 @@ func NewSQLiteRepo(config *config.DB) (Repo, error) {
 		return nil, err
 	}
 
-	r := &sqliteRepo{
-		wallpapers: &sqliteWallpaperRepo{db: db},
-		tags:       &sqliteTagRepo{db: db},
-		sources:    &sqliteSourceRepo{db: db},
-		aliases:    &sqliteAliasRepo{db: db},
-		statuses:   &sqliteStatusRepo{db: db},
-		queues:     &sqliteQueueRepo{db: db},
-	}
+	r := &SQLiteRepo{db: db}
+	r.swap(db)
 
 	return r, nil
 }
@@ -96,26 +96,63 @@ func ping(db *sql.DB) error {
 	return db.PingContext(ctx)
 }
 
-func (r *sqliteRepo) Wallpapers() WallpaperRepo {
+func (r *SQLiteRepo) WithTx(ctx Ctx, opts *TxOptions) (RepoTx, error) {
+	tx, err := r.db.BeginTx(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := &SQLiteRepo{db: r.db, tx: tx}
+	repo.swap(tx)
+
+	return repo, nil
+}
+
+func (r *SQLiteRepo) swap(db DB) {
+	r.wallpapers = &sqliteWallpaperRepo{db: db}
+	r.tags = &sqliteTagRepo{db: db}
+	r.sources = &sqliteSourceRepo{db: db}
+	r.aliases = &sqliteAliasRepo{db: db}
+	r.statuses = &sqliteStatusRepo{db: db}
+	r.queues = &sqliteQueueRepo{db: db}
+}
+
+func (r *SQLiteRepo) Commit() error {
+	if r.tx == nil {
+		return InvalidTx
+	}
+
+	return r.tx.Commit()
+}
+
+func (r *SQLiteRepo) Rollback() error {
+	if r.tx == nil {
+		return InvalidTx
+	}
+
+	return r.tx.Rollback()
+}
+
+func (r *SQLiteRepo) Wallpapers() WallpaperRepo {
 	return r.wallpapers
 }
 
-func (r *sqliteRepo) Tags() TagRepo {
+func (r *SQLiteRepo) Tags() TagRepo {
 	return r.tags
 }
 
-func (r *sqliteRepo) Sources() SourceRepo {
+func (r *SQLiteRepo) Sources() SourceRepo {
 	return r.sources
 }
 
-func (r *sqliteRepo) Aliases() AliasRepo {
+func (r *SQLiteRepo) Aliases() AliasRepo {
 	return r.aliases
 }
 
-func (r *sqliteRepo) Statuses() StatusRepo {
+func (r *SQLiteRepo) Statuses() StatusRepo {
 	return r.statuses
 }
 
-func (r *sqliteRepo) Queues() QueueRepo {
+func (r *SQLiteRepo) Queues() QueueRepo {
 	return r.queues
 }
