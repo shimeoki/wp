@@ -1,4 +1,4 @@
-package store
+package api
 
 import (
 	"crypto/sha256"
@@ -8,31 +8,33 @@ import (
 	"regexp"
 )
 
+type Hash string
+
 var InvalidHash = errors.New("invalid hash")
 
 type Hasher interface {
-	Compute(r io.Reader) (hash string, err error)
-	Valid(hash string) bool
+	Compute(io.Reader) (Hash, error)
+	Valid(Hash) bool
 }
 
 type SHA256Hasher struct{}
 
-func (h *SHA256Hasher) Compute(r io.Reader) (string, error) {
+func (h *SHA256Hasher) Compute(r io.Reader) (Hash, error) {
 	hash := sha256.New()
 
 	if _, err := io.Copy(hash, r); err != nil {
 		return "", err
 	}
 
-	return hex.EncodeToString(hash.Sum(nil)), nil
+	return Hash(hex.EncodeToString(hash.Sum(nil))), nil
 }
 
-func (h *SHA256Hasher) Valid(hash string) bool {
+func (h *SHA256Hasher) Valid(hash Hash) bool {
 	if len(hash) != 64 {
 		return false
 	}
 
-	match, err := regexp.MatchString("^[a-fA-F0-9]{64}$", hash)
+	match, err := regexp.MatchString("^[a-fA-F0-9]{64}$", string(hash))
 	if err != nil {
 		return false
 	}

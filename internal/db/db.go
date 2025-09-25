@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
-	"io"
 	"time"
 
 	"github.com/shimeoki/wp/internal/config"
@@ -16,14 +15,6 @@ type Ctx = context.Context
 type ID int64
 type Hash string
 type Name string
-
-type Exporter interface {
-	Export(Ctx, io.Writer) error
-}
-
-type Importer interface {
-	Import(Ctx, io.Reader) error
-}
 
 type Repo interface {
 	Wallpapers() WallpaperRepo

@@ -1,4 +1,4 @@
-package store
+package api
 
 import (
 	"io"
@@ -6,9 +6,9 @@ import (
 )
 
 type Store interface {
-	Get(hash string) (img io.ReadCloser, err error)
-	Create(img io.Reader) (hash string, err error)
-	Remove(hash string) error
+	Get(Hash) (io.ReadCloser, error)
+	Create(io.Reader) (Hash, error)
+	Remove(Hash) error
 }
 
 type LocalStore struct {
@@ -25,7 +25,7 @@ func NewLocalStore(path string, hasher Hasher) (*LocalStore, error) {
 	return &LocalStore{hasher: hasher, root: root}, nil
 }
 
-func (s *LocalStore) Create(img io.Reader) (string, error) {
+func (s *LocalStore) Create(img io.Reader) (Hash, error) {
 	tmp, err := os.CreateTemp("", "wp-local-store")
 	if err != nil {
 		return "", err
@@ -47,7 +47,7 @@ func (s *LocalStore) Create(img io.Reader) (string, error) {
 		return hash, nil
 	}
 
-	file, err := s.root.Create(hash)
+	file, err := s.root.Create(string(hash))
 	if err != nil {
 		return "", err
 	}
@@ -60,14 +60,14 @@ func (s *LocalStore) Create(img io.Reader) (string, error) {
 	return hash, nil
 }
 
-func (s *LocalStore) Remove(hash string) error {
-	return s.root.Remove(hash)
+func (s *LocalStore) Remove(h Hash) error {
+	return s.root.Remove(string(h))
 }
 
-func (s *LocalStore) Get(hash string) (io.ReadCloser, error) {
-	if !s.hasher.Valid(hash) {
+func (s *LocalStore) Get(h Hash) (io.ReadCloser, error) {
+	if !s.hasher.Valid(h) {
 		return nil, InvalidHash
 	}
 
-	return s.root.Open(hash)
+	return s.root.Open(string(h))
 }
