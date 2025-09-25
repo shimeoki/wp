@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -9,8 +8,8 @@ import (
 )
 
 type Wallpaper struct {
-	ID        int64
-	Hash      string
+	ID
+	Hash
 	Format    string
 	CreatedAt time.Time
 	Aliases   []*Alias
@@ -19,33 +18,33 @@ type Wallpaper struct {
 }
 
 type WallpaperCreate struct {
-	Hash   string
+	Hash
 	Format string
 }
 
 type WallpaperTag struct {
-	WallpaperID int64
-	TagID       int64
+	WallpaperID ID
+	TagID       ID
 }
 
 type WallpaperSource struct {
-	WallpaperID int64
-	SourceID    int64
+	WallpaperID ID
+	SourceID    ID
 }
 
 type WallpaperRepo interface {
-	GetAll(ctx context.Context) ([]*Wallpaper, error)
-	GetByID(ctx context.Context, id int64) (*Wallpaper, error)
-	GetByHash(ctx context.Context, hash string) (*Wallpaper, error)
+	GetAll(Ctx) ([]*Wallpaper, error)
+	GetByID(Ctx, ID) (*Wallpaper, error)
+	GetByHash(Ctx, Hash) (*Wallpaper, error)
 
-	Create(ctx context.Context, w *WallpaperCreate) (int64, error)
-	Delete(ctx context.Context, id int64) error
+	Create(Ctx, *WallpaperCreate) (ID, error)
+	Delete(Ctx, ID) error
 
-	AddTag(ctx context.Context, w *WallpaperTag) error
-	RemoveTag(ctx context.Context, w *WallpaperTag) error
+	AddTag(Ctx, *WallpaperTag) error
+	RemoveTag(Ctx, *WallpaperTag) error
 
-	AddSource(ctx context.Context, w *WallpaperSource) error
-	RemoveSource(ctx context.Context, w *WallpaperSource) error
+	AddSource(Ctx, *WallpaperSource) error
+	RemoveSource(Ctx, *WallpaperSource) error
 }
 
 type sqliteWallpaperRepo struct {
@@ -84,19 +83,19 @@ func (r *sqliteWallpaperRepo) query() string {
 type wallpaperRow struct {
 	wallpaper Wallpaper
 
-	aliasID          *int64
-	aliasWallpaperID *int64
-	aliasName        *string
+	aliasID          *ID
+	aliasWallpaperID *ID
+	aliasName        *Name
 	aliasCreatedAt   *time.Time
 	aliasUpdatedAt   *time.Time
 
-	tagID        *int64
-	tagName      *string
+	tagID        *ID
+	tagName      *Name
 	tagCreatedAt *time.Time
 	tagUpdatedAt *time.Time
 
-	sourceID        *int64
-	sourceName      *string
+	sourceID        *ID
+	sourceName      *Name
 	sourceLink      *string
 	sourceCreatedAt *time.Time
 	sourceUpdatedAt *time.Time
@@ -104,10 +103,10 @@ type wallpaperRow struct {
 
 type sqliteWallpaperScanner struct {
 	rows             *sql.Rows
-	wallpapers       map[int64]*Wallpaper
-	tags             map[int64]*Tag
-	sources          map[int64]*Source
-	aliases          map[int64]bool
+	wallpapers       map[ID]*Wallpaper
+	tags             map[ID]*Tag
+	sources          map[ID]*Source
+	aliases          map[ID]bool
 	wallpaperTags    map[WallpaperTag]bool
 	wallpaperSources map[WallpaperSource]bool
 }
@@ -117,10 +116,10 @@ func (r *sqliteWallpaperRepo) newScanner(
 ) *sqliteWallpaperScanner {
 	return &sqliteWallpaperScanner{
 		rows:             rows,
-		wallpapers:       make(map[int64]*Wallpaper),
-		tags:             make(map[int64]*Tag),
-		sources:          make(map[int64]*Source),
-		aliases:          make(map[int64]bool),
+		wallpapers:       make(map[ID]*Wallpaper),
+		tags:             make(map[ID]*Tag),
+		sources:          make(map[ID]*Source),
+		aliases:          make(map[ID]bool),
 		wallpaperTags:    make(map[WallpaperTag]bool),
 		wallpaperSources: make(map[WallpaperSource]bool),
 	}
@@ -181,7 +180,7 @@ func (s *sqliteWallpaperScanner) scanRows() ([]*Wallpaper, error) {
 	return ws, nil
 }
 
-func (s *sqliteWallpaperScanner) scanAlias(wid int64, row *wallpaperRow) {
+func (s *sqliteWallpaperScanner) scanAlias(wid ID, row *wallpaperRow) {
 	if row.aliasID == nil {
 		return
 	}
@@ -193,8 +192,8 @@ func (s *sqliteWallpaperScanner) scanAlias(wid int64, row *wallpaperRow) {
 
 	w := s.wallpapers[wid]
 	alias := &Alias{
-		ID:          aid,
-		WallpaperID: *row.aliasWallpaperID,
+		ID:          ID(aid),
+		WallpaperID: ID(*row.aliasWallpaperID),
 		Name:        *row.aliasName,
 		CreatedAt:   *row.aliasCreatedAt,
 		UpdatedAt:   *row.aliasUpdatedAt,
@@ -204,7 +203,7 @@ func (s *sqliteWallpaperScanner) scanAlias(wid int64, row *wallpaperRow) {
 	w.Aliases = append(w.Aliases, alias)
 }
 
-func (s *sqliteWallpaperScanner) scanTag(wid int64, row *wallpaperRow) {
+func (s *sqliteWallpaperScanner) scanTag(wid ID, row *wallpaperRow) {
 	if row.tagID == nil {
 		return
 	}
@@ -216,7 +215,7 @@ func (s *sqliteWallpaperScanner) scanTag(wid int64, row *wallpaperRow) {
 
 	w := s.wallpapers[wid]
 	tag := &Tag{
-		ID:        tid,
+		ID:        ID(tid),
 		Name:      *row.tagName,
 		CreatedAt: *row.tagCreatedAt,
 		UpdatedAt: *row.tagUpdatedAt,
@@ -233,7 +232,7 @@ func (s *sqliteWallpaperScanner) scanTag(wid int64, row *wallpaperRow) {
 	}
 }
 
-func (s *sqliteWallpaperScanner) scanSource(wid int64, row *wallpaperRow) {
+func (s *sqliteWallpaperScanner) scanSource(wid ID, row *wallpaperRow) {
 	if row.sourceID == nil {
 		return
 	}
@@ -245,7 +244,7 @@ func (s *sqliteWallpaperScanner) scanSource(wid int64, row *wallpaperRow) {
 
 	w := s.wallpapers[wid]
 	source := &Source{
-		ID:        sid,
+		ID:        ID(sid),
 		Name:      *row.sourceName,
 		Link:      row.sourceLink,
 		CreatedAt: *row.sourceCreatedAt,
@@ -263,9 +262,7 @@ func (s *sqliteWallpaperScanner) scanSource(wid int64, row *wallpaperRow) {
 	}
 }
 
-func (r *sqliteWallpaperRepo) GetAll(
-	ctx context.Context,
-) ([]*Wallpaper, error) {
+func (r *sqliteWallpaperRepo) GetAll(ctx Ctx) ([]*Wallpaper, error) {
 	sql := r.query()
 
 	rows, err := r.db.QueryContext(ctx, sql)
@@ -284,10 +281,7 @@ func (r *sqliteWallpaperRepo) GetAll(
 	return ws, rows.Err()
 }
 
-func (r *sqliteWallpaperRepo) GetByID(
-	ctx context.Context,
-	id int64,
-) (*Wallpaper, error) {
+func (r *sqliteWallpaperRepo) GetByID(ctx Ctx, id ID) (*Wallpaper, error) {
 	sql := fmt.Sprintf("%s where w.id = ?", r.query())
 
 	rows, err := r.db.QueryContext(ctx, sql, id)
@@ -313,13 +307,10 @@ func (r *sqliteWallpaperRepo) GetByID(
 	}
 }
 
-func (r *sqliteWallpaperRepo) GetByHash(
-	ctx context.Context,
-	hash string,
-) (*Wallpaper, error) {
+func (r *sqliteWallpaperRepo) GetByHash(ctx Ctx, h Hash) (*Wallpaper, error) {
 	sql := fmt.Sprintf("%s where w.hash = ?", r.query())
 
-	rows, err := r.db.QueryContext(ctx, sql, hash)
+	rows, err := r.db.QueryContext(ctx, sql, h)
 	if err != nil {
 		return nil, err
 	}
@@ -342,10 +333,7 @@ func (r *sqliteWallpaperRepo) GetByHash(
 	}
 }
 
-func (r *sqliteWallpaperRepo) Create(
-	ctx context.Context,
-	w *WallpaperCreate,
-) (int64, error) {
+func (r *sqliteWallpaperRepo) Create(ctx Ctx, w *WallpaperCreate) (ID, error) {
 	sql := "insert into wallpaper(hash, format) values (?, ?)"
 
 	result, err := r.db.ExecContext(ctx, sql, w.Hash, w.Format)
@@ -358,10 +346,10 @@ func (r *sqliteWallpaperRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
-func (r *sqliteWallpaperRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteWallpaperRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from wallpaper where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
@@ -369,10 +357,7 @@ func (r *sqliteWallpaperRepo) Delete(ctx context.Context, id int64) error {
 	return err
 }
 
-func (r *sqliteWallpaperRepo) AddTag(
-	ctx context.Context,
-	join *WallpaperTag,
-) error {
+func (r *sqliteWallpaperRepo) AddTag(ctx Ctx, join *WallpaperTag) error {
 	sql := `
 		insert into wallpaper_tag(wallpaper_id, tag_id)
 		values(?, ?)`
@@ -382,10 +367,7 @@ func (r *sqliteWallpaperRepo) AddTag(
 	return err
 }
 
-func (r *sqliteWallpaperRepo) RemoveTag(
-	ctx context.Context,
-	join *WallpaperTag,
-) error {
+func (r *sqliteWallpaperRepo) RemoveTag(ctx Ctx, join *WallpaperTag) error {
 	sql := "delete from wallpaper_tag where wallpaper_id = ? and tag_id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, join.WallpaperID, join.TagID)
@@ -393,10 +375,7 @@ func (r *sqliteWallpaperRepo) RemoveTag(
 	return err
 }
 
-func (r *sqliteWallpaperRepo) AddSource(
-	ctx context.Context,
-	join *WallpaperSource,
-) error {
+func (r *sqliteWallpaperRepo) AddSource(ctx Ctx, join *WallpaperSource) error {
 	sql := `
 		insert into wallpaper_source(wallpaper_id, source_id)
 		values(?, ?)`
@@ -407,7 +386,7 @@ func (r *sqliteWallpaperRepo) AddSource(
 }
 
 func (r *sqliteWallpaperRepo) RemoveSource(
-	ctx context.Context,
+	ctx Ctx,
 	join *WallpaperSource,
 ) error {
 	sql := `

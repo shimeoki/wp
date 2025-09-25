@@ -4,20 +4,17 @@ import (
 	"context"
 	"database/sql"
 	_ "embed"
-	"io"
 	"time"
 
 	"github.com/shimeoki/wp/internal/config"
 	_ "modernc.org/sqlite"
 )
 
-type Exporter interface {
-	Export(ctx context.Context, out io.Writer) error
-}
+type Ctx = context.Context
 
-type Importer interface {
-	Import(ctx context.Context, in io.Reader) error
-}
+type ID int64
+type Hash string
+type Name string
 
 type Repo interface {
 	Wallpapers() WallpaperRepo

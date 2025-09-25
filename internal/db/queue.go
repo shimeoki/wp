@@ -1,14 +1,13 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"time"
 )
 
 type Queue struct {
-	ID          int64
-	WallpaperID int64
+	ID
+	WallpaperID ID
 	Status      *Status
 	Priority    int
 	CreatedAt   time.Time
@@ -16,31 +15,31 @@ type Queue struct {
 }
 
 type QueueCreate struct {
-	WallpaperID int64
-	StatusID    int64
+	WallpaperID ID
+	StatusID    ID
 	Priority    int
 }
 
 type QueueUpdate struct {
-	ID       int64
-	StatusID int64
+	ID
+	StatusID ID
 	Priority int
 }
 
 type QueueRepo interface {
-	GetAll(ctx context.Context) ([]*Queue, error)
-	GetByID(ctx context.Context, id int64) (*Queue, error)
+	GetAll(Ctx) ([]*Queue, error)
+	GetByID(Ctx, ID) (*Queue, error)
 
-	Create(ctx context.Context, q *QueueCreate) (int64, error)
-	Update(ctx context.Context, q *QueueUpdate) error
-	Delete(ctx context.Context, id int64) error
+	Create(Ctx, *QueueCreate) (ID, error)
+	Update(Ctx, *QueueUpdate) error
+	Delete(Ctx, ID) error
 }
 
 type sqliteQueueRepo struct {
 	db *sql.DB
 }
 
-func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
+func (r *sqliteQueueRepo) GetAll(ctx Ctx) ([]*Queue, error) {
 	sql := `
 		select
 			q.id
@@ -60,7 +59,7 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 
 	defer rows.Close()
 	var qs []*Queue
-	statuses := make(map[int64]*Status)
+	statuses := make(map[ID]*Status)
 
 	for rows.Next() {
 		var s Status
@@ -91,10 +90,7 @@ func (r *sqliteQueueRepo) GetAll(ctx context.Context) ([]*Queue, error) {
 	return qs, rows.Err()
 }
 
-func (r *sqliteQueueRepo) GetByID(
-	ctx context.Context,
-	id int64,
-) (*Queue, error) {
+func (r *sqliteQueueRepo) GetByID(ctx Ctx, id ID) (*Queue, error) {
 	sql := `
 		select
 			q.id
@@ -129,10 +125,7 @@ func (r *sqliteQueueRepo) GetByID(
 	return &q, nil
 }
 
-func (r *sqliteQueueRepo) Create(
-	ctx context.Context,
-	q *QueueCreate,
-) (int64, error) {
+func (r *sqliteQueueRepo) Create(ctx Ctx, q *QueueCreate) (ID, error) {
 	sql := `
 		insert into queue(wallpaper_id, status_id, priority)
 		values(?, ?, ?)`
@@ -154,10 +147,10 @@ func (r *sqliteQueueRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
-func (r *sqliteQueueRepo) Update(ctx context.Context, q *QueueUpdate) error {
+func (r *sqliteQueueRepo) Update(ctx Ctx, q *QueueUpdate) error {
 	sql := `update queue set status_id = ?, priority = ? where id = ?`
 
 	_, err := r.db.ExecContext(
@@ -171,7 +164,7 @@ func (r *sqliteQueueRepo) Update(ctx context.Context, q *QueueUpdate) error {
 	return err
 }
 
-func (r *sqliteQueueRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteQueueRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from queue where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)

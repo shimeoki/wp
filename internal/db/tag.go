@@ -1,42 +1,41 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"time"
 )
 
 type Tag struct {
-	ID        int64
-	Name      string
+	ID
+	Name
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
 type TagCreate struct {
-	Name string
+	Name
 }
 
 type TagUpdate struct {
-	ID   int64
-	Name string
+	ID
+	Name
 }
 
 type TagRepo interface {
-	GetAll(ctx context.Context) ([]*Tag, error)
-	GetByID(ctx context.Context, id int64) (*Tag, error)
-	GetByName(ctx context.Context, name string) (*Tag, error)
+	GetAll(Ctx) ([]*Tag, error)
+	GetByID(Ctx, ID) (*Tag, error)
+	GetByName(Ctx, Name) (*Tag, error)
 
-	Create(ctx context.Context, t *TagCreate) (int64, error)
-	Update(ctx context.Context, t *TagUpdate) error
-	Delete(ctx context.Context, id int64) error
+	Create(Ctx, *TagCreate) (ID, error)
+	Update(Ctx, *TagUpdate) error
+	Delete(Ctx, ID) error
 }
 
 type sqliteTagRepo struct {
 	db *sql.DB
 }
 
-func (r *sqliteTagRepo) GetAll(ctx context.Context) ([]*Tag, error) {
+func (r *sqliteTagRepo) GetAll(ctx Ctx) ([]*Tag, error) {
 	sql := "select id, name, created_at, updated_at from tag"
 
 	rows, err := r.db.QueryContext(ctx, sql)
@@ -61,7 +60,7 @@ func (r *sqliteTagRepo) GetAll(ctx context.Context) ([]*Tag, error) {
 	return ts, rows.Err()
 }
 
-func (r *sqliteTagRepo) GetByID(ctx context.Context, id int64) (*Tag, error) {
+func (r *sqliteTagRepo) GetByID(ctx Ctx, id ID) (*Tag, error) {
 	sql := "select id, name, created_at, updated_at from tag where id = ?"
 
 	row := r.db.QueryRowContext(ctx, sql, id)
@@ -74,10 +73,7 @@ func (r *sqliteTagRepo) GetByID(ctx context.Context, id int64) (*Tag, error) {
 	return &t, nil
 }
 
-func (r *sqliteTagRepo) GetByName(
-	ctx context.Context,
-	name string,
-) (*Tag, error) {
+func (r *sqliteTagRepo) GetByName(ctx Ctx, name Name) (*Tag, error) {
 	sql := "select id, name, created_at, updated_at from tag where name = ?"
 
 	row := r.db.QueryRowContext(ctx, sql, name)
@@ -90,10 +86,7 @@ func (r *sqliteTagRepo) GetByName(
 	return &t, nil
 }
 
-func (r *sqliteTagRepo) Create(
-	ctx context.Context,
-	t *TagCreate,
-) (int64, error) {
+func (r *sqliteTagRepo) Create(ctx Ctx, t *TagCreate) (ID, error) {
 	sql := "insert into tag(name) values (?)"
 
 	result, err := r.db.ExecContext(ctx, sql, t.Name)
@@ -106,10 +99,10 @@ func (r *sqliteTagRepo) Create(
 		return 0, err
 	}
 
-	return id, nil
+	return ID(id), nil
 }
 
-func (r *sqliteTagRepo) Update(ctx context.Context, t *TagUpdate) error {
+func (r *sqliteTagRepo) Update(ctx Ctx, t *TagUpdate) error {
 	sql := "update tag set name = ? where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, t.Name, t.ID)
@@ -117,7 +110,7 @@ func (r *sqliteTagRepo) Update(ctx context.Context, t *TagUpdate) error {
 	return err
 }
 
-func (r *sqliteTagRepo) Delete(ctx context.Context, id int64) error {
+func (r *sqliteTagRepo) Delete(ctx Ctx, id ID) error {
 	sql := "delete from tag where id = ?"
 
 	_, err := r.db.ExecContext(ctx, sql, id)
