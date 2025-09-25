@@ -31,6 +31,27 @@ type Repo interface {
 	Queues() QueueRepo
 }
 
+type TxOptions = sql.TxOptions
+
+type Tx interface {
+	Commit() error
+	Rollback() error
+}
+
+type Txer interface {
+	WithTx(Ctx, *TxOptions) (RepoTx, error)
+}
+
+type RepoTx interface {
+	Repo
+	Tx
+}
+
+type RepoTxer interface {
+	Repo
+	Txer
+}
+
 //go:embed sqlite.sql
 var sqliteScheme string
 
