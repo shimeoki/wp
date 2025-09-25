@@ -27,10 +27,13 @@ type Backup struct {
 
 type JSONer struct {
 	repo db.Repo
+	txer db.Txer
+
+	tags map[Tag]db.ID
 }
 
-func NewJSONer(r db.Repo) *JSONer {
-	return &JSONer{repo: r}
+func NewJSONer(r db.RepoTxer) *JSONer {
+	return &JSONer{repo: r, txer: r}
 }
 
 func (j *JSONer) Export(ctx Ctx, out io.Writer) error {
@@ -142,36 +145,31 @@ func (j *JSONer) importSources(ctx Ctx, sources []Source, wid ID) error {
 	return nil
 }
 
-type jsonTagger struct {
-	jsoner *JSONer
-	tags   map[Tag]db.ID
-}
-
-func (t *jsonTagger) importTags(ctx Ctx, tags []Tag, wid ID) error {
-	tagRepo := t.jsoner.repo.Tags()
-	wallRepo := t.jsoner.repo.Wallpapers()
+func (j *JSONer) importTags(ctx Ctx, tags []Tag, wid ID) error {
+	tagRepo := j.repo.Tags()
+	wallRepo := j.repo.Wallpapers()
 
 	for _, n := range tags {
 		name := db.Name(n)
 
-		if t.tags[n] == 0 {
+		if j.tags[n] == 0 {
 			if tag, _ := tagRepo.GetByName(ctx, name); tag != nil {
-				t.tags[n] = tag.ID
+				j.tags[n] = tag.ID
 			}
 		}
 
-		if t.tags[n] == 0 {
+		if j.tags[n] == 0 {
 			id, err := tagRepo.Create(ctx, &db.TagCreate{Name: name})
 			if err != nil {
 				return err
 			}
 
-			t.tags[n] = id
+			j.tags[n] = id
 		}
 
 		err := wallRepo.AddTag(
 			ctx,
-			&db.WallpaperTag{WallpaperID: db.ID(wid), TagID: t.tags[n]},
+			&db.WallpaperTag{WallpaperID: db.ID(wid), TagID: j.tags[n]},
 		)
 
 		if err != nil {
@@ -183,7 +181,6 @@ func (t *jsonTagger) importTags(ctx Ctx, tags []Tag, wid ID) error {
 }
 
 func (j *JSONer) Import(ctx Ctx, in io.Reader) error {
-	// TODO: use a single transaction
 	file := &Backup{}
 
 	if err := json.NewDecoder(in).Decode(file); err != nil {
@@ -194,26 +191,32 @@ func (j *JSONer) Import(ctx Ctx, in io.Reader) error {
 		return InvalidVersion
 	}
 
-	tagger := &jsonTagger{jsoner: j, tags: make(map[Tag]db.ID)}
+	tx, err := j.txer.WithTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	defer tx.Rollback()
+	jsoner := &JSONer{repo: tx, tags: make(map[Tag]db.ID)}
 
 	for hash, w := range file.Wallpapers {
-		id, err := j.importWallpaper(ctx, hash, w.Format)
+		id, err := jsoner.importWallpaper(ctx, hash, w.Format)
 		if err != nil {
 			return err
 		}
 
-		if err := j.importAliases(ctx, w.Aliases, id); err != nil {
+		if err := jsoner.importAliases(ctx, w.Aliases, id); err != nil {
 			return err
 		}
 
-		if err := tagger.importTags(ctx, w.Tags, id); err != nil {
+		if err := jsoner.importTags(ctx, w.Tags, id); err != nil {
 			return err
 		}
 
-		if err := j.importSources(ctx, w.Sources, id); err != nil {
+		if err := jsoner.importSources(ctx, w.Sources, id); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return tx.Commit()
 }
