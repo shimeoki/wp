@@ -14,15 +14,23 @@ var rootCmd = &cobra.Command{
 	Use: "wp",
 }
 
+func fatal(err error) {
+	fmt.Fprintln(os.Stderr, err)
+	os.Exit(1)
+}
+
 func init() {
+	initStore()
+
 	rootCmd.PersistentFlags().StringVar(
-		&cfg.DB.DataSourceName, "db-dsn",
-		"", "database data source name")
+		&cfg.DB.DataSourceName, "db-dsn", "",
+		"database data source name")
+
+	rootCmd.AddCommand(storeCmd)
 }
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		fatal(err)
 	}
 }
