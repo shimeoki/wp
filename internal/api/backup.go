@@ -29,7 +29,8 @@ type JSONer struct {
 	repo db.Repo
 	txer db.Txer
 
-	tags map[Tag]db.ID
+	tags    map[Tag]db.ID
+	sources map[ID]db.ID
 }
 
 func NewJSONer(r db.RepoTxer) *JSONer {
@@ -123,18 +124,32 @@ func (j *JSONer) importSources(ctx Ctx, sources []Source, wid ID) error {
 	wallRepo := j.repo.Wallpapers()
 
 	for _, s := range sources {
-		id, err := sourceRepo.Create(
-			ctx,
-			&db.SourceCreate{Name: db.Name(s.Name), Link: s.Link},
-		)
-
-		if err != nil {
-			return err
+		if j.sources[s.ID] == 0 {
+			id := db.ID(s.ID)
+			if source, _ := sourceRepo.GetByID(ctx, id); source != nil {
+				j.sources[s.ID] = id
+			}
 		}
 
-		err = wallRepo.AddSource(
+		if j.sources[s.ID] == 0 {
+			id, err := sourceRepo.Create(
+				ctx,
+				&db.SourceCreate{Name: db.Name(s.Name), Link: s.Link},
+			)
+
+			if err != nil {
+				return err
+			}
+
+			j.sources[s.ID] = id
+		}
+
+		err := wallRepo.AddSource(
 			ctx,
-			&db.WallpaperSource{WallpaperID: db.ID(wid), SourceID: id},
+			&db.WallpaperSource{
+				WallpaperID: db.ID(wid),
+				SourceID:    j.sources[s.ID],
+			},
 		)
 
 		if err != nil {
@@ -197,7 +212,11 @@ func (j *JSONer) Import(ctx Ctx, in io.Reader) error {
 	}
 
 	defer tx.Rollback()
-	jsoner := &JSONer{repo: tx, tags: make(map[Tag]db.ID)}
+	jsoner := &JSONer{
+		repo:    tx,
+		tags:    make(map[Tag]db.ID),
+		sources: make(map[ID]db.ID),
+	}
 
 	for hash, w := range file.Wallpapers {
 		id, err := jsoner.importWallpaper(ctx, hash, w.Format)
