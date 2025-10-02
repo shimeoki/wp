@@ -32,55 +32,44 @@ type Wallpaper struct {
 
 type Wallpapers map[Hash]*Wallpaper
 
-type Service interface {
-	// Add a wallpaper entry with the specified image.
-	CreateWallpaper(Ctx, Image) (Hash, error)
+// TODO: queue service
 
-	// Remove a wallpaper entry with the image.
-	DeleteWallpaper(Ctx, Hash) error
+type TagService interface {
+	Create(Ctx, Name) error
+	Delete(Ctx, Name) error
 
-	// Get all information about the wallpaper.
-	GetWallpaper(Ctx, Hash) (*Wallpaper, error)
+	Rename(ctx Ctx, before, after Name) error
 
-	// Get the readable image for the specified wallpaper.
-	ShowWallpaper(Ctx, Hash) (Image, error)
+	List(Ctx) ([]Tag, error)
+}
 
-	// Add a tag. Can be added to some wallpapers later.
-	CreateTag(Ctx, Name) error
+type SourceService interface {
+	Create(Ctx, *SourceCreate) (ID, error)
+	Delete(Ctx, ID) error
 
-	// Remove a tag. Also removes it from all wallpapers where it's used.
-	DeleteTag(Ctx, Name) error
+	// TODO: update
 
-	// Rename a tag "before" to "after", if "before" exists.
-	RenameTag(ctx Ctx, before, after Name) error
+	List(Ctx) ([]Source, error)
+}
 
-	// Get a list of all tags.
-	ListTags(Ctx) ([]Tag, error)
+type WallpaperService interface {
+	Create(Ctx, Image) (Hash, error)
+	Delete(Ctx, Hash) error
+	Get(Ctx, Hash) (*Wallpaper, error)
+	Show(Ctx, Hash) (Image, error)
 
-	// Attach a tag to a specified wallpaper.
 	AddTag(Ctx, Hash, Name) error
-
-	// Unattach a tag from a specified wallpaper.
 	RemoveTag(Ctx, Hash, Name) error
 
-	// Add a source. Can be added to some wallpapers later.
-	CreateSource(Ctx, *SourceCreate) (ID, error)
-
-	// Remove a source. Also removes it from all wallpapers where it's used.
-	DeleteSource(Ctx, ID) error
-
-	// Attach a source to specified wallpaper.
 	AddSource(Ctx, Hash, ID) error
-
-	// Unattach a source from a specified wallpaper.
 	RemoveSource(Ctx, Hash, ID) error
 
-	// Get a list of all sources.
-	ListSources(Ctx) ([]Source, error)
-
-	// Add an alias to a wallpaper.
 	AddAlias(Ctx, Hash, Name) error
-
-	// Remove an alias from a wallpaper.
 	RemoveAlias(Ctx, Hash, Name) error
+}
+
+type Service interface {
+	Wallpapers() WallpaperService
+	Sources() SourceService
+	Tags() TagService
 }
