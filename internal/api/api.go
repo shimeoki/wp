@@ -32,38 +32,44 @@ type Wallpaper struct {
 
 type Wallpapers map[Hash]*Wallpaper
 
-type Service interface {
-	CreateWallpaper(Ctx, Image) (Hash, error)
+// TODO: queue service
 
-	DeleteWallpaper(Ctx, Hash) error
+type TagService interface {
+	Create(Ctx, Name) error
+	Delete(Ctx, Name) error
 
-	GetWallpaper(Ctx, Hash) (*Wallpaper, error)
+	Rename(ctx Ctx, before, after Name) error
 
-	ShowWallpaper(Ctx, Hash) (Image, error)
+	List(Ctx) ([]Tag, error)
+}
 
-	CreateTag(Ctx, Name) error
+type SourceService interface {
+	Create(Ctx, *SourceCreate) (ID, error)
+	Delete(Ctx, ID) error
 
-	DeleteTag(Ctx, Name) error
+	// TODO: update
 
-	RenameTag(ctx Ctx, before, after Name) error
+	List(Ctx) ([]Source, error)
+}
 
-	ListTags(Ctx) ([]Tag, error)
+type WallpaperService interface {
+	Create(Ctx, Image) (Hash, error)
+	Delete(Ctx, Hash) error
+	Get(Ctx, Hash) (*Wallpaper, error)
+	Show(Ctx, Hash) (Image, error)
 
 	AddTag(Ctx, Hash, Name) error
-
 	RemoveTag(Ctx, Hash, Name) error
 
-	CreateSource(Ctx, *SourceCreate) (ID, error)
-
-	DeleteSource(Ctx, ID) error
-
 	AddSource(Ctx, Hash, ID) error
-
 	RemoveSource(Ctx, Hash, ID) error
 
-	ListSources(Ctx) ([]Source, error)
-
 	AddAlias(Ctx, Hash, Name) error
-
 	RemoveAlias(Ctx, Hash, Name) error
+}
+
+type Service interface {
+	Wallpapers() WallpaperService
+	Sources() SourceService
+	Tags() TagService
 }
