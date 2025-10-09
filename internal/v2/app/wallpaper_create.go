@@ -1,6 +1,27 @@
 package app
 
+import (
+	"errors"
+
+	"github.com/shimeoki/wp/internal/v2/domain"
+)
+
 type CreateWallpaperCommand struct {
+	store      Store
+	wallpapers domain.WallpaperRepo
+}
+
+func NewCreateWallpaperCommand(
+	store Store,
+	wallpapers domain.WallpaperRepo,
+) *CreateWallpaperCommand {
+	return &CreateWallpaperCommand{
+		store:      store,
+		wallpapers: wallpapers,
+	}
+}
+
+type CreateWallpaperData struct {
 	Image
 }
 
@@ -8,9 +29,32 @@ type CreateWallpaperResult struct {
 	Hash
 }
 
-func (s *WallpaperService) Create(
-	Ctx,
-	*CreateWallpaperCommand,
+func (s *CreateWallpaperCommand) Execute(
+	ctx Ctx,
+	data *CreateWallpaperData,
 ) (*CreateWallpaperResult, error) {
-	return nil, nil // TODO: implement
+	hash, err := s.store.Create(data.Image)
+	if err != nil {
+		return nil, err
+	}
+
+	h := string(hash)
+
+	w, _ := s.wallpapers.ByHash(ctx, h)
+	if w != nil {
+		return nil, errors.New("wallpaper already exists")
+	}
+
+	f, err := toDomainFormat(data.Image.Format())
+	if err != nil {
+		return nil, err
+	}
+
+	wall := domain.NewWallpaper(f, h)
+
+	if err := s.wallpapers.Save(ctx, wall); err != nil {
+		return nil, err
+	}
+
+	return &CreateWallpaperResult{Hash: hash}, nil
 }
