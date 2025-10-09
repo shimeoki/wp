@@ -7,12 +7,12 @@ import (
 )
 
 type DeleteWallpaperCommand struct {
-	store      Store
+	store      domain.Store
 	wallpapers domain.WallpaperRepo
 }
 
 func NewDeleteWallpaperCommand(
-	store Store,
+	store domain.Store,
 	wallpapers domain.WallpaperRepo,
 ) *DeleteWallpaperCommand {
 	return &DeleteWallpaperCommand{
@@ -40,7 +40,7 @@ func (cmd *DeleteWallpaperCommand) Execute(
 		return nil, err
 	}
 
-	if err := cmd.store.Remove(data.Hash); err != nil {
+	if err := cmd.store.Remove(domain.Hash(data.Hash)); err != nil {
 		return nil, err
 	}
 

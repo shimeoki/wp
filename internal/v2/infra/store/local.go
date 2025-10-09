@@ -4,15 +4,15 @@ import (
 	"io"
 	"os"
 
-	"github.com/shimeoki/wp/internal/v2/app"
+	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
 type LocalStore struct {
 	root   *os.Root
-	hasher app.Hasher
+	hasher domain.Hasher
 }
 
-func NewLocalStore(path string, hasher app.Hasher) (*LocalStore, error) {
+func NewLocalStore(path string, hasher domain.Hasher) (*LocalStore, error) {
 	root, err := os.OpenRoot(path)
 	if err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func NewLocalStore(path string, hasher app.Hasher) (*LocalStore, error) {
 	return &LocalStore{hasher: hasher, root: root}, nil
 }
 
-func (s *LocalStore) Create(img io.Reader) (app.Hash, error) {
+func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {
 	tmp, err := os.CreateTemp("", "wp-local-store")
 	if err != nil {
 		return "", err
@@ -56,13 +56,13 @@ func (s *LocalStore) Create(img io.Reader) (app.Hash, error) {
 	return hash, nil
 }
 
-func (s *LocalStore) Remove(h app.Hash) error {
+func (s *LocalStore) Remove(h domain.Hash) error {
 	return s.root.Remove(string(h))
 }
 
-func (s *LocalStore) Get(h app.Hash) (io.ReadCloser, error) {
+func (s *LocalStore) Get(h domain.Hash) (io.ReadCloser, error) {
 	if !s.hasher.Valid(h) {
-		return nil, app.InvalidHash
+		return nil, domain.InvalidHash
 	}
 
 	return s.root.Open(string(h))

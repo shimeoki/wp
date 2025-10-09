@@ -1,10 +1,12 @@
 package app
 
+import "github.com/shimeoki/wp/internal/v2/domain"
+
 type BackupService struct {
-	store Store
+	store domain.Store
 }
 
-func NewBackupService(s Store) *BackupService {
+func NewBackupService(s domain.Store) *BackupService {
 	return &BackupService{
 		store: s,
 	}

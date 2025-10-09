@@ -8,12 +8,12 @@ import (
 )
 
 type CreateWallpaperCommand struct {
-	store      Store
+	store      domain.Store
 	wallpapers domain.WallpaperRepo
 }
 
 func NewCreateWallpaperCommand(
-	store Store,
+	store domain.Store,
 	wallpapers domain.WallpaperRepo,
 ) *CreateWallpaperCommand {
 	return &CreateWallpaperCommand{
@@ -58,5 +58,5 @@ func (s *CreateWallpaperCommand) Execute(
 		return nil, err
 	}
 
-	return &CreateWallpaperResult{Hash: hash}, nil
+	return &CreateWallpaperResult{Hash: Hash(hash)}, nil
 }

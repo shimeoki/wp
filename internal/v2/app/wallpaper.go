@@ -2,25 +2,9 @@ package app
 
 import (
 	"errors"
-	"io"
 
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
-
-type Store interface {
-	Get(Hash) (io.ReadCloser, error)
-	Create(io.Reader) (Hash, error)
-	Remove(Hash) error
-}
-
-type Hash string
-
-var InvalidHash = errors.New("invalid hash")
-
-type Hasher interface {
-	Compute(io.Reader) (Hash, error)
-	Valid(Hash) bool
-}
 
 type Format string
 
@@ -52,6 +36,8 @@ func toAppFormat(f domain.Format) (Format, error) {
 
 	return "", InvalidFormat
 }
+
+type Hash string
 
 type WallpaperResult struct {
 	Format

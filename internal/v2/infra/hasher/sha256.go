@@ -6,22 +6,22 @@ import (
 	"io"
 	"regexp"
 
-	"github.com/shimeoki/wp/internal/v2/app"
+	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
 type SHA256Hasher struct{}
 
-func (h *SHA256Hasher) Compute(r io.Reader) (app.Hash, error) {
+func (h *SHA256Hasher) Compute(r io.Reader) (domain.Hash, error) {
 	hash := sha256.New()
 
 	if _, err := io.Copy(hash, r); err != nil {
 		return "", err
 	}
 
-	return app.Hash(hex.EncodeToString(hash.Sum(nil))), nil
+	return domain.Hash(hex.EncodeToString(hash.Sum(nil))), nil
 }
 
-func (h *SHA256Hasher) Valid(hash app.Hash) bool {
+func (h *SHA256Hasher) Valid(hash domain.Hash) bool {
 	if len(hash) != 64 {
 		return false
 	}

@@ -8,12 +8,12 @@ import (
 )
 
 type ShowWallpaperQuery struct {
-	store      Store
+	store      domain.Store
 	wallpapers domain.WallpaperRepo
 }
 
 func NewShowWallpaperQuery(
-	store Store,
+	store domain.Store,
 	wallpapers domain.WallpaperRepo,
 ) *ShowWallpaperQuery {
 	return &ShowWallpaperQuery{
@@ -45,7 +45,7 @@ func (qry *ShowWallpaperQuery) Execute(
 		return nil, err
 	}
 
-	r, err := qry.store.Get(data.Hash)
+	r, err := qry.store.Get(domain.Hash(data.Hash))
 	if err != nil {
 		return nil, err
 	}
