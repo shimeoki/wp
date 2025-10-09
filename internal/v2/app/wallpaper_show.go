@@ -23,7 +23,7 @@ func NewShowWallpaperQuery(
 }
 
 type ShowWallpaperData struct {
-	Hash
+	Hash string
 }
 
 type ShowWallpaperResult struct {

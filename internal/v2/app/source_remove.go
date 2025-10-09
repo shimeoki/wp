@@ -23,7 +23,7 @@ func NewRemoveSourceCommand(
 }
 
 type RemoveSourceData struct {
-	Hash
+	Hash     string
 	SourceID string
 }
 

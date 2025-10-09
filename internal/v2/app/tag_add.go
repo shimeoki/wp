@@ -22,7 +22,7 @@ func NewAddTagCommand(
 }
 
 type AddTagData struct {
-	Hash
+	Hash    string
 	TagName string
 }
 

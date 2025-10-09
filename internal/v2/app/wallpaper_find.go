@@ -19,7 +19,7 @@ func NewFindWallpaperQuery(
 }
 
 type FindWallpaperData struct {
-	Hash
+	Hash string
 }
 
 type FindWallpaperResult struct {

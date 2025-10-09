@@ -23,7 +23,7 @@ func NewAddSourceCommand(
 }
 
 type AddSourceData struct {
-	WallpaperHash Hash
+	WallpaperHash string
 	SourceID      string
 }
 

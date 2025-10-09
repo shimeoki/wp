@@ -22,7 +22,7 @@ func NewDeleteWallpaperCommand(
 }
 
 type DeleteWallpaperData struct {
-	Hash
+	Hash string
 }
 
 type DeleteWallpaperResult struct{}

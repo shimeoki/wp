@@ -33,9 +33,7 @@ func toAppFormat(f domain.Format) (Format, error) {
 	return "", domain.InvalidFormat
 }
 
-type Hash string
-
 type WallpaperResult struct {
 	Format
-	Hash
+	Hash string
 }

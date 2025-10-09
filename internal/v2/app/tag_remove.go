@@ -22,7 +22,7 @@ func NewRemoveTagCommand(
 }
 
 type RemoveTagData struct {
-	Hash
+	Hash    string
 	TagName string
 }
 

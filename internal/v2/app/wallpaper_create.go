@@ -28,7 +28,7 @@ type CreateWallpaperData struct {
 }
 
 type CreateWallpaperResult struct {
-	Hash
+	Hash string
 }
 
 func (s *CreateWallpaperCommand) Execute(
@@ -58,5 +58,5 @@ func (s *CreateWallpaperCommand) Execute(
 		return nil, err
 	}
 
-	return &CreateWallpaperResult{Hash: Hash(hash)}, nil
+	return &CreateWallpaperResult{Hash: string(hash)}, nil
 }
