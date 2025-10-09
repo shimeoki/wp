@@ -12,37 +12,35 @@ type AliasRepo interface {
 
 type Alias struct {
 	ID
+	Name
 	WallpaperID ID
-
-	Name string
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
-func NewAlias(name string, wid ID) *Alias {
-	return &Alias{
+func NewAlias(n Name, wid ID) (*Alias, error) {
+	alias := &Alias{
 		ID:          NewID(),
+		Name:        n,
 		WallpaperID: wid,
-
-		Name: name,
-
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
+
+	if err := alias.validate(); err != nil {
+		return nil, err
+	}
+
+	return alias, nil
 }
 
-func (a *Alias) Rename(name string) error {
-	a.Name = name
+func (a *Alias) Rename(n Name) error {
+	a.Name = n
 	a.UpdatedAt = time.Now()
-	return a.Validate()
+	return a.validate()
 }
 
-func (a *Alias) Validate() error {
-	if a.Name == "" {
-		return errors.New("name is empty")
-	}
-
+func (a *Alias) validate() error {
 	if a.CreatedAt.After(a.UpdatedAt) {
 		return errors.New("created is after updated")
 	}
