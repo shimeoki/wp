@@ -15,6 +15,10 @@ func NewID() ID {
 	return ID(uuid.Must(uuid.NewV7()))
 }
 
+func (id ID) String() string {
+	return (uuid.UUID)(id).String()
+}
+
 type Repo[V any] interface {
 	Save(Ctx, V) error
 	Delete(Ctx, ID) error
