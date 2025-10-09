@@ -12,15 +12,6 @@ type WallpaperRepo interface {
 	ByTagID(Ctx, ID) (iter.Seq[*Wallpaper], error)
 }
 
-type Format string
-
-const (
-	JPEG Format = "jpg"
-	PNG  Format = "png"
-)
-
-var InvalidFormat = errors.New("invalid format")
-
 type Wallpaper struct {
 	ID
 
