@@ -7,7 +7,7 @@ import (
 
 type AliasRepo interface {
 	Repo[*Alias]
-	ByWallpaperID(Ctx, ID) ([]*Alias, error)
+	FindByWallpaperID(Ctx, ID) ([]*Alias, error)
 }
 
 type Alias struct {

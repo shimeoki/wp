@@ -33,7 +33,7 @@ func (h *AddSourceHandler) Handle(
 	ctx Ctx,
 	cmd *AddSourceCommand,
 ) (*AddSourceResult, error) {
-	w, _ := h.wallpapers.ByHash(ctx, domain.Hash(cmd.WallpaperHash))
+	w, _ := h.wallpapers.FindByHash(ctx, domain.Hash(cmd.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
@@ -43,7 +43,7 @@ func (h *AddSourceHandler) Handle(
 		return nil, err
 	}
 
-	source, _ := h.sources.ByID(ctx, domain.ID(id))
+	source, _ := h.sources.FindByID(ctx, domain.ID(id))
 	if source == nil {
 		return nil, errors.New("source not found")
 	}

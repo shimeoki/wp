@@ -8,8 +8,8 @@ import (
 
 type WallpaperRepo interface {
 	Repo[*Wallpaper]
-	ByHash(Ctx, Hash) (*Wallpaper, error)
-	ByTagID(Ctx, ID) (iter.Seq[*Wallpaper], error)
+	FindByHash(Ctx, Hash) (*Wallpaper, error)
+	FindByTagID(Ctx, ID) (iter.Seq[*Wallpaper], error)
 }
 
 type Wallpaper struct {

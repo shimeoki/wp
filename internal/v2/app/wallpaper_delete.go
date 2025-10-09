@@ -33,7 +33,7 @@ func (h *DeleteWallpaperHandler) Handle(
 ) (*DeleteWallpaperResult, error) {
 	hash := domain.Hash(cmd.Hash)
 
-	w, _ := h.wallpapers.ByHash(ctx, hash)
+	w, _ := h.wallpapers.FindByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}

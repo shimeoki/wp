@@ -32,7 +32,7 @@ func (h *RenameTagHandler) Handle(
 	ctx Ctx,
 	cmd *RenameTagCommand,
 ) (*RenameTagResult, error) {
-	before, _ := h.tags.ByName(ctx, cmd.Before)
+	before, _ := h.tags.FindByName(ctx, cmd.Before)
 	if before == nil {
 		return nil, errors.New("tag not found")
 	}
@@ -41,9 +41,9 @@ func (h *RenameTagHandler) Handle(
 		return nil, err
 	}
 
-	after, _ := h.tags.ByName(ctx, cmd.After)
+	after, _ := h.tags.FindByName(ctx, cmd.After)
 	if after != nil {
-		walls, err := h.wallpapers.ByTagID(ctx, after.ID)
+		walls, err := h.wallpapers.FindByTagID(ctx, after.ID)
 		if err != nil {
 			return nil, err
 		}

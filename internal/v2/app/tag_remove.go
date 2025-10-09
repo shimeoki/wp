@@ -32,12 +32,12 @@ func (h *RemoveTagHandler) Handle(
 	ctx Ctx,
 	cmd *RemoveTagCommand,
 ) (*RemoveTagResult, error) {
-	w, _ := h.wallpapers.ByHash(ctx, domain.Hash(cmd.WallpaperHash))
+	w, _ := h.wallpapers.FindByHash(ctx, domain.Hash(cmd.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	t, _ := h.tags.ByName(ctx, cmd.TagName)
+	t, _ := h.tags.FindByName(ctx, cmd.TagName)
 	if t == nil {
 		return nil, errors.New("tag not found")
 	}

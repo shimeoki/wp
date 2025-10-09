@@ -7,7 +7,7 @@ import (
 
 type TagRepo interface {
 	Repo[*Tag]
-	ByName(Ctx, string) (*Tag, error)
+	FindByName(Ctx, string) (*Tag, error)
 }
 
 type Tag struct {

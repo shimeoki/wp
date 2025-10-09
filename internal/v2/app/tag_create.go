@@ -28,7 +28,7 @@ func (h *CreateTagHandler) Handle(
 	ctx Ctx,
 	cmd *CreateTagCommand,
 ) (*CreateTagResult, error) {
-	t, _ := h.tags.ByName(ctx, cmd.Name)
+	t, _ := h.tags.FindByName(ctx, cmd.Name)
 	if t != nil {
 		return nil, errors.New("tag already exists")
 	}

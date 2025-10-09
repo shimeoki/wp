@@ -40,7 +40,7 @@ func (h *CreateWallpaperHandler) Handle(
 		return nil, err
 	}
 
-	w, _ := h.wallpapers.ByHash(ctx, hash)
+	w, _ := h.wallpapers.FindByHash(ctx, hash)
 	if w != nil {
 		return nil, errors.New("wallpaper already exists")
 	}

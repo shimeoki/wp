@@ -34,7 +34,7 @@ func (h *DeleteSourceHandler) Handle(
 		return nil, err
 	}
 
-	source, _ := h.sources.ByID(ctx, domain.ID(id))
+	source, _ := h.sources.FindByID(ctx, domain.ID(id))
 	if source == nil {
 		return nil, errors.New("source not found")
 	}

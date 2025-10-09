@@ -7,8 +7,8 @@ import (
 
 type QueueRepo interface {
 	Repo[*Queue]
-	ByWallpaperID(Ctx, ID) ([]*Queue, error)
-	ByStatus(Ctx, Status) ([]*Queue, error)
+	FindByWallpaperID(Ctx, ID) ([]*Queue, error)
+	FindByStatus(Ctx, Status) ([]*Queue, error)
 }
 
 type Queue struct {
