@@ -6,34 +6,34 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type DeleteTagCommand struct {
+type DeleteTagHandler struct {
 	tags domain.TagRepo
 }
 
-func NewDeleteTagCommand(
+func NewDeleteTagHandler(
 	tags domain.TagRepo,
-) *DeleteTagCommand {
-	return &DeleteTagCommand{
+) *DeleteTagHandler {
+	return &DeleteTagHandler{
 		tags: tags,
 	}
 }
 
-type DeleteTagData struct {
+type DeleteTagCommand struct {
 	Name string
 }
 
 type DeleteTagResult struct{}
 
-func (cmd *DeleteTagCommand) Execute(
+func (h *DeleteTagHandler) Handle(
 	ctx Ctx,
-	data *DeleteTagData,
+	cmd *DeleteTagCommand,
 ) (*DeleteTagResult, error) {
-	t, _ := cmd.tags.ByName(ctx, data.Name)
+	t, _ := h.tags.ByName(ctx, cmd.Name)
 	if t == nil {
 		return nil, errors.New("tag not found")
 	}
 
-	if err := cmd.tags.Delete(ctx, t.ID); err != nil {
+	if err := h.tags.Delete(ctx, t.ID); err != nil {
 		return nil, err
 	}
 
