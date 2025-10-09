@@ -23,7 +23,7 @@ type CreateSourceResult struct {
 	ID string
 }
 
-func (h *CreateSourceHandler) Execute(
+func (h *CreateSourceHandler) Handle(
 	ctx Ctx,
 	cmd *CreateSourceCommand,
 ) (*CreateSourceResult, error) {

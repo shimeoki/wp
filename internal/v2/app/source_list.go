@@ -20,7 +20,7 @@ type ListSourcesResult struct {
 	List []SourceResult
 }
 
-func (h *ListSourcesHandler) Execute(
+func (h *ListSourcesHandler) Handle(
 	ctx Ctx,
 	qry *ListSourcesQuery,
 ) (*ListSourcesResult, error) {

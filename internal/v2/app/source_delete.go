@@ -25,7 +25,7 @@ type DeleteSourceCommand struct {
 
 type DeleteSourceResult struct{}
 
-func (h *DeleteSourceHandler) Execute(
+func (h *DeleteSourceHandler) Handle(
 	ctx Ctx,
 	cmd *DeleteSourceCommand,
 ) (*DeleteSourceResult, error) {
