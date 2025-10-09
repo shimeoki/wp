@@ -6,36 +6,36 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type CreateTagCommand struct {
+type CreateTagHandler struct {
 	tags domain.TagRepo
 }
 
-func NewCreateTagCommand(
+func NewCreateTagHandler(
 	tags domain.TagRepo,
-) *CreateTagCommand {
-	return &CreateTagCommand{
+) *CreateTagHandler {
+	return &CreateTagHandler{
 		tags: tags,
 	}
 }
 
-type CreateTagData struct {
+type CreateTagCommand struct {
 	Name string
 }
 
 type CreateTagResult struct{}
 
-func (cmd *CreateTagCommand) Execute(
+func (h *CreateTagHandler) Handle(
 	ctx Ctx,
-	data *CreateTagData,
+	cmd *CreateTagCommand,
 ) (*CreateTagResult, error) {
-	t, _ := cmd.tags.ByName(ctx, data.Name)
+	t, _ := h.tags.ByName(ctx, cmd.Name)
 	if t != nil {
 		return nil, errors.New("tag already exists")
 	}
 
-	tag := domain.NewTag(data.Name)
+	tag := domain.NewTag(cmd.Name)
 
-	if err := cmd.tags.Save(ctx, tag); err != nil {
+	if err := h.tags.Save(ctx, tag); err != nil {
 		return nil, err
 	}
 
