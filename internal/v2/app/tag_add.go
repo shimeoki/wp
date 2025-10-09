@@ -6,38 +6,38 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type AddTagCommand struct {
+type AddTagHandler struct {
 	wallpapers domain.WallpaperRepo
 	tags       domain.TagRepo
 }
 
-func NewAddTagCommand(
+func NewAddTagHandler(
 	wallpapers domain.WallpaperRepo,
 	tags domain.TagRepo,
-) *AddTagCommand {
-	return &AddTagCommand{
+) *AddTagHandler {
+	return &AddTagHandler{
 		wallpapers: wallpapers,
 		tags:       tags,
 	}
 }
 
-type AddTagData struct {
+type AddTagCommand struct {
 	WallpaperHash string
 	TagName       string
 }
 
 type AddTagResult struct{}
 
-func (cmd *AddTagCommand) Execute(
+func (h *AddTagHandler) Handle(
 	ctx Ctx,
-	data *AddTagData,
+	cmd *AddTagCommand,
 ) (*AddTagResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, domain.Hash(data.WallpaperHash))
+	w, _ := h.wallpapers.ByHash(ctx, domain.Hash(cmd.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	t, _ := cmd.tags.ByName(ctx, data.TagName)
+	t, _ := h.tags.ByName(ctx, cmd.TagName)
 	if t == nil {
 		// automatically create tag?
 		return nil, errors.New("tag not found")
@@ -51,7 +51,7 @@ func (cmd *AddTagCommand) Execute(
 		return nil, err
 	}
 
-	if err := cmd.wallpapers.Save(ctx, w); err != nil {
+	if err := h.wallpapers.Save(ctx, w); err != nil {
 		return nil, err
 	}
 
