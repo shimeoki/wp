@@ -2,29 +2,29 @@ package app
 
 import "github.com/shimeoki/wp/internal/v2/domain"
 
-type ListSourcesQuery struct {
+type ListSourcesHandler struct {
 	sources domain.SourceRepo
 }
 
-func NewListSourcesQuery(
+func NewListSourcesHandler(
 	sources domain.SourceRepo,
-) *ListSourcesQuery {
-	return &ListSourcesQuery{
+) *ListSourcesHandler {
+	return &ListSourcesHandler{
 		sources: sources,
 	}
 }
 
-type ListSourcesData struct{}
+type ListSourcesQuery struct{}
 
 type ListSourcesResult struct {
 	List []SourceResult
 }
 
-func (qry *ListSourcesQuery) Execute(
+func (h *ListSourcesHandler) Execute(
 	ctx Ctx,
-	data *ListSourcesData,
+	qry *ListSourcesQuery,
 ) (*ListSourcesResult, error) {
-	it, err := qry.sources.All(ctx)
+	it, err := h.sources.All(ctx)
 	if err != nil {
 		return nil, err
 	}
