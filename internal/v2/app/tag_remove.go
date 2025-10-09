@@ -6,38 +6,38 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type RemoveTagCommand struct {
+type RemoveTagHandler struct {
 	wallpapers domain.WallpaperRepo
 	tags       domain.TagRepo
 }
 
-func NewRemoveTagCommand(
+func NewRemoveTagHandler(
 	wallpapers domain.WallpaperRepo,
 	tags domain.TagRepo,
-) *RemoveTagCommand {
-	return &RemoveTagCommand{
+) *RemoveTagHandler {
+	return &RemoveTagHandler{
 		wallpapers: wallpapers,
 		tags:       tags,
 	}
 }
 
-type RemoveTagData struct {
+type RemoveTagCommand struct {
 	WallpaperHash string
 	TagName       string
 }
 
 type RemoveTagResult struct{}
 
-func (cmd *RemoveTagCommand) Execute(
+func (h *RemoveTagHandler) Handle(
 	ctx Ctx,
-	data *RemoveTagData,
+	cmd *RemoveTagCommand,
 ) (*RemoveTagResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, domain.Hash(data.WallpaperHash))
+	w, _ := h.wallpapers.ByHash(ctx, domain.Hash(cmd.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	t, _ := cmd.tags.ByName(ctx, data.TagName)
+	t, _ := h.tags.ByName(ctx, cmd.TagName)
 	if t == nil {
 		return nil, errors.New("tag not found")
 	}
@@ -50,7 +50,7 @@ func (cmd *RemoveTagCommand) Execute(
 		return nil, err
 	}
 
-	if err := cmd.wallpapers.Save(ctx, w); err != nil {
+	if err := h.wallpapers.Save(ctx, w); err != nil {
 		return nil, err
 	}
 
