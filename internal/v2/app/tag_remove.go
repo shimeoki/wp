@@ -32,7 +32,7 @@ func (cmd *RemoveTagCommand) Execute(
 	ctx Ctx,
 	data *RemoveTagData,
 ) (*RemoveTagResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, string(data.WallpaperHash))
+	w, _ := cmd.wallpapers.ByHash(ctx, domain.Hash(data.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}

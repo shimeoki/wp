@@ -30,7 +30,7 @@ func (qry *FindWallpaperQuery) Execute(
 	ctx Ctx,
 	data *FindWallpaperData,
 ) (*FindWallpaperResult, error) {
-	w, _ := qry.wallpapers.ByHash(ctx, string(data.Hash))
+	w, _ := qry.wallpapers.ByHash(ctx, domain.Hash(data.Hash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}

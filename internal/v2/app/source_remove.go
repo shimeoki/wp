@@ -33,7 +33,7 @@ func (cmd *RemoveSourceCommand) Execute(
 	ctx Ctx,
 	data *RemoveSourceData,
 ) (*RemoveSourceResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, string(data.WallpaperHash))
+	w, _ := cmd.wallpapers.ByHash(ctx, domain.Hash(data.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}

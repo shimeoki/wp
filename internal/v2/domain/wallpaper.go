@@ -8,7 +8,7 @@ import (
 
 type WallpaperRepo interface {
 	Repo[*Wallpaper]
-	ByHash(Ctx, string) (*Wallpaper, error)
+	ByHash(Ctx, Hash) (*Wallpaper, error)
 	ByTagID(Ctx, ID) (iter.Seq[*Wallpaper], error)
 }
 
@@ -25,7 +25,7 @@ type Wallpaper struct {
 	ID
 
 	Format
-	Hash string
+	Hash
 
 	Sources map[ID]*Source
 	Tags    map[ID]*Tag
@@ -34,12 +34,12 @@ type Wallpaper struct {
 	UpdatedAt time.Time
 }
 
-func NewWallpaper(f Format, hash string) *Wallpaper {
+func NewWallpaper(f Format, h Hash) *Wallpaper {
 	return &Wallpaper{
 		ID: NewID(),
 
 		Format: f,
-		Hash:   hash,
+		Hash:   h,
 
 		Sources: make(map[ID]*Source),
 		Tags:    make(map[ID]*Tag),
@@ -49,8 +49,8 @@ func NewWallpaper(f Format, hash string) *Wallpaper {
 	}
 }
 
-func (w *Wallpaper) UpdateHash(hash string) error {
-	w.Hash = hash
+func (w *Wallpaper) UpdateHash(h Hash) error {
+	w.Hash = h
 	w.UpdatedAt = time.Now()
 	return w.Validate()
 }

@@ -40,7 +40,7 @@ func (s *CreateWallpaperCommand) Execute(
 		return nil, err
 	}
 
-	h := string(hash)
+	h := domain.Hash(hash)
 
 	w, _ := s.wallpapers.ByHash(ctx, h)
 	if w != nil {

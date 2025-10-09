@@ -31,7 +31,9 @@ func (cmd *DeleteWallpaperCommand) Execute(
 	ctx Ctx,
 	data *DeleteWallpaperData,
 ) (*DeleteWallpaperResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, string(data.Hash))
+	h := domain.Hash(data.Hash)
+
+	w, _ := cmd.wallpapers.ByHash(ctx, h)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
@@ -40,7 +42,7 @@ func (cmd *DeleteWallpaperCommand) Execute(
 		return nil, err
 	}
 
-	if err := cmd.store.Remove(domain.Hash(data.Hash)); err != nil {
+	if err := cmd.store.Remove(h); err != nil {
 		return nil, err
 	}
 

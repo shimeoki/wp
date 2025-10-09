@@ -35,7 +35,9 @@ func (qry *ShowWallpaperQuery) Execute(
 	ctx Ctx,
 	data *ShowWallpaperData,
 ) (*ShowWallpaperResult, error) {
-	w, _ := qry.wallpapers.ByHash(ctx, string(data.Hash))
+	h := domain.Hash(data.Hash)
+
+	w, _ := qry.wallpapers.ByHash(ctx, h)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
@@ -45,7 +47,7 @@ func (qry *ShowWallpaperQuery) Execute(
 		return nil, err
 	}
 
-	r, err := qry.store.Get(domain.Hash(data.Hash))
+	r, err := qry.store.Get(h)
 	if err != nil {
 		return nil, err
 	}
