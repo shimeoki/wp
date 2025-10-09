@@ -2,12 +2,14 @@ package domain
 
 import (
 	"errors"
+	"iter"
 	"time"
 )
 
 type WallpaperRepo interface {
 	Repo[*Wallpaper]
 	ByHash(Ctx, string) (*Wallpaper, error)
+	ByTagID(Ctx, ID) (iter.Seq[*Wallpaper], error)
 }
 
 type Format string
