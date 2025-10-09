@@ -7,22 +7,22 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type ShowWallpaperQuery struct {
+type ShowWallpaperHandler struct {
 	store      domain.Store
 	wallpapers domain.WallpaperRepo
 }
 
-func NewShowWallpaperQuery(
+func NewShowWallpaperHandler(
 	store domain.Store,
 	wallpapers domain.WallpaperRepo,
-) *ShowWallpaperQuery {
-	return &ShowWallpaperQuery{
+) *ShowWallpaperHandler {
+	return &ShowWallpaperHandler{
 		store:      store,
 		wallpapers: wallpapers,
 	}
 }
 
-type ShowWallpaperData struct {
+type ShowWallpaperQuery struct {
 	Hash string
 }
 
@@ -31,18 +31,18 @@ type ShowWallpaperResult struct {
 	Format string
 }
 
-func (qry *ShowWallpaperQuery) Execute(
+func (h *ShowWallpaperHandler) Handle(
 	ctx Ctx,
-	data *ShowWallpaperData,
+	qry *ShowWallpaperQuery,
 ) (*ShowWallpaperResult, error) {
-	h := domain.Hash(data.Hash)
+	hash := domain.Hash(qry.Hash)
 
-	w, _ := qry.wallpapers.ByHash(ctx, h)
+	w, _ := h.wallpapers.ByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	r, err := qry.store.Get(h)
+	r, err := h.store.Get(hash)
 	if err != nil {
 		return nil, err
 	}
