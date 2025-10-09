@@ -6,44 +6,44 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type RenameTagCommand struct {
+type RenameTagHandler struct {
 	wallpapers domain.WallpaperRepo
 	tags       domain.TagRepo
 }
 
-func NewRenameTagCommand(
+func NewRenameTagHandler(
 	wallpapers domain.WallpaperRepo,
 	tags domain.TagRepo,
-) *RenameTagCommand {
-	return &RenameTagCommand{
+) *RenameTagHandler {
+	return &RenameTagHandler{
 		wallpapers: wallpapers,
 		tags:       tags,
 	}
 }
 
-type RenameTagData struct {
+type RenameTagCommand struct {
 	Before string
 	After  string
 }
 
 type RenameTagResult struct{}
 
-func (cmd *RenameTagCommand) Execute(
+func (h *RenameTagHandler) Handle(
 	ctx Ctx,
-	data *RenameTagData,
+	cmd *RenameTagCommand,
 ) (*RenameTagResult, error) {
-	before, _ := cmd.tags.ByName(ctx, data.Before)
+	before, _ := h.tags.ByName(ctx, cmd.Before)
 	if before == nil {
 		return nil, errors.New("tag not found")
 	}
 
-	if err := before.Rename(data.After); err != nil {
+	if err := before.Rename(cmd.After); err != nil {
 		return nil, err
 	}
 
-	after, _ := cmd.tags.ByName(ctx, data.After)
+	after, _ := h.tags.ByName(ctx, cmd.After)
 	if after != nil {
-		walls, err := cmd.wallpapers.ByTagID(ctx, after.ID)
+		walls, err := h.wallpapers.ByTagID(ctx, after.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -57,17 +57,17 @@ func (cmd *RenameTagCommand) Execute(
 				return nil, err
 			}
 
-			if err := cmd.wallpapers.Save(ctx, wall); err != nil {
+			if err := h.wallpapers.Save(ctx, wall); err != nil {
 				return nil, err
 			}
 		}
 
-		if err := cmd.tags.Delete(ctx, after.ID); err != nil {
+		if err := h.tags.Delete(ctx, after.ID); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := cmd.tags.Save(ctx, before); err != nil {
+	if err := h.tags.Save(ctx, before); err != nil {
 		return nil, err
 	}
 
