@@ -11,16 +11,6 @@ type QueueRepo interface {
 	ByStatus(Ctx, Status) ([]*Queue, error)
 }
 
-type Status string
-
-const (
-	QUEUED  Status = "queued"
-	USED    Status = "used"
-	SKIPPED Status = "skipped"
-)
-
-var InvalidStatus = errors.New("invalid status")
-
 type Queue struct {
 	ID
 	WallpaperID ID
