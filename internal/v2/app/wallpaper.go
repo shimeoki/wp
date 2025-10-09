@@ -45,9 +45,40 @@ const (
 
 var InvalidFormat = errors.New("invalid format")
 
+func toDomainFormat(f Format) (domain.Format, error) {
+	switch f {
+	case JPEG:
+		return domain.JPEG, nil
+	case PNG:
+		return domain.PNG, nil
+	}
+
+	return "", InvalidFormat
+}
+
+func toAppFormat(f domain.Format) (Format, error) {
+	switch f {
+	case domain.JPEG:
+		return JPEG, nil
+	case domain.PNG:
+		return PNG, nil
+	}
+
+	return "", InvalidFormat
+}
+
 type Image interface {
 	io.ReadCloser
 	Format() Format
+}
+
+type image struct {
+	io.ReadCloser
+	format Format
+}
+
+func (i *image) Format() Format {
+	return i.format
 }
 
 type WallpaperResult struct {
