@@ -35,12 +35,7 @@ func (qry *FindWallpaperQuery) Execute(
 		return nil, errors.New("wallpaper not found")
 	}
 
-	f, err := toAppFormat(w.Format)
-	if err != nil {
-		return nil, err
-	}
-
-	wall := WallpaperResult{Format: f, Hash: data.Hash}
+	wall := WallpaperResult{Format: w.Format.String(), Hash: data.Hash}
 
 	return &FindWallpaperResult{Wallpaper: wall}, nil
 }

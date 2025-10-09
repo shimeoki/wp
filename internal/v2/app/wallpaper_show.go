@@ -27,8 +27,8 @@ type ShowWallpaperData struct {
 }
 
 type ShowWallpaperResult struct {
-	Image io.ReadCloser
-	Format
+	Image  io.ReadCloser
+	Format string
 }
 
 func (qry *ShowWallpaperQuery) Execute(
@@ -42,15 +42,10 @@ func (qry *ShowWallpaperQuery) Execute(
 		return nil, errors.New("wallpaper not found")
 	}
 
-	f, err := toAppFormat(w.Format)
-	if err != nil {
-		return nil, err
-	}
-
 	r, err := qry.store.Get(h)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ShowWallpaperResult{Image: r, Format: f}, nil
+	return &ShowWallpaperResult{Image: r, Format: w.Format.String()}, nil
 }

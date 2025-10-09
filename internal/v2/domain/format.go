@@ -7,6 +7,10 @@ import (
 
 type Format string
 
+func (f Format) String() string {
+	return string(f)
+}
+
 const (
 	JPEG Format = "jpg"
 	PNG  Format = "png"

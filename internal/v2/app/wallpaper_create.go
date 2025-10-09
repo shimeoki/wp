@@ -23,8 +23,8 @@ func NewCreateWallpaperCommand(
 }
 
 type CreateWallpaperData struct {
-	Image io.ReadCloser
-	Format
+	Image  io.ReadCloser
+	Format string
 }
 
 type CreateWallpaperResult struct {
@@ -47,7 +47,7 @@ func (s *CreateWallpaperCommand) Execute(
 		return nil, errors.New("wallpaper already exists")
 	}
 
-	f, err := toDomainFormat(data.Format)
+	f, err := domain.ParseFormat(data.Format)
 	if err != nil {
 		return nil, err
 	}
