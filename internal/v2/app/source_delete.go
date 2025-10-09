@@ -7,39 +7,39 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type DeleteSourceCommand struct {
+type DeleteSourceHandler struct {
 	sources domain.SourceRepo
 }
 
-func NewDeleteSourceCommand(
+func NewDeleteSourceHandler(
 	sources domain.SourceRepo,
-) *DeleteSourceCommand {
-	return &DeleteSourceCommand{
+) *DeleteSourceHandler {
+	return &DeleteSourceHandler{
 		sources: sources,
 	}
 }
 
-type DeleteSourceData struct {
+type DeleteSourceCommand struct {
 	ID string
 }
 
 type DeleteSourceResult struct{}
 
-func (cmd *DeleteSourceCommand) Execute(
+func (h *DeleteSourceHandler) Execute(
 	ctx Ctx,
-	data *DeleteSourceData,
+	cmd *DeleteSourceCommand,
 ) (*DeleteSourceResult, error) {
-	id, err := uuid.Parse(data.ID)
+	id, err := uuid.Parse(cmd.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	source, _ := cmd.sources.ByID(ctx, domain.ID(id))
+	source, _ := h.sources.ByID(ctx, domain.ID(id))
 	if source == nil {
 		return nil, errors.New("source not found")
 	}
 
-	if err := cmd.sources.Delete(ctx, source.ID); err != nil {
+	if err := h.sources.Delete(ctx, source.ID); err != nil {
 		return nil, err
 	}
 
