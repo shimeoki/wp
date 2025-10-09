@@ -3,21 +3,28 @@ package app
 import (
 	"errors"
 	"io"
-	"time"
 
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
 type WallpaperService struct {
-	store  Store
-	hasher Hasher
-	repo   domain.WallpaperRepo
+	store      Store
+	wallpapers domain.WallpaperRepo
+	tags       domain.TagRepo
+	sources    domain.SourceRepo
 }
 
-func NewWallpaperService(s Store, h Hasher) *WallpaperService {
+func NewWallpaperService(
+	store Store,
+	wallpapers domain.WallpaperRepo,
+	tags domain.TagRepo,
+	sources domain.SourceRepo,
+) *WallpaperService {
 	return &WallpaperService{
-		store:  s,
-		hasher: h,
+		store:      store,
+		wallpapers: wallpapers,
+		tags:       tags,
+		sources:    sources,
 	}
 }
 
@@ -84,11 +91,4 @@ func (i *image) Format() Format {
 type WallpaperResult struct {
 	Format
 	Hash
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-}
-
-type AliasResult struct {
-	Name string
 }
