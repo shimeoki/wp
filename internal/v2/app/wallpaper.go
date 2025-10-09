@@ -1,8 +1,6 @@
 package app
 
 import (
-	"errors"
-
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
@@ -13,8 +11,6 @@ const (
 	PNG  Format = "png"
 )
 
-var InvalidFormat = errors.New("invalid format")
-
 func toDomainFormat(f Format) (domain.Format, error) {
 	switch f {
 	case JPEG:
@@ -23,7 +19,7 @@ func toDomainFormat(f Format) (domain.Format, error) {
 		return domain.PNG, nil
 	}
 
-	return "", InvalidFormat
+	return "", domain.InvalidFormat
 }
 
 func toAppFormat(f domain.Format) (Format, error) {
@@ -34,7 +30,7 @@ func toAppFormat(f domain.Format) (Format, error) {
 		return PNG, nil
 	}
 
-	return "", InvalidFormat
+	return "", domain.InvalidFormat
 }
 
 type Hash string
