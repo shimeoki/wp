@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"io"
 
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
@@ -22,7 +23,8 @@ func NewCreateWallpaperCommand(
 }
 
 type CreateWallpaperData struct {
-	Image
+	Image io.ReadCloser
+	Format
 }
 
 type CreateWallpaperResult struct {
@@ -45,7 +47,7 @@ func (s *CreateWallpaperCommand) Execute(
 		return nil, errors.New("wallpaper already exists")
 	}
 
-	f, err := toDomainFormat(data.Image.Format())
+	f, err := toDomainFormat(data.Format)
 	if err != nil {
 		return nil, err
 	}

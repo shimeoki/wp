@@ -53,20 +53,6 @@ func toAppFormat(f domain.Format) (Format, error) {
 	return "", InvalidFormat
 }
 
-type Image interface {
-	io.ReadCloser
-	Format() Format
-}
-
-type image struct {
-	io.ReadCloser
-	format Format
-}
-
-func (i *image) Format() Format {
-	return i.format
-}
-
 type WallpaperResult struct {
 	Format
 	Hash

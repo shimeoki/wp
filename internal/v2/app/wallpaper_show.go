@@ -2,6 +2,7 @@ package app
 
 import (
 	"errors"
+	"io"
 
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
@@ -26,7 +27,8 @@ type ShowWallpaperData struct {
 }
 
 type ShowWallpaperResult struct {
-	Image
+	Image io.ReadCloser
+	Format
 }
 
 func (qry *ShowWallpaperQuery) Execute(
@@ -48,7 +50,5 @@ func (qry *ShowWallpaperQuery) Execute(
 		return nil, err
 	}
 
-	img := &image{ReadCloser: r, format: f}
-
-	return &ShowWallpaperResult{Image: img}, nil
+	return &ShowWallpaperResult{Image: r, Format: f}, nil
 }
