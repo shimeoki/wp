@@ -6,43 +6,43 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type DeleteWallpaperCommand struct {
+type DeleteWallpaperHandler struct {
 	store      domain.Store
 	wallpapers domain.WallpaperRepo
 }
 
-func NewDeleteWallpaperCommand(
+func NewDeleteWallpaperHandler(
 	store domain.Store,
 	wallpapers domain.WallpaperRepo,
-) *DeleteWallpaperCommand {
-	return &DeleteWallpaperCommand{
+) *DeleteWallpaperHandler {
+	return &DeleteWallpaperHandler{
 		store:      store,
 		wallpapers: wallpapers,
 	}
 }
 
-type DeleteWallpaperData struct {
+type DeleteWallpaperCommand struct {
 	Hash string
 }
 
 type DeleteWallpaperResult struct{}
 
-func (cmd *DeleteWallpaperCommand) Execute(
+func (h *DeleteWallpaperHandler) Handle(
 	ctx Ctx,
-	data *DeleteWallpaperData,
+	cmd *DeleteWallpaperCommand,
 ) (*DeleteWallpaperResult, error) {
-	h := domain.Hash(data.Hash)
+	hash := domain.Hash(cmd.Hash)
 
-	w, _ := cmd.wallpapers.ByHash(ctx, h)
+	w, _ := h.wallpapers.ByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	if err := cmd.wallpapers.Delete(ctx, w.ID); err != nil {
+	if err := h.wallpapers.Delete(ctx, w.ID); err != nil {
 		return nil, err
 	}
 
-	if err := cmd.store.Remove(h); err != nil {
+	if err := h.store.Remove(hash); err != nil {
 		return nil, err
 	}
 
