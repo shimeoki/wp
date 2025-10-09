@@ -2,29 +2,29 @@ package app
 
 import "github.com/shimeoki/wp/internal/v2/domain"
 
-type ListTagsQuery struct {
+type ListTagsHandler struct {
 	tags domain.TagRepo
 }
 
-func NewListTagsQuery(
+func NewListTagsHandler(
 	tags domain.TagRepo,
-) *ListTagsQuery {
-	return &ListTagsQuery{
+) *ListTagsHandler {
+	return &ListTagsHandler{
 		tags: tags,
 	}
 }
 
-type ListTagsData struct{}
+type ListTagsQuery struct{}
 
 type ListTagsResult struct {
 	Map map[string]TagResult
 }
 
-func (qry *ListTagsQuery) Execute(
+func (h *ListTagsHandler) Handle(
 	ctx Ctx,
-	data *ListTagsData,
+	qry *ListTagsQuery,
 ) (*ListTagsResult, error) {
-	it, err := qry.tags.All(ctx)
+	it, err := h.tags.All(ctx)
 	if err != nil {
 		return nil, err
 	}
