@@ -2,19 +2,19 @@ package app
 
 import "github.com/shimeoki/wp/internal/v2/domain"
 
-type CreateSourceCommand struct {
+type CreateSourceHandler struct {
 	sources domain.SourceRepo
 }
 
-func NewCreateSourceCommand(
+func NewCreateSourceHandler(
 	sources domain.SourceRepo,
-) *CreateSourceCommand {
-	return &CreateSourceCommand{
+) *CreateSourceHandler {
+	return &CreateSourceHandler{
 		sources: sources,
 	}
 }
 
-type CreateSourceData struct {
+type CreateSourceCommand struct {
 	Name string
 	Link *string
 }
@@ -23,13 +23,13 @@ type CreateSourceResult struct {
 	ID string
 }
 
-func (cmd *CreateSourceCommand) Execute(
+func (h *CreateSourceHandler) Execute(
 	ctx Ctx,
-	data *CreateSourceData,
+	cmd *CreateSourceCommand,
 ) (*CreateSourceResult, error) {
-	source := domain.NewSource(data.Name, data.Link)
+	source := domain.NewSource(cmd.Name, cmd.Link)
 
-	if err := cmd.sources.Save(ctx, source); err != nil {
+	if err := h.sources.Save(ctx, source); err != nil {
 		return nil, err
 	}
 
