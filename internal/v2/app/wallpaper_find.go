@@ -6,19 +6,19 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type FindWallpaperQuery struct {
+type FindWallpaperHandler struct {
 	wallpapers domain.WallpaperRepo
 }
 
-func NewFindWallpaperQuery(
+func NewFindWallpaperHandler(
 	wallpapers domain.WallpaperRepo,
-) *FindWallpaperQuery {
-	return &FindWallpaperQuery{
+) *FindWallpaperHandler {
+	return &FindWallpaperHandler{
 		wallpapers: wallpapers,
 	}
 }
 
-type FindWallpaperData struct {
+type FindWallpaperQuery struct {
 	Hash string
 }
 
@@ -26,16 +26,16 @@ type FindWallpaperResult struct {
 	Wallpaper WallpaperResult
 }
 
-func (qry *FindWallpaperQuery) Execute(
+func (h *FindWallpaperHandler) Handle(
 	ctx Ctx,
-	data *FindWallpaperData,
+	qry *FindWallpaperQuery,
 ) (*FindWallpaperResult, error) {
-	w, _ := qry.wallpapers.ByHash(ctx, domain.Hash(data.Hash))
+	w, _ := h.wallpapers.ByHash(ctx, domain.Hash(qry.Hash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	wall := WallpaperResult{Format: w.Format.String(), Hash: data.Hash}
+	wall := WallpaperResult{Format: w.Format.String(), Hash: qry.Hash}
 
 	return &FindWallpaperResult{Wallpaper: wall}, nil
 }
