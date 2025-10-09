@@ -7,22 +7,22 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type CreateWallpaperCommand struct {
+type CreateWallpaperHandler struct {
 	store      domain.Store
 	wallpapers domain.WallpaperRepo
 }
 
-func NewCreateWallpaperCommand(
+func NewCreateWallpaperHandler(
 	store domain.Store,
 	wallpapers domain.WallpaperRepo,
-) *CreateWallpaperCommand {
-	return &CreateWallpaperCommand{
+) *CreateWallpaperHandler {
+	return &CreateWallpaperHandler{
 		store:      store,
 		wallpapers: wallpapers,
 	}
 }
 
-type CreateWallpaperData struct {
+type CreateWallpaperCommand struct {
 	Image  io.ReadCloser
 	Format string
 }
@@ -31,30 +31,28 @@ type CreateWallpaperResult struct {
 	Hash string
 }
 
-func (s *CreateWallpaperCommand) Execute(
+func (h *CreateWallpaperHandler) Handle(
 	ctx Ctx,
-	data *CreateWallpaperData,
+	cmd *CreateWallpaperCommand,
 ) (*CreateWallpaperResult, error) {
-	hash, err := s.store.Create(data.Image)
+	hash, err := h.store.Create(cmd.Image)
 	if err != nil {
 		return nil, err
 	}
 
-	h := domain.Hash(hash)
-
-	w, _ := s.wallpapers.ByHash(ctx, h)
+	w, _ := h.wallpapers.ByHash(ctx, hash)
 	if w != nil {
 		return nil, errors.New("wallpaper already exists")
 	}
 
-	f, err := domain.ParseFormat(data.Format)
+	f, err := domain.ParseFormat(cmd.Format)
 	if err != nil {
 		return nil, err
 	}
 
-	wall := domain.NewWallpaper(f, h)
+	wall := domain.NewWallpaper(f, hash)
 
-	if err := s.wallpapers.Save(ctx, wall); err != nil {
+	if err := h.wallpapers.Save(ctx, wall); err != nil {
 		return nil, err
 	}
 
