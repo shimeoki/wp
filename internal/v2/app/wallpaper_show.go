@@ -1,8 +1,27 @@
 package app
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/shimeoki/wp/internal/v2/domain"
+)
 
 type ShowWallpaperQuery struct {
+	store      Store
+	wallpapers domain.WallpaperRepo
+}
+
+func NewShowWallpaperQuery(
+	store Store,
+	wallpapers domain.WallpaperRepo,
+) *ShowWallpaperQuery {
+	return &ShowWallpaperQuery{
+		store:      store,
+		wallpapers: wallpapers,
+	}
+}
+
+type ShowWallpaperData struct {
 	Hash
 }
 
@@ -10,11 +29,11 @@ type ShowWallpaperResult struct {
 	Image
 }
 
-func (cmd *WallpaperService) Show(
+func (qry *ShowWallpaperQuery) Execute(
 	ctx Ctx,
-	qry *ShowWallpaperQuery,
+	data *ShowWallpaperData,
 ) (*ShowWallpaperResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, string(qry.Hash))
+	w, _ := qry.wallpapers.ByHash(ctx, string(data.Hash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
@@ -24,7 +43,7 @@ func (cmd *WallpaperService) Show(
 		return nil, err
 	}
 
-	r, err := cmd.store.Get(qry.Hash)
+	r, err := qry.store.Get(data.Hash)
 	if err != nil {
 		return nil, err
 	}
