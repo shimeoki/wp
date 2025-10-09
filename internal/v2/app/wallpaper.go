@@ -7,27 +7,6 @@ import (
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
-type WallpaperService struct {
-	store      Store
-	wallpapers domain.WallpaperRepo
-	tags       domain.TagRepo
-	sources    domain.SourceRepo
-}
-
-func NewWallpaperService(
-	store Store,
-	wallpapers domain.WallpaperRepo,
-	tags domain.TagRepo,
-	sources domain.SourceRepo,
-) *WallpaperService {
-	return &WallpaperService{
-		store:      store,
-		wallpapers: wallpapers,
-		tags:       tags,
-		sources:    sources,
-	}
-}
-
 type Store interface {
 	Get(Hash) (io.ReadCloser, error)
 	Create(io.Reader) (Hash, error)
