@@ -22,8 +22,8 @@ func NewRemoveTagCommand(
 }
 
 type RemoveTagData struct {
-	Hash    string
-	TagName string
+	WallpaperHash string
+	TagName       string
 }
 
 type RemoveTagResult struct{}
@@ -32,7 +32,7 @@ func (cmd *RemoveTagCommand) Execute(
 	ctx Ctx,
 	data *RemoveTagData,
 ) (*RemoveTagResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, string(data.Hash))
+	w, _ := cmd.wallpapers.ByHash(ctx, string(data.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}

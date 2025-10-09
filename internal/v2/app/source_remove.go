@@ -23,8 +23,8 @@ func NewRemoveSourceCommand(
 }
 
 type RemoveSourceData struct {
-	Hash     string
-	SourceID string
+	WallpaperHash string
+	SourceID      string
 }
 
 type RemoveSourceResult struct{}
@@ -33,7 +33,7 @@ func (cmd *RemoveSourceCommand) Execute(
 	ctx Ctx,
 	data *RemoveSourceData,
 ) (*RemoveSourceResult, error) {
-	w, _ := cmd.wallpapers.ByHash(ctx, string(data.Hash))
+	w, _ := cmd.wallpapers.ByHash(ctx, string(data.WallpaperHash))
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
