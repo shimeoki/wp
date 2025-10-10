@@ -18,7 +18,7 @@ func (h *SHA256Hasher) Compute(r io.Reader) (domain.Hash, error) {
 		return "", err
 	}
 
-	return domain.Hash(hex.EncodeToString(hash.Sum(nil))), nil
+	return domain.ParseHash(hex.EncodeToString(hash.Sum(nil)))
 }
 
 func (h *SHA256Hasher) Valid(hash domain.Hash) bool {

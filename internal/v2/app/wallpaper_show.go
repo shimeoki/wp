@@ -35,7 +35,10 @@ func (h *ShowWallpaperHandler) Handle(
 	ctx Ctx,
 	qry *ShowWallpaperQuery,
 ) (*ShowWallpaperResult, error) {
-	hash := domain.Hash(qry.Hash)
+	hash, err := domain.ParseHash(qry.Hash)
+	if err != nil {
+		return nil, err
+	}
 
 	w, _ := h.wallpapers.FindByHash(ctx, hash)
 	if w == nil {

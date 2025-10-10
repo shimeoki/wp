@@ -13,7 +13,22 @@ type Store interface {
 
 type Hash string
 
-var InvalidHash = errors.New("invalid hash")
+func (h Hash) String() string {
+	return string(h)
+}
+
+func ParseHash(value string) (Hash, error) {
+	if len(value) == 0 {
+		return "", EmptyHash
+	}
+
+	return Hash(value), nil
+}
+
+var (
+	InvalidHash = errors.New("invalid hash")
+	EmptyHash   = errors.New("hash is empty")
+)
 
 type Hasher interface {
 	Compute(io.Reader) (Hash, error)
