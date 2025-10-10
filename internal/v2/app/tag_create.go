@@ -33,7 +33,15 @@ func (h *CreateTagHandler) Handle(
 		return nil, errors.New("tag already exists")
 	}
 
-	tag := domain.NewTag(cmd.Name)
+	name, err := domain.NewName(cmd.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	tag, err := domain.NewTag(name)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := h.tags.Save(ctx, tag); err != nil {
 		return nil, err

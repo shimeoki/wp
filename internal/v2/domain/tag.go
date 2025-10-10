@@ -12,35 +12,33 @@ type TagRepo interface {
 
 type Tag struct {
 	ID
-
-	Name string
-
+	Name
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func NewTag(name string) *Tag {
-	return &Tag{
-		ID: NewID(),
-
-		Name: name,
-
+func NewTag(n Name) (*Tag, error) {
+	t := &Tag{
+		ID:        NewID(),
+		Name:      n,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-}
 
-func (t *Tag) Rename(name string) error {
-	t.Name = name
-	t.UpdatedAt = time.Now()
-	return t.Validate()
-}
-
-func (t *Tag) Validate() error {
-	if t.Name == "" {
-		return errors.New("name is empty")
+	if err := t.validate(); err != nil {
+		return nil, err
 	}
 
+	return t, nil
+}
+
+func (t *Tag) Rename(n Name) error {
+	t.Name = n
+	t.UpdatedAt = time.Now()
+	return t.validate()
+}
+
+func (t *Tag) validate() error {
 	if t.CreatedAt.After(t.UpdatedAt) {
 		return errors.New("created is after updated")
 	}

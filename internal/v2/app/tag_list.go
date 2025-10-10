@@ -32,7 +32,8 @@ func (h *ListTagsHandler) Handle(
 	result := &ListTagsResult{Map: make(map[string]TagResult)}
 
 	for tag := range it {
-		result.Map[tag.Name] = TagResult{Name: tag.Name}
+		name := tag.Name.String()
+		result.Map[name] = TagResult{Name: name}
 	}
 
 	return result, nil
