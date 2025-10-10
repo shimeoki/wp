@@ -17,7 +17,7 @@ func NewListTagsHandler(
 type ListTagsQuery struct{}
 
 type ListTagsResult struct {
-	Map map[string]TagResult
+	Names []string
 }
 
 func (h *ListTagsHandler) Handle(
@@ -29,11 +29,10 @@ func (h *ListTagsHandler) Handle(
 		return nil, err
 	}
 
-	result := &ListTagsResult{Map: make(map[string]TagResult)}
+	result := &ListTagsResult{}
 
 	for tag := range it {
-		name := tag.Name.String()
-		result.Map[name] = TagResult{Name: name}
+		result.Names = append(result.Names, tag.Name.String())
 	}
 
 	return result, nil

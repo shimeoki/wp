@@ -17,7 +17,11 @@ func NewListSourcesHandler(
 type ListSourcesQuery struct{}
 
 type ListSourcesResult struct {
-	List []SourceResult
+	List []struct {
+		ID   string
+		Name string
+		Link *string
+	}
 }
 
 func (h *ListSourcesHandler) Handle(
@@ -32,13 +36,15 @@ func (h *ListSourcesHandler) Handle(
 	result := &ListSourcesResult{}
 
 	for source := range it {
-		res := SourceResult{
+		result.List = append(result.List, struct {
+			ID   string
+			Name string
+			Link *string
+		}{
 			ID:   source.ID.String(),
 			Name: source.Name.String(),
 			Link: source.Link,
-		}
-
-		result.List = append(result.List, res)
+		})
 	}
 
 	return result, nil

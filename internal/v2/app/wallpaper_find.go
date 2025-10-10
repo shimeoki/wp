@@ -23,7 +23,7 @@ type FindWallpaperQuery struct {
 }
 
 type FindWallpaperResult struct {
-	Wallpaper WallpaperResult
+	Format string
 }
 
 func (h *FindWallpaperHandler) Handle(
@@ -40,7 +40,5 @@ func (h *FindWallpaperHandler) Handle(
 		return nil, errors.New("wallpaper not found")
 	}
 
-	wall := WallpaperResult{Format: w.Format.String(), Hash: qry.Hash}
-
-	return &FindWallpaperResult{Wallpaper: wall}, nil
+	return &FindWallpaperResult{Format: w.Format.String()}, nil
 }
