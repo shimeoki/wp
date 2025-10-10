@@ -8,6 +8,10 @@
         treefmt = {
             programs = {
                 # keep-sorted start block=yes newline_separated=yes
+                golines = {
+                    enable = true;
+                };
+
                 keep-sorted = {
                     enable = true;
                 };
@@ -15,10 +19,6 @@
                 nixfmt = {
                     enable = true;
                     width = 80;
-                };
-
-                golines = {
-                    enable = true;
                 };
                 # keep-sorted end
             };

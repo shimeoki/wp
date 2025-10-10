@@ -6,8 +6,8 @@
                 packages = with pkgs; [
                     # keep-sorted start
                     go
-                    sqlite
                     nushell
+                    sqlite
                     # keep-sorted end
                 ];
 
