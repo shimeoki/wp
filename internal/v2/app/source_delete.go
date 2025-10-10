@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
@@ -29,12 +28,12 @@ func (h *DeleteSourceHandler) Handle(
 	ctx Ctx,
 	cmd *DeleteSourceCommand,
 ) (*DeleteSourceResult, error) {
-	id, err := uuid.Parse(cmd.ID)
+	id, err := domain.ParseID(cmd.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	source, _ := h.sources.FindByID(ctx, domain.ID(id))
+	source, _ := h.sources.FindByID(ctx, id)
 	if source == nil {
 		return nil, errors.New("source not found")
 	}

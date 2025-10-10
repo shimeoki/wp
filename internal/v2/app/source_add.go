@@ -3,7 +3,6 @@ package app
 import (
 	"errors"
 
-	"github.com/google/uuid"
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
@@ -43,12 +42,12 @@ func (h *AddSourceHandler) Handle(
 		return nil, errors.New("wallpaper not found")
 	}
 
-	id, err := uuid.Parse(cmd.SourceID)
+	id, err := domain.ParseID(cmd.SourceID)
 	if err != nil {
 		return nil, err
 	}
 
-	source, _ := h.sources.FindByID(ctx, domain.ID(id))
+	source, _ := h.sources.FindByID(ctx, id)
 	if source == nil {
 		return nil, errors.New("source not found")
 	}
