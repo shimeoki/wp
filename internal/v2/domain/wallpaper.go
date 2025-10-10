@@ -14,42 +14,42 @@ type WallpaperRepo interface {
 
 type Wallpaper struct {
 	ID
-
 	Format
 	Hash
-
-	Sources map[ID]*Source
-	Tags    map[ID]*Tag
-
+	Sources   map[ID]*Source
+	Tags      map[ID]*Tag
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func NewWallpaper(f Format, h Hash) *Wallpaper {
-	return &Wallpaper{
-		ID: NewID(),
-
-		Format: f,
-		Hash:   h,
-
-		Sources: make(map[ID]*Source),
-		Tags:    make(map[ID]*Tag),
-
+func NewWallpaper(f Format, h Hash) (*Wallpaper, error) {
+	w := &Wallpaper{
+		ID:        NewID(),
+		Format:    f,
+		Hash:      h,
+		Sources:   make(map[ID]*Source),
+		Tags:      make(map[ID]*Tag),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+
+	if err := w.validate(); err != nil {
+		return nil, err
+	}
+
+	return w, nil
 }
 
 func (w *Wallpaper) UpdateHash(h Hash) error {
 	w.Hash = h
 	w.UpdatedAt = time.Now()
-	return w.Validate()
+	return w.validate()
 }
 
 func (w *Wallpaper) UpdateFormat(f Format) error {
 	w.Format = f
 	w.UpdatedAt = time.Now()
-	return w.Validate()
+	return w.validate()
 }
 
 func (w *Wallpaper) AddSource(s *Source) error {
@@ -86,11 +86,7 @@ func (w *Wallpaper) RemoveTag(id ID) error {
 	return nil
 }
 
-func (w *Wallpaper) Validate() error {
-	if w.Hash == "" {
-		return errors.New("hash is empty")
-	}
-
+func (w *Wallpaper) validate() error {
 	if w.CreatedAt.After(w.UpdatedAt) {
 		return errors.New("created is after updated")
 	}

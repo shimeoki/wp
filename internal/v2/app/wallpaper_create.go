@@ -50,7 +50,10 @@ func (h *CreateWallpaperHandler) Handle(
 		return nil, err
 	}
 
-	wall := domain.NewWallpaper(f, hash)
+	wall, err := domain.NewWallpaper(f, hash)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := h.wallpapers.Save(ctx, wall); err != nil {
 		return nil, err
