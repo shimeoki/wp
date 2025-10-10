@@ -34,7 +34,7 @@ func NewSQLiteTagRepo(db DB) *SQLiteTagRepo {
 	return &SQLiteTagRepo{db: db}
 }
 
-// keep-sorted start block=yes case=no newline_separated=yes skip_lines=1
+// keep-sorted start block=yes newline_separated=yes skip_lines=1
 
 func (r *SQLiteTagRepo) All(ctx domain.Ctx) (iter.Seq[*domain.Tag], error) {
 	sql := `select id, uuid, name, created_at, updated_at from tag`
@@ -140,8 +140,6 @@ func (r *SQLiteTagRepo) Save(ctx domain.Ctx, t *domain.Tag) error {
 	}
 }
 
-// keep-sorted end
-
 func (r *SQLiteTagRepo) create(ctx domain.Ctx, t *domain.Tag) error {
 	sql := `
 		insert into tag(uuid, name, created_at, updated_at) values (?, ?, ?, ?)
@@ -174,3 +172,5 @@ func (r *SQLiteTagRepo) update(ctx domain.Ctx, t *domain.Tag) error {
 
 	return err
 }
+
+// keep-sorted end
