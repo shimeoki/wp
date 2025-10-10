@@ -34,7 +34,7 @@ func (h *ListSourcesHandler) Handle(
 	for source := range it {
 		res := SourceResult{
 			ID:   source.ID.String(),
-			Name: source.Name,
+			Name: source.Name.String(),
 			Link: source.Link,
 		}
 

@@ -27,7 +27,15 @@ func (h *CreateSourceHandler) Handle(
 	ctx Ctx,
 	cmd *CreateSourceCommand,
 ) (*CreateSourceResult, error) {
-	source := domain.NewSource(cmd.Name, cmd.Link)
+	name, err := domain.NewName(cmd.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	source, err := domain.NewSource(name, cmd.Link)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := h.sources.Save(ctx, source); err != nil {
 		return nil, err
