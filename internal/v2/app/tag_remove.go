@@ -37,12 +37,17 @@ func (h *RemoveTagHandler) Handle(
 		return nil, err
 	}
 
+	name, err := domain.ParseName(cmd.TagName)
+	if err != nil {
+		return nil, err
+	}
+
 	w, _ := h.wallpapers.FindByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	t, _ := h.tags.FindByName(ctx, cmd.TagName)
+	t, _ := h.tags.FindByName(ctx, name)
 	if t == nil {
 		return nil, errors.New("tag not found")
 	}

@@ -28,7 +28,12 @@ func (h *DeleteTagHandler) Handle(
 	ctx Ctx,
 	cmd *DeleteTagCommand,
 ) (*DeleteTagResult, error) {
-	t, _ := h.tags.FindByName(ctx, cmd.Name)
+	name, err := domain.ParseName(cmd.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	t, _ := h.tags.FindByName(ctx, name)
 	if t == nil {
 		return nil, errors.New("tag not found")
 	}

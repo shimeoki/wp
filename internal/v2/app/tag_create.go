@@ -28,14 +28,14 @@ func (h *CreateTagHandler) Handle(
 	ctx Ctx,
 	cmd *CreateTagCommand,
 ) (*CreateTagResult, error) {
-	t, _ := h.tags.FindByName(ctx, cmd.Name)
-	if t != nil {
-		return nil, errors.New("tag already exists")
-	}
-
 	name, err := domain.ParseName(cmd.Name)
 	if err != nil {
 		return nil, err
+	}
+
+	t, _ := h.tags.FindByName(ctx, name)
+	if t != nil {
+		return nil, errors.New("tag already exists")
 	}
 
 	tag, err := domain.NewTag(name)
