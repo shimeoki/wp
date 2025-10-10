@@ -13,41 +13,43 @@ type QueueRepo interface {
 
 type Queue struct {
 	ID
-	WallpaperID ID
-
 	Status
-	Priority int
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	WallpaperID ID
+	Priority    int
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
-func NewQueue(wid ID, s Status, priority int) *Queue {
-	return &Queue{
+func NewQueue(wid ID, s Status, priority int) (*Queue, error) {
+	q := &Queue{
 		ID:          NewID(),
+		Status:      s,
 		WallpaperID: wid,
-
-		Status:   s,
-		Priority: priority,
-
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Priority:    priority,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
+
+	if err := q.validate(); err != nil {
+		return nil, err
+	}
+
+	return q, nil
 }
 
 func (q *Queue) UpdateStatus(s Status) error {
 	q.Status = s
 	q.UpdatedAt = time.Now()
-	return q.Validate()
+	return q.validate()
 }
 
 func (q *Queue) UpdatePriority(priority int) error {
 	q.Priority = priority
 	q.UpdatedAt = time.Now()
-	return q.Validate()
+	return q.validate()
 }
 
-func (q *Queue) Validate() error {
+func (q *Queue) validate() error {
 	if q.CreatedAt.After(q.UpdatedAt) {
 		return errors.New("created is after updated")
 	}
