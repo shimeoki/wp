@@ -53,13 +53,8 @@ func (w *Wallpaper) UpdateFormat(f Format) error {
 }
 
 func (w *Wallpaper) AddSource(s *Source) error {
-	if err := s.Validate(); err != nil {
-		return err
-	}
-
 	w.Sources[s.ID] = s
 	w.UpdatedAt = time.Now()
-
 	return nil
 }
 
@@ -75,13 +70,8 @@ func (w *Wallpaper) RemoveSource(id ID) error {
 }
 
 func (w *Wallpaper) AddTag(t *Tag) error {
-	if err := t.Validate(); err != nil {
-		return err
-	}
-
 	w.Tags[t.ID] = t
 	w.UpdatedAt = time.Now()
-
 	return nil
 }
 
