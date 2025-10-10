@@ -33,7 +33,7 @@ func (h *CreateTagHandler) Handle(
 		return nil, errors.New("tag already exists")
 	}
 
-	name, err := domain.NewName(cmd.Name)
+	name, err := domain.ParseName(cmd.Name)
 	if err != nil {
 		return nil, err
 	}

@@ -37,7 +37,7 @@ func (h *RenameTagHandler) Handle(
 		return nil, errors.New("tag not found")
 	}
 
-	name, err := domain.NewName(cmd.After)
+	name, err := domain.ParseName(cmd.After)
 	if err != nil {
 		return nil, err
 	}

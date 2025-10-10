@@ -27,7 +27,7 @@ func (h *CreateSourceHandler) Handle(
 	ctx Ctx,
 	cmd *CreateSourceCommand,
 ) (*CreateSourceResult, error) {
-	name, err := domain.NewName(cmd.Name)
+	name, err := domain.ParseName(cmd.Name)
 	if err != nil {
 		return nil, err
 	}

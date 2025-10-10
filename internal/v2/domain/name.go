@@ -10,7 +10,7 @@ func (n Name) String() string {
 
 var EmptyName = errors.New("name is empty")
 
-func NewName(value string) (Name, error) {
+func ParseName(value string) (Name, error) {
 	name := Name(value)
 
 	if err := name.validate(); err != nil {
