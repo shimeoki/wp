@@ -2,12 +2,13 @@ package domain
 
 import (
 	"errors"
+	"iter"
 	"time"
 )
 
 type AliasRepo interface {
 	Repo[*Alias]
-	FindByWallpaperID(Ctx, ID) ([]*Alias, error)
+	FindByWallpaperID(Ctx, ID) (iter.Seq[*Alias], error)
 }
 
 type Alias struct {

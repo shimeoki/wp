@@ -2,13 +2,14 @@ package domain
 
 import (
 	"errors"
+	"iter"
 	"time"
 )
 
 type QueueRepo interface {
 	Repo[*Queue]
-	FindByWallpaperID(Ctx, ID) ([]*Queue, error)
-	FindByStatus(Ctx, Status) ([]*Queue, error)
+	FindByWallpaperID(Ctx, ID) (iter.Seq[*Queue], error)
+	FindByStatus(Ctx, Status) (iter.Seq[*Queue], error)
 }
 
 type Queue struct {
