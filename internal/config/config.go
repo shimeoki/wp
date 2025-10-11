@@ -1,7 +1,7 @@
 package config
 
 type Config struct {
-	DB *DB
+	DB
 }
 
 type DB struct {
