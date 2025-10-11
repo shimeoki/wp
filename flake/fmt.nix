@@ -10,6 +10,8 @@
                 # keep-sorted start block=yes newline_separated=yes
                 golines = {
                     enable = true;
+                    maxLength = 80;
+                    tabLength = 4;
                 };
 
                 keep-sorted = {
@@ -26,12 +28,6 @@
             settings.formatter = {
                 # TODO: use indent option after numtide/treefmt-nix#416
                 nixfmt.options = [ "--indent=4" ];
-
-                # TODO: use options after numtide/treefmt-nix#417
-                golines.options = [
-                    "--max-len=80"
-                    "--tab-len=4"
-                ];
             };
         };
     };
