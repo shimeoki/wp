@@ -3,7 +3,7 @@ pragma foreign_keys = on;
 -- keep-sorted start block=yes newline_separated=yes
 create table if not exists alias (
     id integer primary key
-    , uuid         text      not null
+    , uuid         text      not null unique
     , wallpaper_id integer   not null
     , name         text      not null
     , created_at   timestamp not null default current_timestamp
@@ -18,7 +18,7 @@ create table if not exists alias (
 
 create table if not exists queue (
     id integer primary key
-    , uuid         text      not null
+    , uuid         text      not null unique
     , wallpaper_id integer   not null
     , status_id    integer   not null
     , priority     integer   not null
@@ -36,7 +36,7 @@ create table if not exists queue (
 
 create table if not exists source (
     id integer primary key
-    , uuid       text      not null
+    , uuid       text      not null unique
     , name       text      not null
     , link       text
     , created_at timestamp not null default current_timestamp
@@ -50,7 +50,7 @@ create table if not exists status (
 
 create table if not exists tag (
     id integer primary key
-    , uuid       text      not null
+    , uuid       text      not null unique
     , name       text      not null unique
     , created_at timestamp not null default current_timestamp
     , updated_at timestamp not null default current_timestamp
@@ -58,10 +58,11 @@ create table if not exists tag (
 
 create table if not exists wallpaper (
     id integer primary key
-    , uuid       text      not null
+    , uuid       text      not null unique
     , hash       text      not null unique
     , format     text      not null
     , created_at timestamp not null default current_timestamp
+    , updated_at timestamp not null default current_timestamp
 );
 
 create table if not exists wallpaper_source (
