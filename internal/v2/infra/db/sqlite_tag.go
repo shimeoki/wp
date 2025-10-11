@@ -3,18 +3,16 @@ package db
 import (
 	"iter"
 	"slices"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/shimeoki/wp/internal/v2/domain"
 )
 
 type sqliteTagTable struct {
-	ID        int64
-	UUID      uuid.UUID
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        integer
+	UUID      uid
+	Name      text
+	CreatedAt timestamp
+	UpdatedAt timestamp
 }
 
 func (t *sqliteTagTable) toDomain() *domain.Tag {
