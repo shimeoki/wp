@@ -11,12 +11,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-type DB interface {
-	ExecContext(ctx domain.Ctx, query string, args ...any) (sql.Result, error)
-	QueryContext(ctx domain.Ctx, query string, args ...any) (*sql.Rows, error)
-	QueryRowContext(ctx domain.Ctx, query string, args ...any) *sql.Row
-}
-
 //go:embed sqlite.sql
 var sqliteScheme string
 
