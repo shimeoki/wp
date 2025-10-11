@@ -8,6 +8,7 @@ import (
 
 	"github.com/shimeoki/wp/internal/config"
 	"github.com/shimeoki/wp/internal/v2/domain"
+	_ "modernc.org/sqlite"
 )
 
 type DB interface {
