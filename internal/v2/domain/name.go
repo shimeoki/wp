@@ -14,7 +14,7 @@ func ParseName(value string) (Name, error) {
 	name := Name(value)
 
 	if err := name.validate(); err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return name, nil
