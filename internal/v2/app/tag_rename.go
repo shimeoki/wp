@@ -51,14 +51,14 @@ func (h *RenameTagHandler) Handle(
 		return nil, err
 	}
 
-	if after, _ := h.tags.FindByName(ctx, after); after != nil {
-		walls, err := h.wallpapers.FindByTagID(ctx, after.ID)
+	if existent, _ := h.tags.FindByName(ctx, after); existent != nil {
+		walls, err := h.wallpapers.FindByTagID(ctx, existent.ID)
 		if err != nil {
 			return nil, err
 		}
 
 		for wall := range walls {
-			if err := wall.RemoveTag(after.ID); err != nil {
+			if err := wall.RemoveTag(existent.ID); err != nil {
 				return nil, err
 			}
 
@@ -71,7 +71,7 @@ func (h *RenameTagHandler) Handle(
 			}
 		}
 
-		if err := h.tags.Delete(ctx, after.ID); err != nil {
+		if err := h.tags.Delete(ctx, existent.ID); err != nil {
 			return nil, err
 		}
 	}
