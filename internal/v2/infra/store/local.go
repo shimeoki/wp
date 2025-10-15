@@ -43,7 +43,7 @@ func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {
 		return hash, nil
 	}
 
-	file, err := s.root.Create(string(hash))
+	file, err := s.root.Create(hash.String())
 	if err != nil {
 		return "", err
 	}
@@ -57,7 +57,7 @@ func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {
 }
 
 func (s *LocalStore) Remove(h domain.Hash) error {
-	return s.root.Remove(string(h))
+	return s.root.Remove(h.String())
 }
 
 func (s *LocalStore) Get(h domain.Hash) (io.ReadCloser, error) {
@@ -65,5 +65,14 @@ func (s *LocalStore) Get(h domain.Hash) (io.ReadCloser, error) {
 		return nil, domain.InvalidHash
 	}
 
-	return s.root.Open(string(h))
+	r, err := s.root.Open(h.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func (s *LocalStore) Close() error {
+	return s.root.Close()
 }
