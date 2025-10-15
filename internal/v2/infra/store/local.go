@@ -43,6 +43,10 @@ func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {
 		return hash, nil
 	}
 
+	if _, err := tmp.Seek(0, 0); err != nil {
+		return "", err
+	}
+
 	file, err := s.root.Create(hash.String())
 	if err != nil {
 		return "", err
