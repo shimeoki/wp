@@ -77,8 +77,8 @@ func (t *sqliteWallpaperJoinTable) toWallpaperDomain() *domain.Wallpaper {
 		Hash:      domain.Hash(*t.WallpaperHash),
 		Sources:   make(map[domain.ID]*domain.Source),
 		Tags:      make(map[domain.ID]*domain.Tag),
-		CreatedAt: *t.SourceCreatedAt,
-		UpdatedAt: *t.SourceUpdatedAt,
+		CreatedAt: *t.WallpaperCreatedAt,
+		UpdatedAt: *t.WallpaperUpdatedAt,
 	}
 }
 
@@ -96,8 +96,8 @@ func (t *sqliteWallpaperJoinTable) toTagDomain() *domain.Tag {
 	return &domain.Tag{
 		ID:        domain.ID(*t.TagUUID),
 		Name:      domain.Name(*t.TagName),
-		CreatedAt: *t.SourceCreatedAt,
-		UpdatedAt: *t.SourceUpdatedAt,
+		CreatedAt: *t.TagCreatedAt,
+		UpdatedAt: *t.TagUpdatedAt,
 	}
 }
 
@@ -307,7 +307,7 @@ func (r *SQLiteWallpaperRepo) create(
 			, hash
 			, created_at
 			, updated_at
-		) values (?, ?, ?, ?)
+		) values (?, ?, ?, ?, ?)
 	`
 
 	if _, err := r.db.ExecContext(
