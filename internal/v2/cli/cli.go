@@ -21,12 +21,18 @@ func fatal(err error) {
 
 func init() {
 	initTag()
+	initImage()
 
 	rootCmd.PersistentFlags().StringVar(
 		&cfg.DB.DataSourceName, "db-dsn", "",
 		"database data source name")
 
+	rootCmd.PersistentFlags().StringVar(
+		&cfg.Store.Path, "store-path", "",
+		"store location")
+
 	rootCmd.AddCommand(tagCmd)
+	rootCmd.AddCommand(imageCmd)
 }
 
 func Execute() {
