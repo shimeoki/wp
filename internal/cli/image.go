@@ -9,7 +9,6 @@ import (
 
 	"github.com/shimeoki/wp/internal/app"
 	"github.com/shimeoki/wp/internal/infra/db/sqlite"
-	"github.com/shimeoki/wp/internal/infra/store"
 	"github.com/spf13/cobra"
 )
 
@@ -29,15 +28,11 @@ var imageCreateCmd = &cobra.Command{
 		}
 
 		repo := sqlite.NewWallpaperRepo(conn)
-		hasher := &store.SHA256Hasher{}
 
-		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
-		if err != nil {
-			fatal(err)
-		}
+		s := openStore()
+		defer s.Close()
 
-		defer store.Close()
-		h := app.NewCreateWallpaperHandler(store, repo)
+		h := app.NewCreateWallpaperHandler(s, repo)
 
 		img, err := os.Open(args[0])
 		if err != nil {
@@ -70,15 +65,11 @@ var imageDeleteCmd = &cobra.Command{
 		}
 
 		repo := sqlite.NewWallpaperRepo(conn)
-		hasher := &store.SHA256Hasher{}
 
-		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
-		if err != nil {
-			fatal(err)
-		}
+		s := openStore()
+		defer s.Close()
 
-		defer store.Close()
-		h := app.NewDeleteWallpaperHandler(store, repo)
+		h := app.NewDeleteWallpaperHandler(s, repo)
 
 		_, err = h.Handle(ctx, &app.DeleteWallpaperCommand{Hash: args[0]})
 		if err != nil {
@@ -123,15 +114,11 @@ var imageShowCmd = &cobra.Command{
 		}
 
 		repo := sqlite.NewWallpaperRepo(conn)
-		hasher := &store.SHA256Hasher{}
 
-		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
-		if err != nil {
-			fatal(err)
-		}
+		s := openStore()
+		defer s.Close()
 
-		defer store.Close()
-		h := app.NewShowWallpaperHandler(store, repo)
+		h := app.NewShowWallpaperHandler(s, repo)
 
 		res, err := h.Handle(ctx, &app.ShowWallpaperQuery{Hash: args[0]})
 		if err != nil {

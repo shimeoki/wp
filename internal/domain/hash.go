@@ -6,6 +6,7 @@ import (
 )
 
 type Store interface {
+	io.Closer
 	Get(Hash) (io.ReadCloser, error)
 	Create(io.Reader) (Hash, error)
 	Remove(Hash) error
