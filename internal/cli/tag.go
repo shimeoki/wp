@@ -20,14 +20,11 @@ var tagCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := sqlite.Open(ctx, &cfg.DB)
-		if err != nil {
-			fatal(err)
-		}
+		repo := sqlite.NewTagRepo(openDB(ctx))
 
-		h := app.NewCreateTagHandler(sqlite.NewTagRepo(conn))
+		h := app.NewCreateTagHandler(repo)
 
-		_, err = h.Handle(ctx, &app.CreateTagCommand{Name: args[0]})
+		_, err := h.Handle(ctx, &app.CreateTagCommand{Name: args[0]})
 		if err != nil {
 			fatal(err)
 		}
@@ -40,14 +37,11 @@ var tagDeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := sqlite.Open(ctx, &cfg.DB)
-		if err != nil {
-			fatal(err)
-		}
+		repo := sqlite.NewTagRepo(openDB(ctx))
 
-		h := app.NewDeleteTagHandler(sqlite.NewTagRepo(conn))
+		h := app.NewDeleteTagHandler(repo)
 
-		_, err = h.Handle(ctx, &app.DeleteTagCommand{Name: args[0]})
+		_, err := h.Handle(ctx, &app.DeleteTagCommand{Name: args[0]})
 		if err != nil {
 			fatal(err)
 		}
@@ -60,12 +54,9 @@ var tagListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := sqlite.Open(ctx, &cfg.DB)
-		if err != nil {
-			fatal(err)
-		}
+		repo := sqlite.NewTagRepo(openDB(ctx))
 
-		h := app.NewListTagsHandler(sqlite.NewTagRepo(conn))
+		h := app.NewListTagsHandler(repo)
 
 		res, err := h.Handle(ctx, &app.ListTagsQuery{})
 		if err != nil {

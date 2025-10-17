@@ -22,17 +22,12 @@ var imageCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := sqlite.Open(ctx, &cfg.DB)
-		if err != nil {
-			fatal(err)
-		}
+		repo := sqlite.NewWallpaperRepo(openDB(ctx))
 
-		repo := sqlite.NewWallpaperRepo(conn)
+		store := openStore()
+		defer store.Close()
 
-		s := openStore()
-		defer s.Close()
-
-		h := app.NewCreateWallpaperHandler(s, repo)
+		h := app.NewCreateWallpaperHandler(store, repo)
 
 		img, err := os.Open(args[0])
 		if err != nil {
@@ -59,19 +54,14 @@ var imageDeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := sqlite.Open(ctx, &cfg.DB)
-		if err != nil {
-			fatal(err)
-		}
+		repo := sqlite.NewWallpaperRepo(openDB(ctx))
 
-		repo := sqlite.NewWallpaperRepo(conn)
+		store := openStore()
+		defer store.Close()
 
-		s := openStore()
-		defer s.Close()
+		h := app.NewDeleteWallpaperHandler(store, repo)
 
-		h := app.NewDeleteWallpaperHandler(s, repo)
-
-		_, err = h.Handle(ctx, &app.DeleteWallpaperCommand{Hash: args[0]})
+		_, err := h.Handle(ctx, &app.DeleteWallpaperCommand{Hash: args[0]})
 		if err != nil {
 			fatal(err)
 		}
@@ -84,12 +74,7 @@ var imageFindCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := sqlite.Open(ctx, &cfg.DB)
-		if err != nil {
-			fatal(err)
-		}
-
-		repo := sqlite.NewWallpaperRepo(conn)
+		repo := sqlite.NewWallpaperRepo(openDB(ctx))
 
 		h := app.NewFindWallpaperHandler(repo)
 
@@ -108,17 +93,12 @@ var imageShowCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := sqlite.Open(ctx, &cfg.DB)
-		if err != nil {
-			fatal(err)
-		}
+		repo := sqlite.NewWallpaperRepo(openDB(ctx))
 
-		repo := sqlite.NewWallpaperRepo(conn)
+		store := openStore()
+		defer store.Close()
 
-		s := openStore()
-		defer s.Close()
-
-		h := app.NewShowWallpaperHandler(s, repo)
+		h := app.NewShowWallpaperHandler(store, repo)
 
 		res, err := h.Handle(ctx, &app.ShowWallpaperQuery{Hash: args[0]})
 		if err != nil {
