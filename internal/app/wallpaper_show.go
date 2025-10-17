@@ -45,7 +45,7 @@ func (h *ShowWallpaperHandler) Handle(
 		return nil, errors.New("wallpaper not found")
 	}
 
-	r, err := h.store.Get(hash)
+	r, err := h.store.Get(ctx, hash)
 	if err != nil {
 		return nil, err
 	}

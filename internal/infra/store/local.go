@@ -21,7 +21,10 @@ func NewLocalStore(path string, h Hasher) (*LocalStore, error) {
 	return &LocalStore{hasher: h, root: root}, nil
 }
 
-func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {
+func (s *LocalStore) Create(
+	ctx domain.Ctx,
+	img io.Reader,
+) (domain.Hash, error) {
 	tmp, err := os.CreateTemp("", "wp-local-store")
 	if err != nil {
 		return "", err
@@ -37,7 +40,7 @@ func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {
 		return "", err
 	}
 
-	stored, err := s.Get(hash)
+	stored, err := s.Get(ctx, hash)
 	if stored != nil {
 		stored.Close()
 		return hash, nil
@@ -60,11 +63,11 @@ func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {
 	return hash, nil
 }
 
-func (s *LocalStore) Remove(h domain.Hash) error {
+func (s *LocalStore) Remove(ctx domain.Ctx, h domain.Hash) error {
 	return s.root.Remove(h.String())
 }
 
-func (s *LocalStore) Get(h domain.Hash) (io.ReadCloser, error) {
+func (s *LocalStore) Get(ctx domain.Ctx, h domain.Hash) (io.ReadCloser, error) {
 	if !s.hasher.Valid(h) {
 		return nil, domain.InvalidHash
 	}

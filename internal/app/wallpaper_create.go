@@ -35,7 +35,7 @@ func (h *CreateWallpaperHandler) Handle(
 	ctx Ctx,
 	cmd *CreateWallpaperCommand,
 ) (*CreateWallpaperResult, error) {
-	hash, err := h.store.Create(cmd.Image)
+	hash, err := h.store.Create(ctx, cmd.Image)
 	if err != nil {
 		return nil, err
 	}

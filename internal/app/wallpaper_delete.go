@@ -45,7 +45,7 @@ func (h *DeleteWallpaperHandler) Handle(
 		return nil, err
 	}
 
-	if err := h.store.Remove(hash); err != nil {
+	if err := h.store.Remove(ctx, hash); err != nil {
 		return nil, err
 	}
 

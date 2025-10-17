@@ -6,9 +6,9 @@ import (
 )
 
 type Store interface {
-	Get(Hash) (io.ReadCloser, error)
-	Create(io.Reader) (Hash, error)
-	Remove(Hash) error
+	Get(Ctx, Hash) (io.ReadCloser, error)
+	Create(Ctx, io.Reader) (Hash, error)
+	Remove(Ctx, Hash) error
 }
 
 type Hash string
