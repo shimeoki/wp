@@ -9,16 +9,16 @@ import (
 
 type LocalStore struct {
 	root   *os.Root
-	hasher domain.Hasher
+	hasher Hasher
 }
 
-func NewLocalStore(path string, hasher domain.Hasher) (*LocalStore, error) {
+func NewLocalStore(path string, h Hasher) (*LocalStore, error) {
 	root, err := os.OpenRoot(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return &LocalStore{hasher: hasher, root: root}, nil
+	return &LocalStore{hasher: h, root: root}, nil
 }
 
 func (s *LocalStore) Create(img io.Reader) (domain.Hash, error) {

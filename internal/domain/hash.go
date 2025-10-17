@@ -29,8 +29,3 @@ var (
 	InvalidHash = errors.New("invalid hash")
 	EmptyHash   = errors.New("hash is empty")
 )
-
-type Hasher interface {
-	Compute(io.Reader) (Hash, error)
-	Valid(Hash) bool
-}
