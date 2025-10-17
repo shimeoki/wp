@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/shimeoki/wp/internal/app"
-	"github.com/shimeoki/wp/internal/infra/db"
+	"github.com/shimeoki/wp/internal/infra/db/sqlite"
 	"github.com/spf13/cobra"
 )
 
@@ -20,12 +20,12 @@ var tagCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := db.OpenSQLiteDB(ctx, &cfg.DB)
+		conn, err := sqlite.Open(ctx, &cfg.DB)
 		if err != nil {
 			fatal(err)
 		}
 
-		h := app.NewCreateTagHandler(db.NewSQLiteTagRepo(conn))
+		h := app.NewCreateTagHandler(sqlite.NewSQLiteTagRepo(conn))
 
 		_, err = h.Handle(ctx, &app.CreateTagCommand{Name: args[0]})
 		if err != nil {
@@ -40,12 +40,12 @@ var tagDeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := db.OpenSQLiteDB(ctx, &cfg.DB)
+		conn, err := sqlite.Open(ctx, &cfg.DB)
 		if err != nil {
 			fatal(err)
 		}
 
-		h := app.NewDeleteTagHandler(db.NewSQLiteTagRepo(conn))
+		h := app.NewDeleteTagHandler(sqlite.NewSQLiteTagRepo(conn))
 
 		_, err = h.Handle(ctx, &app.DeleteTagCommand{Name: args[0]})
 		if err != nil {
@@ -60,12 +60,12 @@ var tagListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := db.OpenSQLiteDB(ctx, &cfg.DB)
+		conn, err := sqlite.Open(ctx, &cfg.DB)
 		if err != nil {
 			fatal(err)
 		}
 
-		h := app.NewListTagsHandler(db.NewSQLiteTagRepo(conn))
+		h := app.NewListTagsHandler(sqlite.NewSQLiteTagRepo(conn))
 
 		res, err := h.Handle(ctx, &app.ListTagsQuery{})
 		if err != nil {

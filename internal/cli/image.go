@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/shimeoki/wp/internal/app"
-	"github.com/shimeoki/wp/internal/infra/db"
+	"github.com/shimeoki/wp/internal/infra/db/sqlite"
 	"github.com/shimeoki/wp/internal/infra/store"
 	"github.com/spf13/cobra"
 )
@@ -23,12 +23,12 @@ var imageCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := db.OpenSQLiteDB(ctx, &cfg.DB)
+		conn, err := sqlite.Open(ctx, &cfg.DB)
 		if err != nil {
 			fatal(err)
 		}
 
-		repo := db.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewSQLiteWallpaperRepo(conn)
 		hasher := &store.SHA256Hasher{}
 
 		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
@@ -64,12 +64,12 @@ var imageDeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := db.OpenSQLiteDB(ctx, &cfg.DB)
+		conn, err := sqlite.Open(ctx, &cfg.DB)
 		if err != nil {
 			fatal(err)
 		}
 
-		repo := db.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewSQLiteWallpaperRepo(conn)
 		hasher := &store.SHA256Hasher{}
 
 		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
@@ -93,12 +93,12 @@ var imageFindCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := db.OpenSQLiteDB(ctx, &cfg.DB)
+		conn, err := sqlite.Open(ctx, &cfg.DB)
 		if err != nil {
 			fatal(err)
 		}
 
-		repo := db.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewSQLiteWallpaperRepo(conn)
 
 		h := app.NewFindWallpaperHandler(repo)
 
@@ -117,12 +117,12 @@ var imageShowCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		conn, err := db.OpenSQLiteDB(ctx, &cfg.DB)
+		conn, err := sqlite.Open(ctx, &cfg.DB)
 		if err != nil {
 			fatal(err)
 		}
 
-		repo := db.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewSQLiteWallpaperRepo(conn)
 		hasher := &store.SHA256Hasher{}
 
 		store, err := store.NewLocalStore(cfg.Store.Path, hasher)

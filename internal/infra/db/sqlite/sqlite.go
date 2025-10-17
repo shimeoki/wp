@@ -1,4 +1,4 @@
-package db
+package sqlite
 
 import (
 	"context"
@@ -12,6 +12,12 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+type DB interface {
+	ExecContext(ctx domain.Ctx, query string, args ...any) (sql.Result, error)
+	QueryContext(ctx domain.Ctx, query string, args ...any) (*sql.Rows, error)
+	QueryRowContext(ctx domain.Ctx, query string, args ...any) *sql.Row
+}
+
 type (
 	uid       = uuid.UUID
 	text      = string
@@ -19,10 +25,10 @@ type (
 	timestamp = time.Time
 )
 
-//go:embed sqlite.sql
-var sqliteScheme string
+//go:embed schema.sql
+var schema string
 
-func OpenSQLiteDB(ctx domain.Ctx, cfg *config.DB) (*sql.DB, error) {
+func Open(ctx domain.Ctx, cfg *config.DB) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", cfg.DataSourceName)
 	if err != nil {
 		return nil, err
@@ -32,7 +38,7 @@ func OpenSQLiteDB(ctx domain.Ctx, cfg *config.DB) (*sql.DB, error) {
 		return nil, err
 	}
 
-	if _, err := db.ExecContext(ctx, sqliteScheme); err != nil {
+	if _, err := db.ExecContext(ctx, schema); err != nil {
 		return nil, err
 	}
 
