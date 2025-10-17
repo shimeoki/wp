@@ -9,7 +9,6 @@ import (
 
 	"github.com/shimeoki/wp/internal/v2/app"
 	"github.com/shimeoki/wp/internal/v2/infra/db"
-	"github.com/shimeoki/wp/internal/v2/infra/hasher"
 	"github.com/shimeoki/wp/internal/v2/infra/store"
 	"github.com/spf13/cobra"
 )
@@ -30,9 +29,9 @@ var imageCreateCmd = &cobra.Command{
 		}
 
 		repo := db.NewSQLiteWallpaperRepo(conn)
-		hsher := &hasher.SHA256Hasher{}
+		hasher := &store.SHA256Hasher{}
 
-		store, err := store.NewLocalStore(cfg.Store.Path, hsher)
+		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
 		if err != nil {
 			fatal(err)
 		}
@@ -71,9 +70,9 @@ var imageDeleteCmd = &cobra.Command{
 		}
 
 		repo := db.NewSQLiteWallpaperRepo(conn)
-		hsher := &hasher.SHA256Hasher{}
+		hasher := &store.SHA256Hasher{}
 
-		store, err := store.NewLocalStore(cfg.Store.Path, hsher)
+		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
 		if err != nil {
 			fatal(err)
 		}
@@ -124,9 +123,9 @@ var imageShowCmd = &cobra.Command{
 		}
 
 		repo := db.NewSQLiteWallpaperRepo(conn)
-		hsher := &hasher.SHA256Hasher{}
+		hasher := &store.SHA256Hasher{}
 
-		store, err := store.NewLocalStore(cfg.Store.Path, hsher)
+		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
 		if err != nil {
 			fatal(err)
 		}
