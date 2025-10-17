@@ -7,7 +7,7 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type sqliteTagTable struct {
+type tagTable struct {
 	ID        integer
 	UUID      uid
 	Name      text
@@ -15,7 +15,7 @@ type sqliteTagTable struct {
 	UpdatedAt timestamp
 }
 
-func (t *sqliteTagTable) toDomain() *domain.Tag {
+func (t *tagTable) toDomain() *domain.Tag {
 	return &domain.Tag{
 		ID:        domain.ID(t.UUID),
 		Name:      domain.Name(t.Name),
@@ -24,17 +24,17 @@ func (t *sqliteTagTable) toDomain() *domain.Tag {
 	}
 }
 
-type SQLiteTagRepo struct {
+type TagRepo struct {
 	db DB
 }
 
-func NewSQLiteTagRepo(db DB) *SQLiteTagRepo {
-	return &SQLiteTagRepo{db: db}
+func NewTagRepo(db DB) *TagRepo {
+	return &TagRepo{db: db}
 }
 
 // keep-sorted start block=yes newline_separated=yes skip_lines=1
 
-func (r *SQLiteTagRepo) All(ctx domain.Ctx) (iter.Seq[*domain.Tag], error) {
+func (r *TagRepo) All(ctx domain.Ctx) (iter.Seq[*domain.Tag], error) {
 	sql := `select id, uuid, name, created_at, updated_at from tag`
 
 	rows, err := r.db.QueryContext(ctx, sql)
@@ -46,7 +46,7 @@ func (r *SQLiteTagRepo) All(ctx domain.Ctx) (iter.Seq[*domain.Tag], error) {
 	var tags []*domain.Tag
 
 	for rows.Next() {
-		var tbl sqliteTagTable
+		var tbl tagTable
 
 		if err := rows.Scan(
 			&tbl.ID,
@@ -64,7 +64,7 @@ func (r *SQLiteTagRepo) All(ctx domain.Ctx) (iter.Seq[*domain.Tag], error) {
 	return slices.Values(tags), rows.Err()
 }
 
-func (r *SQLiteTagRepo) Count(ctx domain.Ctx) (int, error) {
+func (r *TagRepo) Count(ctx domain.Ctx) (int, error) {
 	sql := `select count(*) from tag`
 
 	var count int
@@ -73,7 +73,7 @@ func (r *SQLiteTagRepo) Count(ctx domain.Ctx) (int, error) {
 	return count, err
 }
 
-func (r *SQLiteTagRepo) Delete(ctx domain.Ctx, id domain.ID) error {
+func (r *TagRepo) Delete(ctx domain.Ctx, id domain.ID) error {
 	sql := `delete from tag where uuid = ?`
 
 	_, err := r.db.ExecContext(ctx, sql, id.String())
@@ -81,7 +81,7 @@ func (r *SQLiteTagRepo) Delete(ctx domain.Ctx, id domain.ID) error {
 	return err
 }
 
-func (r *SQLiteTagRepo) FindByID(
+func (r *TagRepo) FindByID(
 	ctx domain.Ctx,
 	id domain.ID,
 ) (*domain.Tag, error) {
@@ -90,7 +90,7 @@ func (r *SQLiteTagRepo) FindByID(
 	`
 
 	row := r.db.QueryRowContext(ctx, sql, id.String())
-	var tbl sqliteTagTable
+	var tbl tagTable
 
 	if err := row.Scan(
 		&tbl.ID,
@@ -105,7 +105,7 @@ func (r *SQLiteTagRepo) FindByID(
 	return tbl.toDomain(), nil
 }
 
-func (r *SQLiteTagRepo) FindByName(
+func (r *TagRepo) FindByName(
 	ctx domain.Ctx,
 	n domain.Name,
 ) (*domain.Tag, error) {
@@ -114,7 +114,7 @@ func (r *SQLiteTagRepo) FindByName(
 	`
 
 	row := r.db.QueryRowContext(ctx, sql, n.String())
-	var tbl sqliteTagTable
+	var tbl tagTable
 
 	if err := row.Scan(
 		&tbl.ID,
@@ -129,7 +129,7 @@ func (r *SQLiteTagRepo) FindByName(
 	return tbl.toDomain(), nil
 }
 
-func (r *SQLiteTagRepo) Save(ctx domain.Ctx, t *domain.Tag) error {
+func (r *TagRepo) Save(ctx domain.Ctx, t *domain.Tag) error {
 	tag, _ := r.FindByID(ctx, t.ID)
 	if tag == nil {
 		return r.create(ctx, t)
@@ -138,7 +138,7 @@ func (r *SQLiteTagRepo) Save(ctx domain.Ctx, t *domain.Tag) error {
 	}
 }
 
-func (r *SQLiteTagRepo) create(ctx domain.Ctx, t *domain.Tag) error {
+func (r *TagRepo) create(ctx domain.Ctx, t *domain.Tag) error {
 	sql := `
 		insert into tag(uuid, name, created_at, updated_at) values (?, ?, ?, ?)
 	`
@@ -157,7 +157,7 @@ func (r *SQLiteTagRepo) create(ctx domain.Ctx, t *domain.Tag) error {
 	return nil
 }
 
-func (r *SQLiteTagRepo) update(ctx domain.Ctx, t *domain.Tag) error {
+func (r *TagRepo) update(ctx domain.Ctx, t *domain.Tag) error {
 	sql := `update tag set name = ?, updated_at = ? where uuid = ?`
 
 	_, err := r.db.ExecContext(

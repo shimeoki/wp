@@ -25,7 +25,7 @@ var tagCreateCmd = &cobra.Command{
 			fatal(err)
 		}
 
-		h := app.NewCreateTagHandler(sqlite.NewSQLiteTagRepo(conn))
+		h := app.NewCreateTagHandler(sqlite.NewTagRepo(conn))
 
 		_, err = h.Handle(ctx, &app.CreateTagCommand{Name: args[0]})
 		if err != nil {
@@ -45,7 +45,7 @@ var tagDeleteCmd = &cobra.Command{
 			fatal(err)
 		}
 
-		h := app.NewDeleteTagHandler(sqlite.NewSQLiteTagRepo(conn))
+		h := app.NewDeleteTagHandler(sqlite.NewTagRepo(conn))
 
 		_, err = h.Handle(ctx, &app.DeleteTagCommand{Name: args[0]})
 		if err != nil {
@@ -65,7 +65,7 @@ var tagListCmd = &cobra.Command{
 			fatal(err)
 		}
 
-		h := app.NewListTagsHandler(sqlite.NewSQLiteTagRepo(conn))
+		h := app.NewListTagsHandler(sqlite.NewTagRepo(conn))
 
 		res, err := h.Handle(ctx, &app.ListTagsQuery{})
 		if err != nil {

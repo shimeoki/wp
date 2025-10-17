@@ -8,15 +8,15 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type SQLiteWallpaperRepo struct {
+type WallpaperRepo struct {
 	db DB
 }
 
-func NewSQLiteWallpaperRepo(db DB) *SQLiteWallpaperRepo {
-	return &SQLiteWallpaperRepo{db: db}
+func NewWallpaperRepo(db DB) *WallpaperRepo {
+	return &WallpaperRepo{db: db}
 }
 
-type sqliteWallpaperJoinTable struct {
+type wallpaperTable struct {
 	WallpaperID        *integer
 	WallpaperUUID      *uid
 	WallpaperHash      *text
@@ -38,10 +38,10 @@ type sqliteWallpaperJoinTable struct {
 	SourceUpdatedAt *timestamp
 }
 
-func newSQLiteWallpaperJoinTable(
+func scanWallpaperTable(
 	rows *sql.Rows,
-) (*sqliteWallpaperJoinTable, error) {
-	var tbl sqliteWallpaperJoinTable
+) (*wallpaperTable, error) {
+	var tbl wallpaperTable
 
 	if err := rows.Scan(
 		&tbl.WallpaperID,
@@ -70,7 +70,7 @@ func newSQLiteWallpaperJoinTable(
 	return &tbl, nil
 }
 
-func (t *sqliteWallpaperJoinTable) toWallpaperDomain() *domain.Wallpaper {
+func (t *wallpaperTable) toWallpaperDomain() *domain.Wallpaper {
 	return &domain.Wallpaper{
 		ID:        domain.ID(*t.WallpaperUUID),
 		Format:    domain.Format(*t.WallpaperFormat),
@@ -82,7 +82,7 @@ func (t *sqliteWallpaperJoinTable) toWallpaperDomain() *domain.Wallpaper {
 	}
 }
 
-func (t *sqliteWallpaperJoinTable) toSourceDomain() *domain.Source {
+func (t *wallpaperTable) toSourceDomain() *domain.Source {
 	return &domain.Source{
 		ID:        domain.ID(*t.SourceUUID),
 		Name:      domain.Name(*t.SourceName),
@@ -92,7 +92,7 @@ func (t *sqliteWallpaperJoinTable) toSourceDomain() *domain.Source {
 	}
 }
 
-func (t *sqliteWallpaperJoinTable) toTagDomain() *domain.Tag {
+func (t *wallpaperTable) toTagDomain() *domain.Tag {
 	return &domain.Tag{
 		ID:        domain.ID(*t.TagUUID),
 		Name:      domain.Name(*t.TagName),
@@ -101,7 +101,7 @@ func (t *sqliteWallpaperJoinTable) toTagDomain() *domain.Tag {
 	}
 }
 
-var sqliteWallpaperJoinQuery = `
+var wallpaperQuery = `
 	select
 		w.id
 		, w.uuid
@@ -138,7 +138,7 @@ func scanWallpapers(rows *sql.Rows) (map[integer]*domain.Wallpaper, error) {
 	tags := make(map[integer]*domain.Tag)
 
 	for rows.Next() {
-		tbl, err := newSQLiteWallpaperJoinTable(rows)
+		tbl, err := scanWallpaperTable(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -181,10 +181,10 @@ func scanWallpapers(rows *sql.Rows) (map[integer]*domain.Wallpaper, error) {
 
 // keep-sorted start block=yes newline_separated=yes skip_lines=1
 
-func (r *SQLiteWallpaperRepo) All(
+func (r *WallpaperRepo) All(
 	ctx domain.Ctx,
 ) (iter.Seq[*domain.Wallpaper], error) {
-	rows, err := r.db.QueryContext(ctx, sqliteWallpaperJoinQuery)
+	rows, err := r.db.QueryContext(ctx, wallpaperQuery)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +199,7 @@ func (r *SQLiteWallpaperRepo) All(
 	return maps.Values(wallpapers), rows.Err()
 }
 
-func (r *SQLiteWallpaperRepo) Count(ctx domain.Ctx) (int, error) {
+func (r *WallpaperRepo) Count(ctx domain.Ctx) (int, error) {
 	sql := `select count(*) from wallpaper`
 
 	var count int
@@ -208,7 +208,7 @@ func (r *SQLiteWallpaperRepo) Count(ctx domain.Ctx) (int, error) {
 	return count, err
 }
 
-func (r *SQLiteWallpaperRepo) Delete(ctx domain.Ctx, id domain.ID) error {
+func (r *WallpaperRepo) Delete(ctx domain.Ctx, id domain.ID) error {
 	sql := `delete from wallpaper where uuid = ?`
 
 	_, err := r.db.ExecContext(ctx, sql, id.String())
@@ -216,11 +216,11 @@ func (r *SQLiteWallpaperRepo) Delete(ctx domain.Ctx, id domain.ID) error {
 	return err
 }
 
-func (r *SQLiteWallpaperRepo) FindByID(
+func (r *WallpaperRepo) FindByID(
 	ctx domain.Ctx,
 	id domain.ID,
 ) (*domain.Wallpaper, error) {
-	query := sqliteWallpaperJoinQuery + ` where w.uuid = ?`
+	query := wallpaperQuery + ` where w.uuid = ?`
 
 	rows, err := r.db.QueryContext(ctx, query, id.String())
 	if err != nil {
@@ -241,11 +241,11 @@ func (r *SQLiteWallpaperRepo) FindByID(
 	return nil, nil
 }
 
-func (r *SQLiteWallpaperRepo) FindByHash(
+func (r *WallpaperRepo) FindByHash(
 	ctx domain.Ctx,
 	hash domain.Hash,
 ) (*domain.Wallpaper, error) {
-	query := sqliteWallpaperJoinQuery + ` where w.hash = ?`
+	query := wallpaperQuery + ` where w.hash = ?`
 
 	rows, err := r.db.QueryContext(ctx, query, hash.String())
 	if err != nil {
@@ -266,11 +266,11 @@ func (r *SQLiteWallpaperRepo) FindByHash(
 	return nil, nil
 }
 
-func (r *SQLiteWallpaperRepo) FindByTagID(
+func (r *WallpaperRepo) FindByTagID(
 	ctx domain.Ctx,
 	id domain.ID,
 ) (iter.Seq[*domain.Wallpaper], error) {
-	query := sqliteWallpaperJoinQuery + ` where t.uuid = ?`
+	query := wallpaperQuery + ` where t.uuid = ?`
 
 	rows, err := r.db.QueryContext(ctx, query, id.String())
 	if err != nil {
@@ -287,7 +287,7 @@ func (r *SQLiteWallpaperRepo) FindByTagID(
 	return maps.Values(wallpapers), nil
 }
 
-func (r *SQLiteWallpaperRepo) Save(ctx domain.Ctx, w *domain.Wallpaper) error {
+func (r *WallpaperRepo) Save(ctx domain.Ctx, w *domain.Wallpaper) error {
 	wallpaper, _ := r.FindByID(ctx, w.ID)
 	if wallpaper == nil {
 		return r.create(ctx, w)
@@ -296,7 +296,7 @@ func (r *SQLiteWallpaperRepo) Save(ctx domain.Ctx, w *domain.Wallpaper) error {
 	}
 }
 
-func (r *SQLiteWallpaperRepo) create(
+func (r *WallpaperRepo) create(
 	ctx domain.Ctx,
 	w *domain.Wallpaper,
 ) error {
@@ -325,7 +325,7 @@ func (r *SQLiteWallpaperRepo) create(
 	return r.updateJoins(ctx, w)
 }
 
-func (r *SQLiteWallpaperRepo) update(
+func (r *WallpaperRepo) update(
 	ctx domain.Ctx,
 	w *domain.Wallpaper,
 ) error {
@@ -345,7 +345,7 @@ func (r *SQLiteWallpaperRepo) update(
 	return err
 }
 
-func (r *SQLiteWallpaperRepo) updateJoins(
+func (r *WallpaperRepo) updateJoins(
 	ctx domain.Ctx,
 	w *domain.Wallpaper,
 ) error {
@@ -367,7 +367,7 @@ func (r *SQLiteWallpaperRepo) updateJoins(
 	return nil
 }
 
-func (r *SQLiteWallpaperRepo) updateTags(
+func (r *WallpaperRepo) updateTags(
 	ctx domain.Ctx,
 	wid string,
 	current, target map[domain.ID]*domain.Tag,
@@ -407,7 +407,7 @@ func (r *SQLiteWallpaperRepo) updateTags(
 	return nil
 }
 
-func (r *SQLiteWallpaperRepo) updateSources(
+func (r *WallpaperRepo) updateSources(
 	ctx domain.Ctx,
 	wid string,
 	current, target map[domain.ID]*domain.Source,

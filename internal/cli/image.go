@@ -28,7 +28,7 @@ var imageCreateCmd = &cobra.Command{
 			fatal(err)
 		}
 
-		repo := sqlite.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewWallpaperRepo(conn)
 		hasher := &store.SHA256Hasher{}
 
 		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
@@ -69,7 +69,7 @@ var imageDeleteCmd = &cobra.Command{
 			fatal(err)
 		}
 
-		repo := sqlite.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewWallpaperRepo(conn)
 		hasher := &store.SHA256Hasher{}
 
 		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
@@ -98,7 +98,7 @@ var imageFindCmd = &cobra.Command{
 			fatal(err)
 		}
 
-		repo := sqlite.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewWallpaperRepo(conn)
 
 		h := app.NewFindWallpaperHandler(repo)
 
@@ -122,7 +122,7 @@ var imageShowCmd = &cobra.Command{
 			fatal(err)
 		}
 
-		repo := sqlite.NewSQLiteWallpaperRepo(conn)
+		repo := sqlite.NewWallpaperRepo(conn)
 		hasher := &store.SHA256Hasher{}
 
 		store, err := store.NewLocalStore(cfg.Store.Path, hasher)
