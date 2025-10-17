@@ -3,35 +3,35 @@ package app
 import (
 	"errors"
 
-	"github.com/shimeoki/wp/internal/v2/domain"
+	"github.com/shimeoki/wp/internal/domain"
 )
 
-type AddSourceHandler struct {
+type RemoveSourceHandler struct {
 	wallpapers domain.WallpaperRepo
 	sources    domain.SourceRepo
 }
 
-func NewAddSourceHandler(
+func NewRemoveSourceHandler(
 	wallpapers domain.WallpaperRepo,
 	sources domain.SourceRepo,
-) *AddSourceHandler {
-	return &AddSourceHandler{
+) *RemoveSourceHandler {
+	return &RemoveSourceHandler{
 		wallpapers: wallpapers,
 		sources:    sources,
 	}
 }
 
-type AddSourceCommand struct {
+type RemoveSourceCommand struct {
 	WallpaperHash string
 	SourceID      string
 }
 
-type AddSourceResult struct{}
+type RemoveSourceResult struct{}
 
-func (h *AddSourceHandler) Handle(
+func (h *RemoveSourceHandler) Handle(
 	ctx Ctx,
-	cmd *AddSourceCommand,
-) (*AddSourceResult, error) {
+	cmd *RemoveSourceCommand,
+) (*RemoveSourceResult, error) {
 	hash, err := domain.ParseHash(cmd.WallpaperHash)
 	if err != nil {
 		return nil, err
@@ -52,11 +52,11 @@ func (h *AddSourceHandler) Handle(
 		return nil, errors.New("source not found")
 	}
 
-	if _, ok := w.Sources[source.ID]; ok {
-		return nil, errors.New("source already attached")
+	if _, ok := w.Sources[source.ID]; !ok {
+		return nil, errors.New("source not attached")
 	}
 
-	if err := w.AddSource(source); err != nil {
+	if err := w.RemoveSource(source.ID); err != nil {
 		return nil, err
 	}
 
@@ -64,5 +64,5 @@ func (h *AddSourceHandler) Handle(
 		return nil, err
 	}
 
-	return &AddSourceResult{}, nil
+	return &RemoveSourceResult{}, nil
 }

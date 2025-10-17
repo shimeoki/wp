@@ -6,7 +6,7 @@ import (
 	"io"
 	"regexp"
 
-	"github.com/shimeoki/wp/internal/v2/domain"
+	"github.com/shimeoki/wp/internal/domain"
 )
 
 type SHA256Hasher struct{}

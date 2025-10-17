@@ -3,35 +3,35 @@ package app
 import (
 	"errors"
 
-	"github.com/shimeoki/wp/internal/v2/domain"
+	"github.com/shimeoki/wp/internal/domain"
 )
 
-type AddTagHandler struct {
+type RemoveTagHandler struct {
 	wallpapers domain.WallpaperRepo
 	tags       domain.TagRepo
 }
 
-func NewAddTagHandler(
+func NewRemoveTagHandler(
 	wallpapers domain.WallpaperRepo,
 	tags domain.TagRepo,
-) *AddTagHandler {
-	return &AddTagHandler{
+) *RemoveTagHandler {
+	return &RemoveTagHandler{
 		wallpapers: wallpapers,
 		tags:       tags,
 	}
 }
 
-type AddTagCommand struct {
+type RemoveTagCommand struct {
 	WallpaperHash string
 	TagName       string
 }
 
-type AddTagResult struct{}
+type RemoveTagResult struct{}
 
-func (h *AddTagHandler) Handle(
+func (h *RemoveTagHandler) Handle(
 	ctx Ctx,
-	cmd *AddTagCommand,
-) (*AddTagResult, error) {
+	cmd *RemoveTagCommand,
+) (*RemoveTagResult, error) {
 	hash, err := domain.ParseHash(cmd.WallpaperHash)
 	if err != nil {
 		return nil, err
@@ -49,15 +49,14 @@ func (h *AddTagHandler) Handle(
 
 	t, _ := h.tags.FindByName(ctx, name)
 	if t == nil {
-		// automatically create tag?
 		return nil, errors.New("tag not found")
 	}
 
-	if _, ok := w.Tags[t.ID]; ok {
-		return nil, errors.New("tag already attached")
+	if _, ok := w.Tags[t.ID]; !ok {
+		return nil, errors.New("tag not attached")
 	}
 
-	if err := w.AddTag(t); err != nil {
+	if err := w.RemoveTag(t.ID); err != nil {
 		return nil, err
 	}
 
@@ -65,5 +64,5 @@ func (h *AddTagHandler) Handle(
 		return nil, err
 	}
 
-	return &AddTagResult{}, nil
+	return &RemoveTagResult{}, nil
 }

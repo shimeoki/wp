@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/shimeoki/wp/internal/v2/app"
-	"github.com/shimeoki/wp/internal/v2/infra/db"
-	"github.com/shimeoki/wp/internal/v2/infra/store"
+	"github.com/shimeoki/wp/internal/app"
+	"github.com/shimeoki/wp/internal/infra/db"
+	"github.com/shimeoki/wp/internal/infra/store"
 	"github.com/spf13/cobra"
 )
 

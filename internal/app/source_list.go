@@ -1,6 +1,6 @@
 package app
 
-import "github.com/shimeoki/wp/internal/v2/domain"
+import "github.com/shimeoki/wp/internal/domain"
 
 type ListSourcesHandler struct {
 	sources domain.SourceRepo

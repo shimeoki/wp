@@ -4,7 +4,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/shimeoki/wp/internal/v2/domain"
+	"github.com/shimeoki/wp/internal/domain"
 )
 
 type CreateWallpaperHandler struct {

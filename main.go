@@ -1,6 +1,6 @@
 package main
 
-import "github.com/shimeoki/wp/internal/v2/cli"
+import "github.com/shimeoki/wp/internal/cli"
 
 func main() {
 	cli.Execute()

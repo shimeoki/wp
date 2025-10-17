@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shimeoki/wp/internal/config"
-	"github.com/shimeoki/wp/internal/v2/domain"
+	"github.com/shimeoki/wp/internal/domain"
 	_ "modernc.org/sqlite"
 )
 
