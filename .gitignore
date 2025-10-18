@@ -3,6 +3,7 @@
 
 # flake
 /.pre-commit-config.yaml
+/result
 
 # testing
 /test
