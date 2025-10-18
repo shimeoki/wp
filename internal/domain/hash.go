@@ -44,7 +44,7 @@ type Hash struct {
 }
 
 func MakeHash(a Algo, digest string) (Hash, error) {
-	h := Hash{Algo: a, Digest: digest}
+	h := Hash{Algo: a, Digest: strings.ToLower(digest)}
 
 	if err := h.validate(); err != nil {
 		return Hash{}, err
