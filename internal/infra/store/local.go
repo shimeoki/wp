@@ -27,7 +27,7 @@ func (s *LocalStore) Create(
 ) (domain.Hash, error) {
 	tmp, err := os.CreateTemp("", "wp-local-store")
 	if err != nil {
-		return "", err
+		return domain.Hash{}, nil
 	}
 
 	defer os.Remove(tmp.Name())
@@ -37,7 +37,7 @@ func (s *LocalStore) Create(
 
 	hash, err := s.hasher.Compute(r)
 	if err != nil {
-		return "", err
+		return domain.Hash{}, err
 	}
 
 	stored, err := s.Get(ctx, hash)
@@ -47,17 +47,17 @@ func (s *LocalStore) Create(
 	}
 
 	if _, err := tmp.Seek(0, 0); err != nil {
-		return "", err
+		return domain.Hash{}, err
 	}
 
 	file, err := s.root.Create(hash.String())
 	if err != nil {
-		return "", err
+		return domain.Hash{}, err
 	}
 
 	defer file.Close()
 	if _, err := io.Copy(file, tmp); err != nil {
-		return "", err
+		return domain.Hash{}, err
 	}
 
 	return hash, nil
@@ -68,10 +68,6 @@ func (s *LocalStore) Remove(ctx domain.Ctx, h domain.Hash) error {
 }
 
 func (s *LocalStore) Get(ctx domain.Ctx, h domain.Hash) (io.ReadCloser, error) {
-	if !s.hasher.Valid(h) {
-		return nil, domain.InvalidHash
-	}
-
 	r, err := s.root.Open(h.String())
 	if err != nil {
 		return nil, err

@@ -70,35 +70,70 @@ func scanWallpaperTable(
 	return &tbl, nil
 }
 
-func (t *wallpaperTable) toWallpaperDomain() *domain.Wallpaper {
+func (t *wallpaperTable) toWallpaperDomain() (*domain.Wallpaper, error) {
+	id, err := domain.ParseID(t.WallpaperUUID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := domain.ParseFormat(*t.WallpaperFormat)
+	if err != nil {
+		return nil, err
+	}
+
+	h, err := domain.ParseHash(*t.WallpaperHash)
+	if err != nil {
+		return nil, err
+	}
+
 	return &domain.Wallpaper{
-		ID:        domain.ID(*t.WallpaperUUID),
-		Format:    domain.Format(*t.WallpaperFormat),
-		Hash:      domain.Hash(*t.WallpaperHash),
+		ID:        id,
+		Format:    f,
+		Hash:      h,
 		Sources:   make(map[domain.ID]*domain.Source),
 		Tags:      make(map[domain.ID]*domain.Tag),
 		CreatedAt: *t.WallpaperCreatedAt,
 		UpdatedAt: *t.WallpaperUpdatedAt,
-	}
+	}, nil
 }
 
-func (t *wallpaperTable) toSourceDomain() *domain.Source {
+func (t *wallpaperTable) toSourceDomain() (*domain.Source, error) {
+	id, err := domain.ParseID(t.SourceUUID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	n, err := domain.ParseName(*t.SourceName)
+	if err != nil {
+		return nil, err
+	}
+
 	return &domain.Source{
-		ID:        domain.ID(*t.SourceUUID),
-		Name:      domain.Name(*t.SourceName),
+		ID:        id,
+		Name:      n,
 		Link:      t.SourceLink,
 		CreatedAt: *t.SourceCreatedAt,
 		UpdatedAt: *t.SourceUpdatedAt,
-	}
+	}, nil
 }
 
-func (t *wallpaperTable) toTagDomain() *domain.Tag {
+func (t *wallpaperTable) toTagDomain() (*domain.Tag, error) {
+	id, err := domain.ParseID(t.TagUUID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	n, err := domain.ParseName(*t.TagName)
+	if err != nil {
+		return nil, err
+	}
+
 	return &domain.Tag{
-		ID:        domain.ID(*t.TagUUID),
-		Name:      domain.Name(*t.TagName),
+		ID:        id,
+		Name:      n,
 		CreatedAt: *t.TagCreatedAt,
 		UpdatedAt: *t.TagUpdatedAt,
-	}
+	}, nil
 }
 
 var wallpaperQuery = `
@@ -147,7 +182,11 @@ func scanWallpapers(rows *sql.Rows) (map[integer]*domain.Wallpaper, error) {
 
 		w := wallpapers[wid]
 		if w == nil {
-			w = tbl.toWallpaperDomain()
+			w, err := tbl.toWallpaperDomain()
+			if err != nil {
+				return nil, err
+			}
+
 			wallpapers[wid] = w
 		}
 
@@ -156,7 +195,11 @@ func scanWallpapers(rows *sql.Rows) (map[integer]*domain.Wallpaper, error) {
 
 			s := sources[sid]
 			if s == nil {
-				s = tbl.toSourceDomain()
+				s, err := tbl.toSourceDomain()
+				if err != nil {
+					return nil, err
+				}
+
 				sources[sid] = s
 			}
 
@@ -168,7 +211,11 @@ func scanWallpapers(rows *sql.Rows) (map[integer]*domain.Wallpaper, error) {
 
 			t := tags[tid]
 			if t == nil {
-				t = tbl.toTagDomain()
+				t, err := tbl.toTagDomain()
+				if err != nil {
+					return nil, err
+				}
+
 				tags[tid] = t
 			}
 

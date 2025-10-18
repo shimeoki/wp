@@ -59,5 +59,5 @@ func (h *CreateWallpaperHandler) Handle(
 		return nil, err
 	}
 
-	return &CreateWallpaperResult{Hash: string(hash)}, nil
+	return &CreateWallpaperResult{Hash: hash.String()}, nil
 }
