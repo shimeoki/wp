@@ -20,7 +20,7 @@ func openStore() *store.LocalStore {
 }
 
 func openDB(ctx context.Context) *sql.DB {
-	db, err := sqlite.Open(ctx, &cfg.DB)
+	db, err := sqlite.Open(ctx, cfg.DB.DataSourceName)
 	if err != nil {
 		fatal(err)
 	}
