@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/shimeoki/wp/internal/config"
-	"github.com/shimeoki/wp/internal/domain"
 	_ "modernc.org/sqlite"
 )
 
+type Ctx = context.Context
+
 type DB interface {
-	ExecContext(ctx domain.Ctx, query string, args ...any) (sql.Result, error)
-	QueryContext(ctx domain.Ctx, query string, args ...any) (*sql.Rows, error)
-	QueryRowContext(ctx domain.Ctx, query string, args ...any) *sql.Row
+	ExecContext(ctx Ctx, query string, args ...any) (sql.Result, error)
+	QueryContext(ctx Ctx, query string, args ...any) (*sql.Rows, error)
+	QueryRowContext(ctx Ctx, query string, args ...any) *sql.Row
 }
 
 type (
@@ -28,8 +28,8 @@ type (
 //go:embed schema.sql
 var schema string
 
-func Open(ctx domain.Ctx, cfg *config.DB) (*sql.DB, error) {
-	db, err := sql.Open("sqlite", cfg.DataSourceName)
+func Open(ctx Ctx, dsn string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, err
 	}
