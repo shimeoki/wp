@@ -10,14 +10,17 @@ import (
 )
 
 type CLI struct {
-	cmd      *cobra.Command
-	cfg      *config.Config
+	cmd *cobra.Command
+
+	cfg     *config.Config
+	cfgPath string
+
 	app      *config.App
 	handlers *config.Handlers
 }
 
-func New(cfg *config.Config) *CLI {
-	cli := &CLI{cfg: cfg}
+func New(app *config.App) *CLI {
+	cli := &CLI{app: app, cfg: app.Config()}
 	cli.cmd = cli.command()
 	return cli
 }
@@ -39,17 +42,17 @@ func (cli *CLI) command() *cobra.Command {
 
 		// runs before every children command - initialize an app instance
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if cli.app != nil {
+			if cli.handlers != nil {
 				return
 			}
 
-			a, err := config.NewApp(cmd.Context(), cli.cfg)
-			if err != nil {
+			cli.cfg.Load(cli.cfgPath) // TODO: error handling
+
+			if err := cli.app.Open(cmd.Context()); err != nil {
 				fatal(err)
 			}
 
-			cli.app = a
-			cli.handlers = a.Handlers()
+			cli.handlers = cli.app.Handlers()
 		},
 
 		// cleanup after the commands
@@ -61,17 +64,18 @@ func (cli *CLI) command() *cobra.Command {
 	flags := cmd.PersistentFlags()
 
 	flags.StringVar(
-		&cli.cfg.DB.DataSourceName,
-		"db-dsn",
-		cli.cfg.DB.DataSourceName,
-		"database data source name",
+		&cli.cfg.DB.DataSourceName, "db-dsn",
+		cli.cfg.DB.DataSourceName, "database data source name",
 	)
 
 	flags.StringVar(
-		&cli.cfg.Store.Path,
-		"store-path",
-		cli.cfg.Store.Path,
-		"store location",
+		&cli.cfg.Store.Path, "store-path",
+		cli.cfg.Store.Path, "store location",
+	)
+
+	flags.StringVarP(
+		&cli.cfgPath, "config", "c",
+		"", "config location",
 	)
 
 	cmd.AddCommand(

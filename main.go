@@ -8,5 +8,5 @@ import (
 )
 
 func main() {
-	cli.New(config.Load("")).Execute(context.Background())
+	cli.New(config.NewApp(config.New())).Execute(context.Background())
 }

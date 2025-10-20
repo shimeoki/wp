@@ -8,6 +8,8 @@ import (
 )
 
 type Config struct {
+	v *viper.Viper
+
 	DB    DB
 	Store Store
 }
@@ -20,12 +22,8 @@ type Store struct {
 	Path string
 }
 
-func Load(file string) *Config {
+func New() *Config {
 	v := viper.New()
-
-	if file != "" {
-		v.SetConfigFile(file)
-	}
 
 	v.SetConfigName("config")
 	v.SetConfigType("yaml")
@@ -46,18 +44,32 @@ func Load(file string) *Config {
 	v.SetEnvPrefix("wp")
 	v.AutomaticEnv()
 
-	v.ReadInConfig()
-
 	v.SetDefault("db.data-source-name", path.Join(dir, "db.sqlite"))
 	v.SetDefault("store.path", path.Join(dir, "store"))
 
-	return &Config{
-		DB: DB{
-			DataSourceName: v.GetString("db.data-source-name"),
-		},
+	cfg := &Config{v: v}
+	cfg.load() // defaults with no filesystem access
 
-		Store: Store{
-			Path: v.GetString("store.path"),
-		},
+	return cfg
+}
+
+func (c *Config) load() {
+	c.DB = DB{
+		DataSourceName: c.v.GetString("db.data-source-name"),
 	}
+
+	c.Store = Store{
+		Path: c.v.GetString("store.path"),
+	}
+}
+
+func (c *Config) Load(file string) error {
+	c.v.SetConfigFile(file)
+
+	if err := c.v.ReadInConfig(); err != nil {
+		return err
+	}
+
+	c.load()
+	return nil
 }
