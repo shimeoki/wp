@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path"
 
 	"github.com/spf13/viper"
 )
@@ -29,22 +30,26 @@ func Load(file string) *Config {
 	v.SetConfigName("config")
 	v.SetConfigType("yaml")
 
-	dir, err := os.UserConfigDir()
+	dir := "."
+
+	configs, err := os.UserConfigDir()
 	if err == nil {
-		v.AddConfigPath(dir)
+		dir = path.Join(configs, "wp")
 	}
 
-	v.AddConfigPath(".")
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		dir = "."
+	}
+
+	v.AddConfigPath(dir)
 
 	v.SetEnvPrefix("wp")
 	v.AutomaticEnv()
 
 	v.ReadInConfig()
 
-	// code below is bad, but viper doesn't work with Sub() for some reason
-
-	v.SetDefault("db.data-source-name", "db.sqlite")
-	v.SetDefault("store.path", "test/store")
+	v.SetDefault("db.data-source-name", path.Join(dir, "db.sqlite"))
+	v.SetDefault("store.path", path.Join(dir, "store"))
 
 	return &Config{
 		DB: DB{

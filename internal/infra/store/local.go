@@ -13,6 +13,10 @@ type LocalStore struct {
 }
 
 func NewLocalStore(path string, h Hasher) (*LocalStore, error) {
+	if err := os.MkdirAll(path, 0700); err != nil {
+		return nil, err
+	}
+
 	root, err := os.OpenRoot(path)
 	if err != nil {
 		return nil, err
