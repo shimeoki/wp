@@ -7,19 +7,24 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
+type ShowWallpaperWorker interface {
+	Worker
+	Store() domain.Store
+	WallpaperRepo() domain.WallpaperRepo
+}
+
+type ShowWallpaperProvider interface {
+	Provider[ShowWallpaperWorker]
+}
+
 type ShowWallpaperHandler struct {
-	store      domain.Store
-	wallpapers domain.WallpaperRepo
+	provider ShowWallpaperProvider
 }
 
 func NewShowWallpaperHandler(
-	store domain.Store,
-	wallpapers domain.WallpaperRepo,
+	p ShowWallpaperProvider,
 ) *ShowWallpaperHandler {
-	return &ShowWallpaperHandler{
-		store:      store,
-		wallpapers: wallpapers,
-	}
+	return &ShowWallpaperHandler{provider: p}
 }
 
 type ShowWallpaperQuery struct {
@@ -35,17 +40,24 @@ func (h *ShowWallpaperHandler) Handle(
 	ctx Ctx,
 	qry *ShowWallpaperQuery,
 ) (*ShowWallpaperResult, error) {
+	worker, err := h.provider.Provide(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	store, repo := worker.Store(), worker.WallpaperRepo()
+
 	hash, err := domain.ParseHash(qry.Hash)
 	if err != nil {
 		return nil, err
 	}
 
-	w, _ := h.wallpapers.FindByHash(ctx, hash)
+	w, _ := repo.FindByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	r, err := h.store.Get(ctx, hash)
+	r, err := store.Get(ctx, hash)
 	if err != nil {
 		return nil, err
 	}

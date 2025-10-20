@@ -6,19 +6,24 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
+type DeleteWallpaperWorker interface {
+	Worker
+	Store() domain.Store
+	WallpaperRepo() domain.WallpaperRepo
+}
+
+type DeleteWallpaperProvider interface {
+	Provider[DeleteWallpaperWorker]
+}
+
 type DeleteWallpaperHandler struct {
-	store      domain.Store
-	wallpapers domain.WallpaperRepo
+	provider DeleteWallpaperProvider
 }
 
 func NewDeleteWallpaperHandler(
-	store domain.Store,
-	wallpapers domain.WallpaperRepo,
+	p DeleteWallpaperProvider,
 ) *DeleteWallpaperHandler {
-	return &DeleteWallpaperHandler{
-		store:      store,
-		wallpapers: wallpapers,
-	}
+	return &DeleteWallpaperHandler{provider: p}
 }
 
 type DeleteWallpaperCommand struct {
@@ -31,21 +36,33 @@ func (h *DeleteWallpaperHandler) Handle(
 	ctx Ctx,
 	cmd *DeleteWallpaperCommand,
 ) (*DeleteWallpaperResult, error) {
+	worker, err := h.provider.Provide(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer worker.Rollback()
+	store, repo := worker.Store(), worker.WallpaperRepo()
+
 	hash, err := domain.ParseHash(cmd.Hash)
 	if err != nil {
 		return nil, err
 	}
 
-	w, _ := h.wallpapers.FindByHash(ctx, hash)
+	w, _ := repo.FindByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	if err := h.wallpapers.Delete(ctx, w.ID); err != nil {
+	if err := repo.Delete(ctx, w.ID); err != nil {
 		return nil, err
 	}
 
-	if err := h.store.Remove(ctx, hash); err != nil {
+	if err := store.Remove(ctx, hash); err != nil {
+		return nil, err
+	}
+
+	if err := worker.Commit(); err != nil {
 		return nil, err
 	}
 

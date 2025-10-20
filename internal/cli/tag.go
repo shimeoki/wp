@@ -1,74 +1,17 @@
 package cli
 
-import (
-	"context"
-	"fmt"
-	"strings"
+import "github.com/spf13/cobra"
 
-	"github.com/shimeoki/wp/internal/app"
-	"github.com/shimeoki/wp/internal/infra/db/sqlite"
-	"github.com/spf13/cobra"
-)
+func (cli *CLI) tagCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "tag",
+	}
 
-var tagCmd = &cobra.Command{
-	Use: "tag",
-}
+	cmd.AddCommand(
+		cli.tagCreateCommand(),
+		cli.tagDeleteCommand(),
+		cli.tagListCommand(),
+	)
 
-var tagCreateCmd = &cobra.Command{
-	Use:  "create [name]",
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
-		repo := sqlite.NewTagRepo(openDB(ctx))
-
-		h := app.NewCreateTagHandler(repo)
-
-		_, err := h.Handle(ctx, &app.CreateTagCommand{Name: args[0]})
-		if err != nil {
-			fatal(err)
-		}
-	},
-}
-
-var tagDeleteCmd = &cobra.Command{
-	Use:  "delete [name]",
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
-		repo := sqlite.NewTagRepo(openDB(ctx))
-
-		h := app.NewDeleteTagHandler(repo)
-
-		_, err := h.Handle(ctx, &app.DeleteTagCommand{Name: args[0]})
-		if err != nil {
-			fatal(err)
-		}
-	},
-}
-
-var tagListCmd = &cobra.Command{
-	Use:  "list",
-	Args: cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
-		repo := sqlite.NewTagRepo(openDB(ctx))
-
-		h := app.NewListTagsHandler(repo)
-
-		res, err := h.Handle(ctx, &app.ListTagsQuery{})
-		if err != nil {
-			fatal(err)
-		}
-
-		fmt.Println(strings.Join(res.Names, "\n"))
-	},
-}
-
-func initTag() {
-	tagCmd.AddCommand(tagCreateCmd)
-	tagCmd.AddCommand(tagDeleteCmd)
-	tagCmd.AddCommand(tagListCmd)
+	return cmd
 }

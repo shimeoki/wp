@@ -6,16 +6,23 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
+type DeleteTagWorker interface {
+	Worker
+	TagRepo() domain.TagRepo
+}
+
+type DeleteTagProvider interface {
+	Provider[DeleteTagWorker]
+}
+
 type DeleteTagHandler struct {
-	tags domain.TagRepo
+	provider DeleteTagProvider
 }
 
 func NewDeleteTagHandler(
-	tags domain.TagRepo,
+	p DeleteTagProvider,
 ) *DeleteTagHandler {
-	return &DeleteTagHandler{
-		tags: tags,
-	}
+	return &DeleteTagHandler{provider: p}
 }
 
 type DeleteTagCommand struct {
@@ -28,17 +35,24 @@ func (h *DeleteTagHandler) Handle(
 	ctx Ctx,
 	cmd *DeleteTagCommand,
 ) (*DeleteTagResult, error) {
+	worker, err := h.provider.Provide(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	repo := worker.TagRepo()
+
 	name, err := domain.ParseName(cmd.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	t, _ := h.tags.FindByName(ctx, name)
+	t, _ := repo.FindByName(ctx, name)
 	if t == nil {
 		return nil, errors.New("tag not found")
 	}
 
-	if err := h.tags.Delete(ctx, t.ID); err != nil {
+	if err := repo.Delete(ctx, t.ID); err != nil {
 		return nil, err
 	}
 

@@ -7,11 +7,11 @@ import (
 
 type Ctx = context.Context
 
-type Repo[V any] interface {
-	Save(Ctx, V) error
+type Repo[E any] interface {
+	Save(Ctx, E) error
 	Delete(Ctx, ID) error
-	FindByID(Ctx, ID) (V, error)
+	FindByID(Ctx, ID) (E, error)
 
-	All(Ctx) (iter.Seq[V], error)
+	All(Ctx) (iter.Seq[E], error)
 	Count(Ctx) (int, error)
 }

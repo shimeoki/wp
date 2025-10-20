@@ -6,19 +6,24 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
+type AddTagWorker interface {
+	Worker
+	WallpaperRepo() domain.WallpaperRepo
+	TagRepo() domain.TagRepo
+}
+
+type AddTagProvider interface {
+	Provider[AddTagWorker]
+}
+
 type AddTagHandler struct {
-	wallpapers domain.WallpaperRepo
-	tags       domain.TagRepo
+	provider AddTagProvider
 }
 
 func NewAddTagHandler(
-	wallpapers domain.WallpaperRepo,
-	tags domain.TagRepo,
+	p AddTagProvider,
 ) *AddTagHandler {
-	return &AddTagHandler{
-		wallpapers: wallpapers,
-		tags:       tags,
-	}
+	return &AddTagHandler{provider: p}
 }
 
 type AddTagCommand struct {
@@ -32,6 +37,14 @@ func (h *AddTagHandler) Handle(
 	ctx Ctx,
 	cmd *AddTagCommand,
 ) (*AddTagResult, error) {
+	worker, err := h.provider.Provide(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	defer worker.Rollback()
+	wallpapers, tags := worker.WallpaperRepo(), worker.TagRepo()
+
 	hash, err := domain.ParseHash(cmd.WallpaperHash)
 	if err != nil {
 		return nil, err
@@ -42,12 +55,12 @@ func (h *AddTagHandler) Handle(
 		return nil, err
 	}
 
-	w, _ := h.wallpapers.FindByHash(ctx, hash)
+	w, _ := wallpapers.FindByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
 	}
 
-	t, _ := h.tags.FindByName(ctx, name)
+	t, _ := tags.FindByName(ctx, name)
 	if t == nil {
 		// automatically create tag?
 		return nil, errors.New("tag not found")
@@ -61,7 +74,11 @@ func (h *AddTagHandler) Handle(
 		return nil, err
 	}
 
-	if err := h.wallpapers.Save(ctx, w); err != nil {
+	if err := wallpapers.Save(ctx, w); err != nil {
+		return nil, err
+	}
+
+	if err := worker.Commit(); err != nil {
 		return nil, err
 	}
 

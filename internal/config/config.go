@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/viper"
@@ -11,7 +12,7 @@ type Config struct {
 	Store Store
 }
 
-func GetConfig(file string) *Config {
+func Load(file string) *Config {
 	v := viper.New()
 
 	if file != "" {
@@ -33,9 +34,16 @@ func GetConfig(file string) *Config {
 
 	v.ReadInConfig()
 
+	db, store := "db", "store"
+
+	v.SetDefault(db, DB{})
+	v.SetDefault(store, Store{})
+
+	log.Println(v.AllSettings())
+
 	return &Config{
-		DB:    getDB(v.Sub("db")),
-		Store: getStore(v.Sub("store")),
+		DB:    getDB(v.Sub(db)),
+		Store: getStore(v.Sub(store)),
 	}
 }
 

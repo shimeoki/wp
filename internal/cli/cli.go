@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -8,10 +9,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cfg config.Config
+type CLI struct {
+	cmd      *cobra.Command
+	cfg      *config.Config
+	app      *config.App
+	handlers *config.Handlers
+}
 
-var rootCmd = &cobra.Command{
-	Use: "wp",
+func New(cfg *config.Config) *CLI {
+	cli := &CLI{cfg: cfg}
+	cli.cmd = cli.command()
+	return cli
+}
+
+func (cli *CLI) Execute(ctx context.Context) {
+	if err := cli.cmd.ExecuteContext(ctx); err != nil {
+		fatal(err)
+	}
 }
 
 func fatal(err error) {
@@ -19,24 +33,45 @@ func fatal(err error) {
 	os.Exit(1)
 }
 
-func init() {
-	initTag()
-	initImage()
+func (cli *CLI) command() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "wp",
 
-	rootCmd.PersistentFlags().StringVar(
-		&cfg.DB.DataSourceName, "db-dsn", "",
+		// runs before every children command - initialize an app instance
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if cli.app != nil {
+				return
+			}
+
+			a, err := config.NewApp(cmd.Context(), cli.cfg)
+			if err != nil {
+				fatal(err)
+			}
+
+			cli.app = a
+			cli.handlers = a.Handlers()
+		},
+
+		// cleanup after the commands
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			cli.app.Close()
+		},
+	}
+
+	flags := cmd.PersistentFlags()
+
+	flags.StringVar(
+		&cli.cfg.DB.DataSourceName, "db-dsn", "",
 		"database data source name")
 
-	rootCmd.PersistentFlags().StringVar(
-		&cfg.Store.Path, "store-path", "",
+	flags.StringVar(
+		&cli.cfg.Store.Path, "store-path", "",
 		"store location")
 
-	rootCmd.AddCommand(tagCmd)
-	rootCmd.AddCommand(imageCmd)
-}
+	cmd.AddCommand(
+		cli.imageCommand(),
+		cli.tagCommand(),
+	)
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fatal(err)
-	}
+	return cmd
 }

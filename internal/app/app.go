@@ -7,9 +7,13 @@ import (
 
 type Ctx = context.Context
 
-type Tx interface {
+type Worker interface {
 	Commit() error
 	Rollback() error
+}
+
+type Provider[W Worker] interface {
+	Provide(Ctx) (W, error)
 }
 
 type Version int
