@@ -61,12 +61,18 @@ func (cli *CLI) command() *cobra.Command {
 	flags := cmd.PersistentFlags()
 
 	flags.StringVar(
-		&cli.cfg.DB.DataSourceName, "db-dsn", "",
-		"database data source name")
+		&cli.cfg.DB.DataSourceName,
+		"db-dsn",
+		cli.cfg.DB.DataSourceName,
+		"database data source name",
+	)
 
 	flags.StringVar(
-		&cli.cfg.Store.Path, "store-path", "",
-		"store location")
+		&cli.cfg.Store.Path,
+		"store-path",
+		cli.cfg.Store.Path,
+		"store location",
+	)
 
 	cmd.AddCommand(
 		cli.imageCommand(),

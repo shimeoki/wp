@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/spf13/viper"
@@ -10,6 +9,14 @@ import (
 type Config struct {
 	DB    DB
 	Store Store
+}
+
+type DB struct {
+	DataSourceName string
+}
+
+type Store struct {
+	Path string
 }
 
 func Load(file string) *Config {
@@ -34,43 +41,18 @@ func Load(file string) *Config {
 
 	v.ReadInConfig()
 
-	db, store := "db", "store"
+	// code below is bad, but viper doesn't work with Sub() for some reason
 
-	v.SetDefault(db, DB{})
-	v.SetDefault(store, Store{})
-
-	log.Println(v.AllSettings())
+	v.SetDefault("db.data-source-name", "db.sqlite")
+	v.SetDefault("store.path", "test/store")
 
 	return &Config{
-		DB:    getDB(v.Sub(db)),
-		Store: getStore(v.Sub(store)),
-	}
-}
+		DB: DB{
+			DataSourceName: v.GetString("db.data-source-name"),
+		},
 
-type DB struct {
-	DataSourceName string
-}
-
-func getDB(v *viper.Viper) DB {
-	dsn := "data-source-name"
-
-	v.SetDefault(dsn, "db.sqlite")
-
-	return DB{
-		DataSourceName: v.GetString(dsn),
-	}
-}
-
-type Store struct {
-	Path string
-}
-
-func getStore(v *viper.Viper) Store {
-	path := "path"
-
-	v.SetDefault(path, "test/store")
-
-	return Store{
-		Path: v.GetString(path),
+		Store: Store{
+			Path: v.GetString("store.path"),
+		},
 	}
 }
