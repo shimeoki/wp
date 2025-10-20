@@ -42,6 +42,7 @@ func (h *FindWallpaperHandler) Handle(
 		return nil, err
 	}
 
+	defer worker.Rollback()
 	repo := worker.WallpaperRepo()
 
 	hash, err := domain.ParseHash(qry.Hash)
@@ -52,6 +53,10 @@ func (h *FindWallpaperHandler) Handle(
 	w, _ := repo.FindByHash(ctx, hash)
 	if w == nil {
 		return nil, errors.New("wallpaper not found")
+	}
+
+	if err := worker.Commit(); err != nil {
+		return nil, err
 	}
 
 	return &FindWallpaperResult{Format: w.Format.String()}, nil

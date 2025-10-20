@@ -40,6 +40,7 @@ func (h *DeleteTagHandler) Handle(
 		return nil, err
 	}
 
+	defer worker.Rollback()
 	repo := worker.TagRepo()
 
 	name, err := domain.ParseName(cmd.Name)
@@ -53,6 +54,10 @@ func (h *DeleteTagHandler) Handle(
 	}
 
 	if err := repo.Delete(ctx, t.ID); err != nil {
+		return nil, err
+	}
+
+	if err := worker.Commit(); err != nil {
 		return nil, err
 	}
 

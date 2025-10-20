@@ -40,6 +40,7 @@ func (h *CreateTagHandler) Handle(
 		return nil, err
 	}
 
+	defer worker.Rollback()
 	repo := worker.TagRepo()
 
 	name, err := domain.ParseName(cmd.Name)
@@ -58,6 +59,10 @@ func (h *CreateTagHandler) Handle(
 	}
 
 	if err := repo.Save(ctx, tag); err != nil {
+		return nil, err
+	}
+
+	if err := worker.Commit(); err != nil {
 		return nil, err
 	}
 

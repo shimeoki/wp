@@ -36,6 +36,7 @@ func (h *ListTagsHandler) Handle(
 		return nil, err
 	}
 
+	defer worker.Rollback()
 	repo := worker.TagRepo()
 
 	it, err := repo.All(ctx)
@@ -47,6 +48,10 @@ func (h *ListTagsHandler) Handle(
 
 	for tag := range it {
 		result.Names = append(result.Names, tag.Name.String())
+	}
+
+	if err := worker.Commit(); err != nil {
+		return nil, err
 	}
 
 	return result, nil

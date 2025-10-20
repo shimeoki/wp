@@ -45,6 +45,7 @@ func (h *ShowWallpaperHandler) Handle(
 		return nil, err
 	}
 
+	defer worker.Rollback()
 	store, repo := worker.Store(), worker.WallpaperRepo()
 
 	hash, err := domain.ParseHash(qry.Hash)
@@ -59,6 +60,10 @@ func (h *ShowWallpaperHandler) Handle(
 
 	r, err := store.Get(ctx, hash)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := worker.Commit(); err != nil {
 		return nil, err
 	}
 
