@@ -37,6 +37,10 @@ func (a *App) Open(ctx context.Context) error {
 }
 
 func (a *App) Close() error {
+	if a.store == nil {
+		return nil
+	}
+
 	return a.store.Close()
 }
 
