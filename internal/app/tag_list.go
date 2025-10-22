@@ -2,14 +2,11 @@ package app
 
 import "github.com/shimeoki/wp/internal/domain"
 
-type ListTagsWorker interface {
-	Worker
-	TagRepo() domain.TagRepo
+type ListTagsWorker struct {
+	TagRepo domain.TagRepo
 }
 
-type ListTagsProvider interface {
-	Provider[ListTagsWorker]
-}
+type ListTagsProvider Provider[*ListTagsWorker]
 
 type ListTagsHandler struct {
 	provider ListTagsProvider
@@ -31,28 +28,22 @@ func (h *ListTagsHandler) Handle(
 	ctx Ctx,
 	qry *ListTagsQuery,
 ) (*ListTagsResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r ListTagsResult
+
+	if err := h.provider(ctx, func(w *ListTagsWorker) error {
+		it, err := w.TagRepo.All(ctx)
+		if err != nil {
+			return err
+		}
+
+		for tag := range it {
+			r.Names = append(r.Names, tag.Name.String())
+		}
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	repo := worker.TagRepo()
-
-	it, err := repo.All(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	result := &ListTagsResult{}
-
-	for tag := range it {
-		result.Names = append(result.Names, tag.Name.String())
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return &r, nil
 }

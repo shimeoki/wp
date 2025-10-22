@@ -6,22 +6,17 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type CreateTagWorker interface {
-	Worker
-	TagRepo() domain.TagRepo
+type CreateTagWorker struct {
+	TagRepo domain.TagRepo
 }
 
-type CreateTagProvider interface {
-	Provider[CreateTagWorker]
-}
+type CreateTagProvider Provider[*CreateTagWorker]
 
 type CreateTagHandler struct {
 	provider CreateTagProvider
 }
 
-func NewCreateTagHandler(
-	p CreateTagProvider,
-) *CreateTagHandler {
+func NewCreateTagHandler(p CreateTagProvider) *CreateTagHandler {
 	return &CreateTagHandler{provider: p}
 }
 
@@ -35,36 +30,28 @@ func (h *CreateTagHandler) Handle(
 	ctx Ctx,
 	cmd *CreateTagCommand,
 ) (*CreateTagResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r CreateTagResult
+
+	if err := h.provider(ctx, func(w *CreateTagWorker) error {
+		name, err := domain.ParseName(cmd.Name)
+		if err != nil {
+			return err
+		}
+
+		t, _ := w.TagRepo.FindByName(ctx, name)
+		if t != nil {
+			return errors.New("tag already exists")
+		}
+
+		tag, err := domain.NewTag(name)
+		if err != nil {
+			return err
+		}
+
+		return w.TagRepo.Save(ctx, tag)
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	repo := worker.TagRepo()
-
-	name, err := domain.ParseName(cmd.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	t, _ := repo.FindByName(ctx, name)
-	if t != nil {
-		return nil, errors.New("tag already exists")
-	}
-
-	tag, err := domain.NewTag(name)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := repo.Save(ctx, tag); err != nil {
-		return nil, err
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &CreateTagResult{}, nil
+	return &r, nil
 }

@@ -14,45 +14,29 @@ type Provider struct {
 	store *store.LocalStore
 }
 
-func (p *Provider) Provide(ctx app.Ctx) (*Worker, error) {
+type Worker struct {
+	Store         domain.Store
+	TagRepo       domain.TagRepo
+	WallpaperRepo domain.WallpaperRepo
+}
+
+func (p *Provider) Provider(
+	ctx app.Ctx,
+	fn func(*Worker) error,
+) error {
 	tx, err := p.db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &Worker{
-		tx:    tx,
-		store: p.store,
+	defer tx.Rollback()
+	if err := fn(&Worker{
+		Store:         p.store,
+		TagRepo:       sqlite.NewTagRepo(tx),
+		WallpaperRepo: sqlite.NewWallpaperRepo(tx),
+	}); err != nil {
+		return err
+	}
 
-		wallpapers: sqlite.NewWallpaperRepo(tx),
-		tags:       sqlite.NewTagRepo(tx),
-	}, nil
-}
-
-type Worker struct {
-	tx    *sql.Tx
-	store *store.LocalStore
-
-	wallpapers *sqlite.WallpaperRepo
-	tags       *sqlite.TagRepo
-}
-
-func (w *Worker) Commit() error {
-	return w.tx.Commit()
-}
-
-func (w *Worker) Rollback() error {
-	return w.tx.Rollback()
-}
-
-func (w *Worker) Store() domain.Store {
-	return w.store
-}
-
-func (w *Worker) WallpaperRepo() domain.WallpaperRepo {
-	return w.wallpapers
-}
-
-func (w *Worker) TagRepo() domain.TagRepo {
-	return w.tags
+	return tx.Commit()
 }

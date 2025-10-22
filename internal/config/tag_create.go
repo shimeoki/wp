@@ -2,10 +2,13 @@ package config
 
 import "github.com/shimeoki/wp/internal/app"
 
-type CreateTagProvider struct {
-	provider *Provider
-}
-
-func (p *CreateTagProvider) Provide(ctx app.Ctx) (app.CreateTagWorker, error) {
-	return p.provider.Provide(ctx)
+func (p *Provider) CreateTagProvider(
+	ctx app.Ctx,
+	fn func(*app.CreateTagWorker) error,
+) error {
+	return p.Provider(ctx, func(w *Worker) error {
+		return fn(&app.CreateTagWorker{
+			TagRepo: w.TagRepo,
+		})
+	})
 }

@@ -6,14 +6,11 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type FindWallpaperWorker interface {
-	Worker
-	WallpaperRepo() domain.WallpaperRepo
+type FindWallpaperWorker struct {
+	WallpaperRepo domain.WallpaperRepo
 }
 
-type FindWallpaperProvider interface {
-	Provider[FindWallpaperWorker]
-}
+type FindWallpaperProvider Provider[*FindWallpaperWorker]
 
 type FindWallpaperHandler struct {
 	provider FindWallpaperProvider
@@ -37,27 +34,25 @@ func (h *FindWallpaperHandler) Handle(
 	ctx Ctx,
 	qry *FindWallpaperQuery,
 ) (*FindWallpaperResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r FindWallpaperResult
+
+	if err := h.provider(ctx, func(w *FindWallpaperWorker) error {
+		hash, err := domain.ParseHash(qry.Hash)
+		if err != nil {
+			return err
+		}
+
+		wall, _ := w.WallpaperRepo.FindByHash(ctx, hash)
+		if wall == nil {
+			return errors.New("wallpaper not found")
+		}
+
+		r.Format = wall.Format.String()
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	repo := worker.WallpaperRepo()
-
-	hash, err := domain.ParseHash(qry.Hash)
-	if err != nil {
-		return nil, err
-	}
-
-	w, _ := repo.FindByHash(ctx, hash)
-	if w == nil {
-		return nil, errors.New("wallpaper not found")
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &FindWallpaperResult{Format: w.Format.String()}, nil
+	return &r, nil
 }

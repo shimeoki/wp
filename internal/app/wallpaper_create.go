@@ -7,15 +7,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type CreateWallpaperWorker interface {
-	Worker
-	Store() domain.Store
-	WallpaperRepo() domain.WallpaperRepo
+type CreateWallpaperWorker struct {
+	Store         domain.Store
+	WallpaperRepo domain.WallpaperRepo
 }
 
-type CreateWallpaperProvider interface {
-	Provider[CreateWallpaperWorker]
-}
+type CreateWallpaperProvider Provider[*CreateWallpaperWorker]
 
 type CreateWallpaperHandler struct {
 	provider CreateWallpaperProvider
@@ -40,41 +37,38 @@ func (h *CreateWallpaperHandler) Handle(
 	ctx Ctx,
 	cmd *CreateWallpaperCommand,
 ) (*CreateWallpaperResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r CreateWallpaperResult
+
+	if err := h.provider(ctx, func(w *CreateWallpaperWorker) error {
+		hash, err := w.Store.Create(ctx, cmd.Image)
+		if err != nil {
+			return err
+		}
+
+		if wall, _ := w.WallpaperRepo.FindByHash(ctx, hash); wall != nil {
+			return errors.New("wallpaper already exists")
+		}
+
+		f, err := domain.ParseFormat(cmd.Format)
+		if err != nil {
+			return err
+		}
+
+		wall, err := domain.NewWallpaper(f, hash)
+		if err != nil {
+			return err
+		}
+
+		if err := w.WallpaperRepo.Save(ctx, wall); err != nil {
+			return err
+		}
+
+		r.Hash = hash.String()
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	store, repo := worker.Store(), worker.WallpaperRepo()
-
-	hash, err := store.Create(ctx, cmd.Image)
-	if err != nil {
-		return nil, err
-	}
-
-	w, _ := repo.FindByHash(ctx, hash)
-	if w != nil {
-		return nil, errors.New("wallpaper already exists")
-	}
-
-	f, err := domain.ParseFormat(cmd.Format)
-	if err != nil {
-		return nil, err
-	}
-
-	wall, err := domain.NewWallpaper(f, hash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := repo.Save(ctx, wall); err != nil {
-		return nil, err
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &CreateWallpaperResult{Hash: hash.String()}, nil
+	return &r, nil
 }

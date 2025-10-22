@@ -2,12 +2,14 @@ package config
 
 import "github.com/shimeoki/wp/internal/app"
 
-type ShowWallpaperProvider struct {
-	provider *Provider
-}
-
-func (p *ShowWallpaperProvider) Provide(
+func (p *Provider) ShowWallpaperProvider(
 	ctx app.Ctx,
-) (app.ShowWallpaperWorker, error) {
-	return p.provider.Provide(ctx)
+	fn func(*app.ShowWallpaperWorker) error,
+) error {
+	return p.Provider(ctx, func(w *Worker) error {
+		return fn(&app.ShowWallpaperWorker{
+			Store:         w.Store,
+			WallpaperRepo: w.WallpaperRepo,
+		})
+	})
 }

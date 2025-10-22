@@ -6,15 +6,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type AddTagWorker interface {
-	Worker
-	WallpaperRepo() domain.WallpaperRepo
-	TagRepo() domain.TagRepo
+type AddTagWorker struct {
+	WallpaperRepo domain.WallpaperRepo
+	TagRepo       domain.TagRepo
 }
 
-type AddTagProvider interface {
-	Provider[AddTagWorker]
-}
+type AddTagProvider Provider[*AddTagWorker]
 
 type AddTagHandler struct {
 	provider AddTagProvider
@@ -37,50 +34,42 @@ func (h *AddTagHandler) Handle(
 	ctx Ctx,
 	cmd *AddTagCommand,
 ) (*AddTagResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r AddTagResult
+
+	if err := h.provider(ctx, func(w *AddTagWorker) error {
+		hash, err := domain.ParseHash(cmd.WallpaperHash)
+		if err != nil {
+			return err
+		}
+
+		name, err := domain.ParseName(cmd.TagName)
+		if err != nil {
+			return err
+		}
+
+		wall, _ := w.WallpaperRepo.FindByHash(ctx, hash)
+		if wall == nil {
+			return errors.New("wallpaper not found")
+		}
+
+		tag, _ := w.TagRepo.FindByName(ctx, name)
+		if tag == nil {
+			// automatically create tag?
+			return errors.New("tag not found")
+		}
+
+		if _, ok := wall.Tags[tag.ID]; ok {
+			return errors.New("tag already attached")
+		}
+
+		if err := wall.AddTag(tag); err != nil {
+			return err
+		}
+
+		return w.WallpaperRepo.Save(ctx, wall)
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	wallpapers, tags := worker.WallpaperRepo(), worker.TagRepo()
-
-	hash, err := domain.ParseHash(cmd.WallpaperHash)
-	if err != nil {
-		return nil, err
-	}
-
-	name, err := domain.ParseName(cmd.TagName)
-	if err != nil {
-		return nil, err
-	}
-
-	w, _ := wallpapers.FindByHash(ctx, hash)
-	if w == nil {
-		return nil, errors.New("wallpaper not found")
-	}
-
-	t, _ := tags.FindByName(ctx, name)
-	if t == nil {
-		// automatically create tag?
-		return nil, errors.New("tag not found")
-	}
-
-	if _, ok := w.Tags[t.ID]; ok {
-		return nil, errors.New("tag already attached")
-	}
-
-	if err := w.AddTag(t); err != nil {
-		return nil, err
-	}
-
-	if err := wallpapers.Save(ctx, w); err != nil {
-		return nil, err
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &AddTagResult{}, nil
+	return &r, nil
 }

@@ -7,14 +7,7 @@ import (
 
 type Ctx = context.Context
 
-type Worker interface {
-	Commit() error
-	Rollback() error
-}
-
-type Provider[W Worker] interface {
-	Provide(Ctx) (W, error)
-}
+type Provider[W any] func(Ctx, func(W) error) error
 
 type Version int
 

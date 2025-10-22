@@ -17,35 +17,35 @@ type Handlers struct {
 func (p *Provider) Handlers() *Handlers {
 	return &Handlers{
 		CreateWallpaper: app.NewCreateWallpaperHandler(
-			&CreateWallpaperProvider{provider: p},
+			p.CreateWallpaperProvider,
 		),
 
 		DeleteWallpaper: app.NewDeleteWallpaperHandler(
-			&DeleteWallpaperProvider{provider: p},
+			p.DeleteWallpaperProvider,
 		),
 
 		FindWallpaper: app.NewFindWallpaperHandler(
-			&FindWallpaperProvider{provider: p},
+			p.FindWallpaperProvider,
 		),
 
 		ShowWallpaper: app.NewShowWallpaperHandler(
-			&ShowWallpaperProvider{provider: p},
+			p.ShowWallpaperProvider,
 		),
 
 		AddTag: app.NewAddTagHandler(
-			&AddTagProvider{provider: p},
+			p.AddTagProvider,
 		),
 
 		CreateTag: app.NewCreateTagHandler(
-			&CreateTagProvider{provider: p},
+			p.CreateTagProvider,
 		),
 
 		DeleteTag: app.NewDeleteTagHandler(
-			&DeleteTagProvider{provider: p},
+			p.DeleteTagProvider,
 		),
 
 		ListTags: app.NewListTagsHandler(
-			&ListTagsProvider{provider: p},
+			p.ListTagsProvider,
 		),
 	}
 }
