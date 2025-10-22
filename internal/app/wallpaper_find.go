@@ -6,20 +6,18 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type FindWallpaperWorker struct {
+type FindWallpaperProviders struct {
 	WallpaperRepo domain.WallpaperRepo
 }
 
-type FindWallpaperProvider Provider[*FindWallpaperWorker]
+type FindWallpaperWorker Worker[*FindWallpaperProviders]
 
 type FindWallpaperHandler struct {
-	provider FindWallpaperProvider
+	worker FindWallpaperWorker
 }
 
-func NewFindWallpaperHandler(
-	p FindWallpaperProvider,
-) *FindWallpaperHandler {
-	return &FindWallpaperHandler{provider: p}
+func NewFindWallpaperHandler(w FindWallpaperWorker) *FindWallpaperHandler {
+	return &FindWallpaperHandler{worker: w}
 }
 
 type FindWallpaperQuery struct {
@@ -36,13 +34,13 @@ func (h *FindWallpaperHandler) Handle(
 ) (*FindWallpaperResult, error) {
 	var r FindWallpaperResult
 
-	if err := h.provider(ctx, func(w *FindWallpaperWorker) error {
+	if err := h.worker.Do(ctx, func(p *FindWallpaperProviders) error {
 		hash, err := domain.ParseHash(qry.Hash)
 		if err != nil {
 			return err
 		}
 
-		wall, _ := w.WallpaperRepo.FindByHash(ctx, hash)
+		wall, _ := p.WallpaperRepo.FindByHash(ctx, hash)
 		if wall == nil {
 			return errors.New("wallpaper not found")
 		}

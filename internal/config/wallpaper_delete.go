@@ -2,14 +2,18 @@ package config
 
 import "github.com/shimeoki/wp/internal/app"
 
-func (p *Provider) DeleteWallpaperProvider(
+type DeleteWallpaperWorker struct {
+	worker *Worker
+}
+
+func (w *DeleteWallpaperWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.DeleteWallpaperWorker) error,
+	fn func(*app.DeleteWallpaperProviders) error,
 ) error {
-	return p.Provider(ctx, func(w *Worker) error {
-		return fn(&app.DeleteWallpaperWorker{
-			Store:         w.Store,
-			WallpaperRepo: w.WallpaperRepo,
+	return w.worker.Do(ctx, func(p *Providers) error {
+		return fn(&app.DeleteWallpaperProviders{
+			Store:         p.Store,
+			WallpaperRepo: p.WallpaperRepo,
 		})
 	})
 }

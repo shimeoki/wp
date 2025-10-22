@@ -6,21 +6,19 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type AddTagWorker struct {
+type AddTagProviders struct {
 	WallpaperRepo domain.WallpaperRepo
 	TagRepo       domain.TagRepo
 }
 
-type AddTagProvider Provider[*AddTagWorker]
+type AddTagWorker Worker[*AddTagProviders]
 
 type AddTagHandler struct {
-	provider AddTagProvider
+	worker AddTagWorker
 }
 
-func NewAddTagHandler(
-	p AddTagProvider,
-) *AddTagHandler {
-	return &AddTagHandler{provider: p}
+func NewAddTagHandler(w AddTagWorker) *AddTagHandler {
+	return &AddTagHandler{worker: w}
 }
 
 type AddTagCommand struct {
@@ -36,7 +34,7 @@ func (h *AddTagHandler) Handle(
 ) (*AddTagResult, error) {
 	var r AddTagResult
 
-	if err := h.provider(ctx, func(w *AddTagWorker) error {
+	if err := h.worker.Do(ctx, func(p *AddTagProviders) error {
 		hash, err := domain.ParseHash(cmd.WallpaperHash)
 		if err != nil {
 			return err
@@ -47,12 +45,12 @@ func (h *AddTagHandler) Handle(
 			return err
 		}
 
-		wall, _ := w.WallpaperRepo.FindByHash(ctx, hash)
+		wall, _ := p.WallpaperRepo.FindByHash(ctx, hash)
 		if wall == nil {
 			return errors.New("wallpaper not found")
 		}
 
-		tag, _ := w.TagRepo.FindByName(ctx, name)
+		tag, _ := p.TagRepo.FindByName(ctx, name)
 		if tag == nil {
 			// automatically create tag?
 			return errors.New("tag not found")
@@ -66,7 +64,7 @@ func (h *AddTagHandler) Handle(
 			return err
 		}
 
-		return w.WallpaperRepo.Save(ctx, wall)
+		return p.WallpaperRepo.Save(ctx, wall)
 	}); err != nil {
 		return nil, err
 	}

@@ -9,29 +9,29 @@ import (
 	"github.com/shimeoki/wp/internal/infra/store"
 )
 
-type Provider struct {
+type Worker struct {
 	db    *sql.DB
 	store *store.LocalStore
 }
 
-type Worker struct {
+type Providers struct {
 	Store         domain.Store
 	TagRepo       domain.TagRepo
 	WallpaperRepo domain.WallpaperRepo
 }
 
-func (p *Provider) Provider(
+func (w *Worker) Do(
 	ctx app.Ctx,
-	fn func(*Worker) error,
+	fn func(*Providers) error,
 ) error {
-	tx, err := p.db.BeginTx(ctx, nil)
+	tx, err := w.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
 	defer tx.Rollback()
-	if err := fn(&Worker{
-		Store:         p.store,
+	if err := fn(&Providers{
+		Store:         w.store,
 		TagRepo:       sqlite.NewTagRepo(tx),
 		WallpaperRepo: sqlite.NewWallpaperRepo(tx),
 	}); err != nil {

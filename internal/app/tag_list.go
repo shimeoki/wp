@@ -2,20 +2,18 @@ package app
 
 import "github.com/shimeoki/wp/internal/domain"
 
-type ListTagsWorker struct {
+type ListTagsProviders struct {
 	TagRepo domain.TagRepo
 }
 
-type ListTagsProvider Provider[*ListTagsWorker]
+type ListTagsWorker Worker[*ListTagsProviders]
 
 type ListTagsHandler struct {
-	provider ListTagsProvider
+	worker ListTagsWorker
 }
 
-func NewListTagsHandler(
-	p ListTagsProvider,
-) *ListTagsHandler {
-	return &ListTagsHandler{provider: p}
+func NewListTagsHandler(w ListTagsWorker) *ListTagsHandler {
+	return &ListTagsHandler{worker: w}
 }
 
 type ListTagsQuery struct{}
@@ -30,8 +28,8 @@ func (h *ListTagsHandler) Handle(
 ) (*ListTagsResult, error) {
 	var r ListTagsResult
 
-	if err := h.provider(ctx, func(w *ListTagsWorker) error {
-		it, err := w.TagRepo.All(ctx)
+	if err := h.worker.Do(ctx, func(p *ListTagsProviders) error {
+		it, err := p.TagRepo.All(ctx)
 		if err != nil {
 			return err
 		}

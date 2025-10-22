@@ -2,13 +2,17 @@ package config
 
 import "github.com/shimeoki/wp/internal/app"
 
-func (p *Provider) ListTagsProvider(
+type ListTagsWorker struct {
+	worker *Worker
+}
+
+func (w *ListTagsWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.ListTagsWorker) error,
+	fn func(*app.ListTagsProviders) error,
 ) error {
-	return p.Provider(ctx, func(w *Worker) error {
-		return fn(&app.ListTagsWorker{
-			TagRepo: w.TagRepo,
+	return w.worker.Do(ctx, func(p *Providers) error {
+		return fn(&app.ListTagsProviders{
+			TagRepo: p.TagRepo,
 		})
 	})
 }

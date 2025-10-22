@@ -14,38 +14,38 @@ type Handlers struct {
 	ListTags  *app.ListTagsHandler
 }
 
-func (p *Provider) Handlers() *Handlers {
+func (w *Worker) Handlers() *Handlers {
 	return &Handlers{
 		CreateWallpaper: app.NewCreateWallpaperHandler(
-			p.CreateWallpaperProvider,
+			&CreateWallpaperWorker{worker: w},
 		),
 
 		DeleteWallpaper: app.NewDeleteWallpaperHandler(
-			p.DeleteWallpaperProvider,
+			&DeleteWallpaperWorker{worker: w},
 		),
 
 		FindWallpaper: app.NewFindWallpaperHandler(
-			p.FindWallpaperProvider,
+			&FindWallpaperWorker{worker: w},
 		),
 
 		ShowWallpaper: app.NewShowWallpaperHandler(
-			p.ShowWallpaperProvider,
+			&ShowWallpaperWorker{worker: w},
 		),
 
 		AddTag: app.NewAddTagHandler(
-			p.AddTagProvider,
+			&AddTagWorker{worker: w},
 		),
 
 		CreateTag: app.NewCreateTagHandler(
-			p.CreateTagProvider,
+			&CreateTagWorker{worker: w},
 		),
 
 		DeleteTag: app.NewDeleteTagHandler(
-			p.DeleteTagProvider,
+			&DeleteTagWorker{worker: w},
 		),
 
 		ListTags: app.NewListTagsHandler(
-			p.ListTagsProvider,
+			&ListTagsWorker{worker: w},
 		),
 	}
 }

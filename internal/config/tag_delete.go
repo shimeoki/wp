@@ -2,13 +2,17 @@ package config
 
 import "github.com/shimeoki/wp/internal/app"
 
-func (p *Provider) DeleteTagProvider(
+type DeleteTagWorker struct {
+	worker *Worker
+}
+
+func (w *DeleteTagWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.DeleteTagWorker) error,
+	fn func(*app.DeleteTagProviders) error,
 ) error {
-	return p.Provider(ctx, func(w *Worker) error {
-		return fn(&app.DeleteTagWorker{
-			TagRepo: w.TagRepo,
+	return w.worker.Do(ctx, func(p *Providers) error {
+		return fn(&app.DeleteTagProviders{
+			TagRepo: p.TagRepo,
 		})
 	})
 }

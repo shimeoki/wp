@@ -7,7 +7,11 @@ import (
 
 type Ctx = context.Context
 
-type Provider[W any] func(Ctx, func(W) error) error
+type Providers any
+
+type Worker[P Providers] interface {
+	Do(Ctx, func(P) error) error
+}
 
 type Version int
 
