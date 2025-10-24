@@ -9,10 +9,6 @@ type Ctx = context.Context
 
 type Providers any
 
-type Worker[P Providers] interface {
-	Do(Ctx, func(P) error) error
-}
-
 type Version int
 
 const VERSION Version = 1
