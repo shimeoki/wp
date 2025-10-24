@@ -8,10 +8,10 @@ type ListTagsWorker struct {
 
 func (w *ListTagsWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.ListTagsProviders) error,
+	fn func(*app.ListTagsProvider) error,
 ) error {
-	return w.worker.Do(ctx, func(p *Providers) error {
-		return fn(&app.ListTagsProviders{
+	return w.worker.Do(ctx, func(p *Provider) error {
+		return fn(&app.ListTagsProvider{
 			TagRepo: p.TagRepo,
 		})
 	})

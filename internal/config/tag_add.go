@@ -8,10 +8,10 @@ type AddTagWorker struct {
 
 func (w *AddTagWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.AddTagProviders) error,
+	fn func(*app.AddTagProvider) error,
 ) error {
-	return w.worker.Do(ctx, func(p *Providers) error {
-		return fn(&app.AddTagProviders{
+	return w.worker.Do(ctx, func(p *Provider) error {
+		return fn(&app.AddTagProvider{
 			TagRepo:       p.TagRepo,
 			WallpaperRepo: p.WallpaperRepo,
 		})

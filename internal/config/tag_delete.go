@@ -8,10 +8,10 @@ type DeleteTagWorker struct {
 
 func (w *DeleteTagWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.DeleteTagProviders) error,
+	fn func(*app.DeleteTagProvider) error,
 ) error {
-	return w.worker.Do(ctx, func(p *Providers) error {
-		return fn(&app.DeleteTagProviders{
+	return w.worker.Do(ctx, func(p *Provider) error {
+		return fn(&app.DeleteTagProvider{
 			TagRepo: p.TagRepo,
 		})
 	})

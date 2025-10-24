@@ -8,10 +8,10 @@ type DeleteWallpaperWorker struct {
 
 func (w *DeleteWallpaperWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.DeleteWallpaperProviders) error,
+	fn func(*app.DeleteWallpaperProvider) error,
 ) error {
-	return w.worker.Do(ctx, func(p *Providers) error {
-		return fn(&app.DeleteWallpaperProviders{
+	return w.worker.Do(ctx, func(p *Provider) error {
+		return fn(&app.DeleteWallpaperProvider{
 			Store:         p.Store,
 			WallpaperRepo: p.WallpaperRepo,
 		})

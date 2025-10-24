@@ -7,12 +7,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type ShowWallpaperProviders struct {
+type ShowWallpaperProvider struct {
 	Store         domain.Store
 	WallpaperRepo domain.WallpaperRepo
 }
 
-type ShowWallpaperWorker Worker[*ShowWallpaperProviders]
+type ShowWallpaperWorker Worker[*ShowWallpaperProvider]
 
 type ShowWallpaperHandler struct {
 	worker ShowWallpaperWorker
@@ -37,7 +37,7 @@ func (h *ShowWallpaperHandler) Handle(
 ) (*ShowWallpaperResult, error) {
 	var r ShowWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p *ShowWallpaperProviders) error {
+	if err := h.worker.Do(ctx, func(p *ShowWallpaperProvider) error {
 		hash, err := domain.ParseHash(qry.Hash)
 		if err != nil {
 			return err

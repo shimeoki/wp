@@ -6,11 +6,11 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type DeleteTagProviders struct {
+type DeleteTagProvider struct {
 	TagRepo domain.TagRepo
 }
 
-type DeleteTagWorker Worker[*DeleteTagProviders]
+type DeleteTagWorker Worker[*DeleteTagProvider]
 
 type DeleteTagHandler struct {
 	worker DeleteTagWorker
@@ -32,7 +32,7 @@ func (h *DeleteTagHandler) Handle(
 ) (*DeleteTagResult, error) {
 	var r DeleteTagResult
 
-	if err := h.worker.Do(ctx, func(p *DeleteTagProviders) error {
+	if err := h.worker.Do(ctx, func(p *DeleteTagProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
 			return err

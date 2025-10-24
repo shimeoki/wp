@@ -6,11 +6,11 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type CreateTagProviders struct {
+type CreateTagProvider struct {
 	TagRepo domain.TagRepo
 }
 
-type CreateTagWorker Worker[*CreateTagProviders]
+type CreateTagWorker Worker[*CreateTagProvider]
 
 type CreateTagHandler struct {
 	worker CreateTagWorker
@@ -32,7 +32,7 @@ func (h *CreateTagHandler) Handle(
 ) (*CreateTagResult, error) {
 	var r CreateTagResult
 
-	if err := h.worker.Do(ctx, func(p *CreateTagProviders) error {
+	if err := h.worker.Do(ctx, func(p *CreateTagProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
 			return err

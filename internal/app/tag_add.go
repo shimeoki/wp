@@ -6,12 +6,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type AddTagProviders struct {
+type AddTagProvider struct {
 	WallpaperRepo domain.WallpaperRepo
 	TagRepo       domain.TagRepo
 }
 
-type AddTagWorker Worker[*AddTagProviders]
+type AddTagWorker Worker[*AddTagProvider]
 
 type AddTagHandler struct {
 	worker AddTagWorker
@@ -34,7 +34,7 @@ func (h *AddTagHandler) Handle(
 ) (*AddTagResult, error) {
 	var r AddTagResult
 
-	if err := h.worker.Do(ctx, func(p *AddTagProviders) error {
+	if err := h.worker.Do(ctx, func(p *AddTagProvider) error {
 		hash, err := domain.ParseHash(cmd.WallpaperHash)
 		if err != nil {
 			return err

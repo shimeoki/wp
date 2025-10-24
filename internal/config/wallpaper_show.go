@@ -8,10 +8,10 @@ type ShowWallpaperWorker struct {
 
 func (w *ShowWallpaperWorker) Do(
 	ctx app.Ctx,
-	fn func(*app.ShowWallpaperProviders) error,
+	fn func(*app.ShowWallpaperProvider) error,
 ) error {
-	return w.worker.Do(ctx, func(p *Providers) error {
-		return fn(&app.ShowWallpaperProviders{
+	return w.worker.Do(ctx, func(p *Provider) error {
+		return fn(&app.ShowWallpaperProvider{
 			Store:         p.Store,
 			WallpaperRepo: p.WallpaperRepo,
 		})

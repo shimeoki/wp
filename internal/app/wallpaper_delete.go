@@ -6,12 +6,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type DeleteWallpaperProviders struct {
+type DeleteWallpaperProvider struct {
 	Store         domain.Store
 	WallpaperRepo domain.WallpaperRepo
 }
 
-type DeleteWallpaperWorker Worker[*DeleteWallpaperProviders]
+type DeleteWallpaperWorker Worker[*DeleteWallpaperProvider]
 
 type DeleteWallpaperHandler struct {
 	worker DeleteWallpaperWorker
@@ -35,7 +35,7 @@ func (h *DeleteWallpaperHandler) Handle(
 ) (*DeleteWallpaperResult, error) {
 	var r DeleteWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p *DeleteWallpaperProviders) error {
+	if err := h.worker.Do(ctx, func(p *DeleteWallpaperProvider) error {
 		hash, err := domain.ParseHash(cmd.Hash)
 		if err != nil {
 			return err
