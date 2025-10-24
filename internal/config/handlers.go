@@ -17,35 +17,67 @@ type Handlers struct {
 func (w *Worker) Handlers() *Handlers {
 	return &Handlers{
 		CreateWallpaper: app.NewCreateWallpaperHandler(
-			&CreateWallpaperWorker{worker: w},
+			app.WorkerFunc[app.CreateWallpaperProvider](
+				func(ctx app.Ctx, fn func(app.CreateWallpaperProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 
 		DeleteWallpaper: app.NewDeleteWallpaperHandler(
-			&DeleteWallpaperWorker{worker: w},
+			app.WorkerFunc[app.DeleteWallpaperProvider](
+				func(ctx app.Ctx, fn func(app.DeleteWallpaperProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 
 		FindWallpaper: app.NewFindWallpaperHandler(
-			&FindWallpaperWorker{worker: w},
+			app.WorkerFunc[app.FindWallpaperProvider](
+				func(ctx app.Ctx, fn func(app.FindWallpaperProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 
 		ShowWallpaper: app.NewShowWallpaperHandler(
-			&ShowWallpaperWorker{worker: w},
+			app.WorkerFunc[app.ShowWallpaperProvider](
+				func(ctx app.Ctx, fn func(app.ShowWallpaperProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 
 		AddTag: app.NewAddTagHandler(
-			&AddTagWorker{worker: w},
+			app.WorkerFunc[app.AddTagProvider](
+				func(ctx app.Ctx, fn func(app.AddTagProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 
 		CreateTag: app.NewCreateTagHandler(
-			&CreateTagWorker{worker: w},
+			app.WorkerFunc[app.CreateTagProvider](
+				func(ctx app.Ctx, fn func(app.CreateTagProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 
 		DeleteTag: app.NewDeleteTagHandler(
-			&DeleteTagWorker{worker: w},
+			app.WorkerFunc[app.DeleteTagProvider](
+				func(ctx app.Ctx, fn func(app.DeleteTagProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 
 		ListTags: app.NewListTagsHandler(
-			&ListTagsWorker{worker: w},
+			app.WorkerFunc[app.ListTagsProvider](
+				func(ctx app.Ctx, fn func(app.ListTagsProvider) error) error {
+					return w.Do(ctx, func(p *Provider) error { return fn(p) })
+				},
+			),
 		),
 	}
 }

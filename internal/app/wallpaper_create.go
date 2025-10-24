@@ -7,12 +7,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type CreateWallpaperProvider struct {
-	Store         domain.Store
-	WallpaperRepo domain.WallpaperRepo
+type CreateWallpaperProvider interface {
+	StoreProvider
+	WallpaperProvider
 }
 
-type CreateWallpaperWorker Worker[*CreateWallpaperProvider]
+type CreateWallpaperWorker Worker[CreateWallpaperProvider]
 
 type CreateWallpaperHandler struct {
 	worker CreateWallpaperWorker
@@ -39,13 +39,13 @@ func (h *CreateWallpaperHandler) Handle(
 ) (*CreateWallpaperResult, error) {
 	var r CreateWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p *CreateWallpaperProvider) error {
-		hash, err := p.Store.Create(ctx, cmd.Image)
+	if err := h.worker.Do(ctx, func(p CreateWallpaperProvider) error {
+		hash, err := p.Store().Create(ctx, cmd.Image)
 		if err != nil {
 			return err
 		}
 
-		if wall, _ := p.WallpaperRepo.FindByHash(ctx, hash); wall != nil {
+		if wall, _ := p.WallpaperRepo().FindByHash(ctx, hash); wall != nil {
 			return errors.New("wallpaper already exists")
 		}
 
@@ -59,7 +59,7 @@ func (h *CreateWallpaperHandler) Handle(
 			return err
 		}
 
-		if err := p.WallpaperRepo.Save(ctx, wall); err != nil {
+		if err := p.WallpaperRepo().Save(ctx, wall); err != nil {
 			return err
 		}
 

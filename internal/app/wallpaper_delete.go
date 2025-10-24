@@ -6,12 +6,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type DeleteWallpaperProvider struct {
-	Store         domain.Store
-	WallpaperRepo domain.WallpaperRepo
+type DeleteWallpaperProvider interface {
+	StoreProvider
+	WallpaperProvider
 }
 
-type DeleteWallpaperWorker Worker[*DeleteWallpaperProvider]
+type DeleteWallpaperWorker Worker[DeleteWallpaperProvider]
 
 type DeleteWallpaperHandler struct {
 	worker DeleteWallpaperWorker
@@ -35,22 +35,22 @@ func (h *DeleteWallpaperHandler) Handle(
 ) (*DeleteWallpaperResult, error) {
 	var r DeleteWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p *DeleteWallpaperProvider) error {
+	if err := h.worker.Do(ctx, func(p DeleteWallpaperProvider) error {
 		hash, err := domain.ParseHash(cmd.Hash)
 		if err != nil {
 			return err
 		}
 
-		wall, _ := p.WallpaperRepo.FindByHash(ctx, hash)
+		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
 		if wall == nil {
 			return errors.New("wallpaper not found")
 		}
 
-		if err := p.WallpaperRepo.Delete(ctx, wall.ID); err != nil {
+		if err := p.WallpaperRepo().Delete(ctx, wall.ID); err != nil {
 			return err
 		}
 
-		return p.Store.Remove(ctx, hash)
+		return p.Store().Remove(ctx, hash)
 	}); err != nil {
 		return nil, err
 	}

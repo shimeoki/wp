@@ -6,11 +6,11 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type CreateTagProvider struct {
-	TagRepo domain.TagRepo
+type CreateTagProvider interface {
+	TagProvider
 }
 
-type CreateTagWorker Worker[*CreateTagProvider]
+type CreateTagWorker Worker[CreateTagProvider]
 
 type CreateTagHandler struct {
 	worker CreateTagWorker
@@ -32,13 +32,13 @@ func (h *CreateTagHandler) Handle(
 ) (*CreateTagResult, error) {
 	var r CreateTagResult
 
-	if err := h.worker.Do(ctx, func(p *CreateTagProvider) error {
+	if err := h.worker.Do(ctx, func(p CreateTagProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
 			return err
 		}
 
-		t, _ := p.TagRepo.FindByName(ctx, name)
+		t, _ := p.TagRepo().FindByName(ctx, name)
 		if t != nil {
 			return errors.New("tag already exists")
 		}
@@ -48,7 +48,7 @@ func (h *CreateTagHandler) Handle(
 			return err
 		}
 
-		return p.TagRepo.Save(ctx, tag)
+		return p.TagRepo().Save(ctx, tag)
 	}); err != nil {
 		return nil, err
 	}

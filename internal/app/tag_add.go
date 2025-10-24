@@ -6,12 +6,12 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type AddTagProvider struct {
-	WallpaperRepo domain.WallpaperRepo
-	TagRepo       domain.TagRepo
+type AddTagProvider interface {
+	WallpaperProvider
+	TagProvider
 }
 
-type AddTagWorker Worker[*AddTagProvider]
+type AddTagWorker Worker[AddTagProvider]
 
 type AddTagHandler struct {
 	worker AddTagWorker
@@ -34,7 +34,7 @@ func (h *AddTagHandler) Handle(
 ) (*AddTagResult, error) {
 	var r AddTagResult
 
-	if err := h.worker.Do(ctx, func(p *AddTagProvider) error {
+	if err := h.worker.Do(ctx, func(p AddTagProvider) error {
 		hash, err := domain.ParseHash(cmd.WallpaperHash)
 		if err != nil {
 			return err
@@ -45,12 +45,12 @@ func (h *AddTagHandler) Handle(
 			return err
 		}
 
-		wall, _ := p.WallpaperRepo.FindByHash(ctx, hash)
+		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
 		if wall == nil {
 			return errors.New("wallpaper not found")
 		}
 
-		tag, _ := p.TagRepo.FindByName(ctx, name)
+		tag, _ := p.TagRepo().FindByName(ctx, name)
 		if tag == nil {
 			// automatically create tag?
 			return errors.New("tag not found")
@@ -64,7 +64,7 @@ func (h *AddTagHandler) Handle(
 			return err
 		}
 
-		return p.WallpaperRepo.Save(ctx, wall)
+		return p.WallpaperRepo().Save(ctx, wall)
 	}); err != nil {
 		return nil, err
 	}

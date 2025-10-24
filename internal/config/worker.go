@@ -14,12 +14,6 @@ type Worker struct {
 	store *store.LocalStore
 }
 
-type Provider struct {
-	Store         domain.Store
-	TagRepo       domain.TagRepo
-	WallpaperRepo domain.WallpaperRepo
-}
-
 func (w *Worker) Do(
 	ctx app.Ctx,
 	fn func(*Provider) error,
@@ -31,12 +25,30 @@ func (w *Worker) Do(
 
 	defer tx.Rollback()
 	if err := fn(&Provider{
-		Store:         w.store,
-		TagRepo:       sqlite.NewTagRepo(tx),
-		WallpaperRepo: sqlite.NewWallpaperRepo(tx),
+		store:      w.store,
+		tags:       sqlite.NewTagRepo(tx),
+		wallpapers: sqlite.NewWallpaperRepo(tx),
 	}); err != nil {
 		return err
 	}
 
 	return tx.Commit()
+}
+
+type Provider struct {
+	store      domain.Store
+	tags       domain.TagRepo
+	wallpapers domain.WallpaperRepo
+}
+
+func (p *Provider) Store() domain.Store {
+	return p.store
+}
+
+func (p *Provider) TagRepo() domain.TagRepo {
+	return p.tags
+}
+
+func (p *Provider) WallpaperRepo() domain.WallpaperRepo {
+	return p.wallpapers
 }
