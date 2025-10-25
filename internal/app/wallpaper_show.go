@@ -37,7 +37,7 @@ func (h *ShowWallpaperHandler) Handle(
 ) (*ShowWallpaperResult, error) {
 	var r ShowWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p ShowWallpaperProvider) error {
+	if err := h.worker.Work(ctx, func(p ShowWallpaperProvider) error {
 		hash, err := domain.ParseHash(qry.Hash)
 		if err != nil {
 			return err

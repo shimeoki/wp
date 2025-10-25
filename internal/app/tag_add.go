@@ -34,7 +34,7 @@ func (h *AddTagHandler) Handle(
 ) (*AddTagResult, error) {
 	var r AddTagResult
 
-	if err := h.worker.Do(ctx, func(p AddTagProvider) error {
+	if err := h.worker.Work(ctx, func(p AddTagProvider) error {
 		hash, err := domain.ParseHash(cmd.WallpaperHash)
 		if err != nil {
 			return err

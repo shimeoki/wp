@@ -35,7 +35,7 @@ func (h *DeleteWallpaperHandler) Handle(
 ) (*DeleteWallpaperResult, error) {
 	var r DeleteWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p DeleteWallpaperProvider) error {
+	if err := h.worker.Work(ctx, func(p DeleteWallpaperProvider) error {
 		hash, err := domain.ParseHash(cmd.Hash)
 		if err != nil {
 			return err

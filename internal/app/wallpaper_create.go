@@ -39,7 +39,7 @@ func (h *CreateWallpaperHandler) Handle(
 ) (*CreateWallpaperResult, error) {
 	var r CreateWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p CreateWallpaperProvider) error {
+	if err := h.worker.Work(ctx, func(p CreateWallpaperProvider) error {
 		hash, err := p.Store().Create(ctx, cmd.Image)
 		if err != nil {
 			return err

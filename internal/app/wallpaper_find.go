@@ -34,7 +34,7 @@ func (h *FindWallpaperHandler) Handle(
 ) (*FindWallpaperResult, error) {
 	var r FindWallpaperResult
 
-	if err := h.worker.Do(ctx, func(p FindWallpaperProvider) error {
+	if err := h.worker.Work(ctx, func(p FindWallpaperProvider) error {
 		hash, err := domain.ParseHash(qry.Hash)
 		if err != nil {
 			return err

@@ -26,7 +26,7 @@ func (h *ListTagsHandler) Handle(
 ) (*ListTagsResult, error) {
 	var r ListTagsResult
 
-	if err := h.worker.Do(ctx, func(p ListTagsProvider) error {
+	if err := h.worker.Work(ctx, func(p ListTagsProvider) error {
 		it, err := p.TagRepo().All(ctx)
 		if err != nil {
 			return err

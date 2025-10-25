@@ -32,7 +32,7 @@ func (h *DeleteTagHandler) Handle(
 ) (*DeleteTagResult, error) {
 	var r DeleteTagResult
 
-	if err := h.worker.Do(ctx, func(p DeleteTagProvider) error {
+	if err := h.worker.Work(ctx, func(p DeleteTagProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
 			return err

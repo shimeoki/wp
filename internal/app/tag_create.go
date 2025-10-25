@@ -32,7 +32,7 @@ func (h *CreateTagHandler) Handle(
 ) (*CreateTagResult, error) {
 	var r CreateTagResult
 
-	if err := h.worker.Do(ctx, func(p CreateTagProvider) error {
+	if err := h.worker.Work(ctx, func(p CreateTagProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
 			return err
