@@ -67,7 +67,7 @@ func (s *LocalStore) Create(
 	return hash, nil
 }
 
-func (s *LocalStore) Remove(ctx domain.Ctx, h domain.Hash) error {
+func (s *LocalStore) Delete(ctx domain.Ctx, h domain.Hash) error {
 	return s.root.Remove(h.String())
 }
 

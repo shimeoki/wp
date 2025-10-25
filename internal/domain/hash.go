@@ -11,7 +11,7 @@ import (
 type Store interface {
 	Get(Ctx, Hash) (io.ReadCloser, error)
 	Create(Ctx, io.Reader) (Hash, error)
-	Remove(Ctx, Hash) error
+	Delete(Ctx, Hash) error
 }
 
 var (
