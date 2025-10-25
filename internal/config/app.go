@@ -30,7 +30,7 @@ func (a *App) Open(ctx context.Context) error {
 	}
 
 	a.worker = &LocalSQLiteWorker{db: db, store: store}
-	a.handlers = a.worker.Handlers()
+	a.handlers = NewHandlers(a.worker)
 	return nil
 }
 
