@@ -14,7 +14,7 @@ type Handlers struct {
 	ListTags  *app.ListTagsHandler
 }
 
-func (w *Worker) Handlers() *Handlers {
+func (w *LocalSQLiteWorker) Handlers() *Handlers {
 	return &Handlers{
 		CreateWallpaper: app.NewCreateWallpaperHandler(
 			app.WorkerFunc[app.CreateWallpaperProvider](

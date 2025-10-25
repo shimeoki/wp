@@ -8,12 +8,12 @@ import (
 	"github.com/shimeoki/wp/internal/infra/store"
 )
 
-type Worker struct {
+type LocalSQLiteWorker struct {
 	db    *sql.DB
 	store *store.LocalStore
 }
 
-func (w *Worker) Work(
+func (w *LocalSQLiteWorker) Work(
 	ctx app.Ctx,
 	j app.Job[*Provider],
 ) error {

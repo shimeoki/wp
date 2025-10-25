@@ -10,7 +10,7 @@ import (
 type App struct {
 	store    *store.LocalStore
 	cfg      *Config
-	worker   *Worker
+	worker   *LocalSQLiteWorker
 	handlers *Handlers
 }
 
@@ -29,7 +29,7 @@ func (a *App) Open(ctx context.Context) error {
 		return err
 	}
 
-	a.worker = &Worker{db: db, store: store}
+	a.worker = &LocalSQLiteWorker{db: db, store: store}
 	a.handlers = a.worker.Handlers()
 	return nil
 }
