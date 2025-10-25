@@ -67,7 +67,7 @@ func (s *LocalStore) Create(
 	return hash, nil
 }
 
-func (s *LocalStore) Remove(ctx domain.Ctx, h domain.Hash) error {
+func (s *LocalStore) Delete(ctx domain.Ctx, h domain.Hash) error {
 	return s.root.Remove(h.String())
 }
 
@@ -78,6 +78,22 @@ func (s *LocalStore) Get(ctx domain.Ctx, h domain.Hash) (io.ReadCloser, error) {
 	}
 
 	return r, nil
+}
+
+func (s *LocalStore) Count(ctx domain.Ctx) (int, error) {
+	f, err := s.root.Open(".")
+	if err != nil {
+		return 0, err
+	}
+
+	defer f.Close()
+
+	entries, err := f.ReadDir(0)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(entries), nil
 }
 
 func (s *LocalStore) Close() error {

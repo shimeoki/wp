@@ -50,7 +50,7 @@ func (h *DeleteWallpaperHandler) Handle(
 			return err
 		}
 
-		return p.Store().Remove(ctx, hash)
+		return p.Store().Delete(ctx, hash)
 	}); err != nil {
 		return nil, err
 	}
