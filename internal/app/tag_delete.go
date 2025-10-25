@@ -6,23 +6,18 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type DeleteTagWorker interface {
-	Worker
-	TagRepo() domain.TagRepo
+type DeleteTagProvider interface {
+	TagProvider
 }
 
-type DeleteTagProvider interface {
-	Provider[DeleteTagWorker]
-}
+type DeleteTagWorker Worker[DeleteTagProvider]
 
 type DeleteTagHandler struct {
-	provider DeleteTagProvider
+	worker DeleteTagWorker
 }
 
-func NewDeleteTagHandler(
-	p DeleteTagProvider,
-) *DeleteTagHandler {
-	return &DeleteTagHandler{provider: p}
+func NewDeleteTagHandler(w DeleteTagWorker) *DeleteTagHandler {
+	return &DeleteTagHandler{worker: w}
 }
 
 type DeleteTagCommand struct {
@@ -35,31 +30,23 @@ func (h *DeleteTagHandler) Handle(
 	ctx Ctx,
 	cmd *DeleteTagCommand,
 ) (*DeleteTagResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r DeleteTagResult
+
+	if err := h.worker.Do(ctx, func(p DeleteTagProvider) error {
+		name, err := domain.ParseName(cmd.Name)
+		if err != nil {
+			return err
+		}
+
+		t, _ := p.TagRepo().FindByName(ctx, name)
+		if t == nil {
+			return errors.New("tag not found")
+		}
+
+		return p.TagRepo().Delete(ctx, t.ID)
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	repo := worker.TagRepo()
-
-	name, err := domain.ParseName(cmd.Name)
-	if err != nil {
-		return nil, err
-	}
-
-	t, _ := repo.FindByName(ctx, name)
-	if t == nil {
-		return nil, errors.New("tag not found")
-	}
-
-	if err := repo.Delete(ctx, t.ID); err != nil {
-		return nil, err
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &DeleteTagResult{}, nil
+	return &r, nil
 }

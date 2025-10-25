@@ -6,24 +6,19 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type AddTagWorker interface {
-	Worker
-	WallpaperRepo() domain.WallpaperRepo
-	TagRepo() domain.TagRepo
+type AddTagProvider interface {
+	WallpaperProvider
+	TagProvider
 }
 
-type AddTagProvider interface {
-	Provider[AddTagWorker]
-}
+type AddTagWorker Worker[AddTagProvider]
 
 type AddTagHandler struct {
-	provider AddTagProvider
+	worker AddTagWorker
 }
 
-func NewAddTagHandler(
-	p AddTagProvider,
-) *AddTagHandler {
-	return &AddTagHandler{provider: p}
+func NewAddTagHandler(w AddTagWorker) *AddTagHandler {
+	return &AddTagHandler{worker: w}
 }
 
 type AddTagCommand struct {
@@ -37,50 +32,42 @@ func (h *AddTagHandler) Handle(
 	ctx Ctx,
 	cmd *AddTagCommand,
 ) (*AddTagResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r AddTagResult
+
+	if err := h.worker.Do(ctx, func(p AddTagProvider) error {
+		hash, err := domain.ParseHash(cmd.WallpaperHash)
+		if err != nil {
+			return err
+		}
+
+		name, err := domain.ParseName(cmd.TagName)
+		if err != nil {
+			return err
+		}
+
+		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
+		if wall == nil {
+			return errors.New("wallpaper not found")
+		}
+
+		tag, _ := p.TagRepo().FindByName(ctx, name)
+		if tag == nil {
+			// automatically create tag?
+			return errors.New("tag not found")
+		}
+
+		if _, ok := wall.Tags[tag.ID]; ok {
+			return errors.New("tag already attached")
+		}
+
+		if err := wall.AddTag(tag); err != nil {
+			return err
+		}
+
+		return p.WallpaperRepo().Save(ctx, wall)
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	wallpapers, tags := worker.WallpaperRepo(), worker.TagRepo()
-
-	hash, err := domain.ParseHash(cmd.WallpaperHash)
-	if err != nil {
-		return nil, err
-	}
-
-	name, err := domain.ParseName(cmd.TagName)
-	if err != nil {
-		return nil, err
-	}
-
-	w, _ := wallpapers.FindByHash(ctx, hash)
-	if w == nil {
-		return nil, errors.New("wallpaper not found")
-	}
-
-	t, _ := tags.FindByName(ctx, name)
-	if t == nil {
-		// automatically create tag?
-		return nil, errors.New("tag not found")
-	}
-
-	if _, ok := w.Tags[t.ID]; ok {
-		return nil, errors.New("tag already attached")
-	}
-
-	if err := w.AddTag(t); err != nil {
-		return nil, err
-	}
-
-	if err := wallpapers.Save(ctx, w); err != nil {
-		return nil, err
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &AddTagResult{}, nil
+	return &r, nil
 }

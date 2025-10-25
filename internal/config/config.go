@@ -10,16 +10,13 @@ import (
 type Config struct {
 	v *viper.Viper
 
-	DB    DB
-	Store Store
-}
+	DB struct {
+		DataSourceName string
+	}
 
-type DB struct {
-	DataSourceName string
-}
-
-type Store struct {
-	Path string
+	Store struct {
+		Path string
+	}
 }
 
 func New() *Config {
@@ -54,13 +51,8 @@ func New() *Config {
 }
 
 func (c *Config) load() {
-	c.DB = DB{
-		DataSourceName: c.v.GetString("db.data-source-name"),
-	}
-
-	c.Store = Store{
-		Path: c.v.GetString("store.path"),
-	}
+	c.DB.DataSourceName = c.v.GetString("db.data-source-name")
+	c.Store.Path = c.v.GetString("store.path")
 }
 
 func (c *Config) Load(file string) error {

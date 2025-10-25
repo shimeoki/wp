@@ -7,24 +7,19 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type ShowWallpaperWorker interface {
-	Worker
-	Store() domain.Store
-	WallpaperRepo() domain.WallpaperRepo
+type ShowWallpaperProvider interface {
+	StoreProvider
+	WallpaperProvider
 }
 
-type ShowWallpaperProvider interface {
-	Provider[ShowWallpaperWorker]
-}
+type ShowWallpaperWorker Worker[ShowWallpaperProvider]
 
 type ShowWallpaperHandler struct {
-	provider ShowWallpaperProvider
+	worker ShowWallpaperWorker
 }
 
-func NewShowWallpaperHandler(
-	p ShowWallpaperProvider,
-) *ShowWallpaperHandler {
-	return &ShowWallpaperHandler{provider: p}
+func NewShowWallpaperHandler(w ShowWallpaperWorker) *ShowWallpaperHandler {
+	return &ShowWallpaperHandler{worker: w}
 }
 
 type ShowWallpaperQuery struct {
@@ -40,32 +35,31 @@ func (h *ShowWallpaperHandler) Handle(
 	ctx Ctx,
 	qry *ShowWallpaperQuery,
 ) (*ShowWallpaperResult, error) {
-	worker, err := h.provider.Provide(ctx)
-	if err != nil {
+	var r ShowWallpaperResult
+
+	if err := h.worker.Do(ctx, func(p ShowWallpaperProvider) error {
+		hash, err := domain.ParseHash(qry.Hash)
+		if err != nil {
+			return err
+		}
+
+		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
+		if wall == nil {
+			return errors.New("wallpaper not found")
+		}
+
+		img, err := p.Store().Get(ctx, hash)
+		if err != nil {
+			return err
+		}
+
+		r.Image = img
+		r.Format = wall.Format.String()
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	defer worker.Rollback()
-	store, repo := worker.Store(), worker.WallpaperRepo()
-
-	hash, err := domain.ParseHash(qry.Hash)
-	if err != nil {
-		return nil, err
-	}
-
-	w, _ := repo.FindByHash(ctx, hash)
-	if w == nil {
-		return nil, errors.New("wallpaper not found")
-	}
-
-	r, err := store.Get(ctx, hash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := worker.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &ShowWallpaperResult{Image: r, Format: w.Format.String()}, nil
+	return &r, nil
 }

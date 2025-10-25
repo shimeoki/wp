@@ -10,7 +10,7 @@ import (
 type App struct {
 	store    *store.LocalStore
 	cfg      *Config
-	provider *Provider
+	worker   *Worker
 	handlers *Handlers
 }
 
@@ -31,8 +31,8 @@ func (a *App) Open(ctx context.Context) error {
 		return err
 	}
 
-	a.provider = &Provider{db: db, store: store}
-	a.handlers = a.provider.Handlers()
+	a.worker = &Worker{db: db, store: store}
+	a.handlers = a.worker.Handlers()
 	return nil
 }
 
@@ -45,7 +45,7 @@ func (a *App) Close() error {
 }
 
 func (a *App) Handlers() *Handlers {
-	if a.provider == nil {
+	if a.worker == nil {
 		return nil
 	}
 
