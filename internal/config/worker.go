@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"github.com/shimeoki/wp/internal/app"
-	"github.com/shimeoki/wp/internal/domain"
 	"github.com/shimeoki/wp/internal/infra/db/sqlite"
 	"github.com/shimeoki/wp/internal/infra/store"
 )
@@ -33,22 +32,4 @@ func (w *Worker) Work(
 	}
 
 	return tx.Commit()
-}
-
-type Provider struct {
-	store      domain.Store
-	tags       domain.TagRepo
-	wallpapers domain.WallpaperRepo
-}
-
-func (p *Provider) Store() domain.Store {
-	return p.store
-}
-
-func (p *Provider) TagRepo() domain.TagRepo {
-	return p.tags
-}
-
-func (p *Provider) WallpaperRepo() domain.WallpaperRepo {
-	return p.wallpapers
 }
