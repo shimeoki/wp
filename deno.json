@@ -1,0 +1,14 @@
+{
+    "fmt": {
+        "useTabs": false,
+        "lineWidth": 80,
+        "indentWidth": 4,
+        "semiColons": false,
+        "singleQuote": false,
+        "proseWrap": "always",
+        "include": [
+            "deno.json",
+            "README.md"
+        ]
+    }
+}

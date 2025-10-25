@@ -7,6 +7,14 @@
     perSystem = {
         treefmt.programs = {
             # keep-sorted start block=yes newline_separated=yes
+            deno = {
+                enable = true;
+                includes = [
+                    "deno.json"
+                    "README.md"
+                ];
+            };
+
             golines = {
                 enable = true;
                 maxLength = 80;
