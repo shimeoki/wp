@@ -1,0 +1,44 @@
+[formatter.deno]
+command = "deno"
+excludes = []
+includes = ["deno.json", "README.md"]
+options = ["fmt"]
+
+[formatter.golines]
+command = "golines"
+excludes = ["vendor/*"]
+includes = ["*.go"]
+options = [
+    "-w",
+    "--no-reformat-tags",
+    "--max-len",
+    "80",
+    "--tab-len",
+    "4",
+]
+
+[formatter.keep-sorted]
+command = "keep-sorted"
+excludes = []
+includes = ["*"]
+options = []
+
+[formatter.nixfmt]
+command = "nixfmt"
+excludes = []
+includes = ["*.nix"]
+options = ["--width", "80", "--indent", "4"]
+
+[global]
+excludes = [
+    "*.lock",
+    "*.patch",
+    "package-lock.json",
+    "go.mod",
+    "go.sum",
+    ".gitignore",
+    ".gitmodules",
+    ".hgignore",
+    ".svnignore",
+]
+on-unmatched = "warn"
