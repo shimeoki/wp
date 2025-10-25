@@ -8,9 +8,8 @@ import (
 )
 
 type App struct {
-	store    *store.LocalStore
 	cfg      *Config
-	worker   *Worker
+	worker   *LocalSQLiteWorker
 	handlers *Handlers
 }
 
@@ -29,17 +28,20 @@ func (a *App) Open(ctx context.Context) error {
 		return err
 	}
 
-	a.worker = &Worker{db: db, store: store}
-	a.handlers = a.worker.Handlers()
+	a.worker = &LocalSQLiteWorker{db: db, store: store}
+	a.handlers = NewHandlers(a.worker)
 	return nil
 }
 
 func (a *App) Close() error {
-	if a.store == nil {
+	if a.worker == nil {
 		return nil
 	}
 
-	return a.store.Close()
+	a.worker = nil
+	a.handlers = nil
+
+	return a.worker.Close()
 }
 
 func (a *App) Handlers() *Handlers {

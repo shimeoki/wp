@@ -4,20 +4,16 @@ import (
 	"database/sql"
 
 	"github.com/shimeoki/wp/internal/app"
-	"github.com/shimeoki/wp/internal/domain"
 	"github.com/shimeoki/wp/internal/infra/db/sqlite"
 	"github.com/shimeoki/wp/internal/infra/store"
 )
 
-type Worker struct {
+type LocalSQLiteWorker struct {
 	db    *sql.DB
 	store *store.LocalStore
 }
 
-func (w *Worker) Work(
-	ctx app.Ctx,
-	j app.Job[*Provider],
-) error {
+func (w *LocalSQLiteWorker) Work(ctx app.Ctx, j app.Job[*Provider]) error {
 	tx, err := w.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -35,20 +31,6 @@ func (w *Worker) Work(
 	return tx.Commit()
 }
 
-type Provider struct {
-	store      domain.Store
-	tags       domain.TagRepo
-	wallpapers domain.WallpaperRepo
-}
-
-func (p *Provider) Store() domain.Store {
-	return p.store
-}
-
-func (p *Provider) TagRepo() domain.TagRepo {
-	return p.tags
-}
-
-func (p *Provider) WallpaperRepo() domain.WallpaperRepo {
-	return p.wallpapers
+func (w *LocalSQLiteWorker) Close() error {
+	return w.store.Close()
 }

@@ -14,7 +14,9 @@ type Handlers struct {
 	ListTags  *app.ListTagsHandler
 }
 
-func (w *Worker) Handlers() *Handlers {
+// TODO: very ugly, but i don't know is this possible to DRY
+
+func NewHandlers(w app.Worker[*Provider]) *Handlers {
 	return &Handlers{
 		CreateWallpaper: app.NewCreateWallpaperHandler(
 			app.WorkerFunc[app.CreateWallpaperProvider](
