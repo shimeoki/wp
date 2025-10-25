@@ -24,9 +24,7 @@ func (a *App) Open(ctx context.Context) error {
 		return err
 	}
 
-	var hasher store.SHA256Hasher
-
-	store, err := store.NewLocalStore(a.cfg.Store.Path, &hasher)
+	store, err := store.NewLocalStore(a.cfg.Store.Path, store.SHA256Hasher())
 	if err != nil {
 		return err
 	}

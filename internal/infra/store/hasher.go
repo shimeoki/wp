@@ -18,14 +18,17 @@ func (f HasherFunc) Hash(r io.Reader) (domain.Hash, error) {
 	return f(r)
 }
 
-type SHA256Hasher struct{}
+func SHA256Hasher() Hasher {
+	return HasherFunc(func(r io.Reader) (domain.Hash, error) {
+		hasher := sha256.New()
 
-func (h *SHA256Hasher) Hash(r io.Reader) (domain.Hash, error) {
-	hasher := sha256.New()
+		if _, err := io.Copy(hasher, r); err != nil {
+			return domain.Hash{}, err
+		}
 
-	if _, err := io.Copy(hasher, r); err != nil {
-		return domain.Hash{}, err
-	}
-
-	return domain.MakeHash(domain.SHA256, hex.EncodeToString(hasher.Sum(nil)))
+		return domain.MakeHash(
+			domain.SHA256,
+			hex.EncodeToString(hasher.Sum(nil)),
+		)
+	})
 }
