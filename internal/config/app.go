@@ -38,10 +38,12 @@ func (a *App) Close() error {
 		return nil
 	}
 
+	err := a.worker.Close()
+
 	a.worker = nil
 	a.handlers = nil
 
-	return a.worker.Close()
+	return err
 }
 
 func (a *App) Handlers() *Handlers {
