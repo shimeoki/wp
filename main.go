@@ -8,5 +8,11 @@ import (
 )
 
 func main() {
-	cli.New(config.NewApp(config.New())).Execute(context.Background())
+	app := config.NewApp(config.New())
+	cmd := cli.New(app)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cmd.Execute(ctx)
 }
