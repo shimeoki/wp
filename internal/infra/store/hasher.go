@@ -9,12 +9,18 @@ import (
 )
 
 type Hasher interface {
-	Compute(io.Reader) (domain.Hash, error)
+	Hash(io.Reader) (domain.Hash, error)
+}
+
+type HasherFunc func(io.Reader) (domain.Hash, error)
+
+func (f HasherFunc) Hash(r io.Reader) (domain.Hash, error) {
+	return f(r)
 }
 
 type SHA256Hasher struct{}
 
-func (h *SHA256Hasher) Compute(r io.Reader) (domain.Hash, error) {
+func (h *SHA256Hasher) Hash(r io.Reader) (domain.Hash, error) {
 	hasher := sha256.New()
 
 	if _, err := io.Copy(hasher, r); err != nil {

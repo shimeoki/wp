@@ -39,7 +39,7 @@ func (s *LocalStore) Create(
 
 	r := io.TeeReader(img, tmp)
 
-	hash, err := s.hasher.Compute(r)
+	hash, err := s.hasher.Hash(r)
 	if err != nil {
 		return domain.Hash{}, err
 	}
