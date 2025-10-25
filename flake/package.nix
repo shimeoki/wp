@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-    vendorHash = "sha256-jhPsdJUnN2RrploMn46WmADk2zBU6qdeCMSG/DEt0/k=";
+    vendorHash = "sha256-wUGLoQk97hCaQuGFWJnHV/5mPbxON//WgMLQSuR3B9M=";
 
     pname = "wp";
     version = "0.1.0";
