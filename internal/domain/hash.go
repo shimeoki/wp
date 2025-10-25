@@ -12,6 +12,7 @@ type Store interface {
 	Get(Ctx, Hash) (io.ReadCloser, error)
 	Create(Ctx, io.Reader) (Hash, error)
 	Delete(Ctx, Hash) error
+	Count(Ctx) (int, error)
 }
 
 var (
