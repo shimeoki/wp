@@ -1,11 +1,13 @@
 package app
 
+type Job[P Provider] func(P) error
+
 type Worker[P Provider] interface {
-	Work(Ctx, func(P) error) error
+	Work(Ctx, Job[P]) error
 }
 
-type WorkerFunc[P Provider] func(Ctx, func(P) error) error
+type WorkerFunc[P Provider] func(Ctx, Job[P]) error
 
-func (f WorkerFunc[P]) Work(ctx Ctx, fn func(P) error) error {
-	return f(ctx, fn)
+func (f WorkerFunc[P]) Work(ctx Ctx, j Job[P]) error {
+	return f(ctx, j)
 }

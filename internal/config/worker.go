@@ -14,9 +14,9 @@ type Worker struct {
 	store *store.LocalStore
 }
 
-func (w *Worker) Do(
+func (w *Worker) Work(
 	ctx app.Ctx,
-	fn func(*Provider) error,
+	j app.Job[*Provider],
 ) error {
 	tx, err := w.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -24,7 +24,7 @@ func (w *Worker) Do(
 	}
 
 	defer tx.Rollback()
-	if err := fn(&Provider{
+	if err := j(&Provider{
 		store:      w.store,
 		tags:       sqlite.NewTagRepo(tx),
 		wallpapers: sqlite.NewWallpaperRepo(tx),
