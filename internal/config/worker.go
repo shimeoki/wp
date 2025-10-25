@@ -30,3 +30,7 @@ func (w *LocalSQLiteWorker) Work(ctx app.Ctx, j app.Job[*Provider]) error {
 
 	return tx.Commit()
 }
+
+func (w *LocalSQLiteWorker) Close() error {
+	return w.store.Close()
+}
