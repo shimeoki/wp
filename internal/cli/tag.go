@@ -11,6 +11,9 @@ func (cli *CLI) tagCommand() *cobra.Command {
 		cli.tagCreateCommand(),
 		cli.tagDeleteCommand(),
 		cli.tagListCommand(),
+		cli.tagAddCommand(),
+		cli.tagRemoveCommand(),
+		cli.tagRenameCommand(),
 	)
 
 	return cmd
