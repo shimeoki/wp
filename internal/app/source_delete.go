@@ -6,16 +6,18 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type DeleteSourceHandler struct {
-	sources domain.SourceRepo
+type DeleteSourceProvider interface {
+	SourceProvider
 }
 
-func NewDeleteSourceHandler(
-	sources domain.SourceRepo,
-) *DeleteSourceHandler {
-	return &DeleteSourceHandler{
-		sources: sources,
-	}
+type DeleteSourceWorker Worker[DeleteSourceProvider]
+
+type DeleteSourceHandler struct {
+	worker DeleteSourceWorker
+}
+
+func NewDeleteSourceHandler(w DeleteSourceWorker) *DeleteSourceHandler {
+	return &DeleteSourceHandler{worker: w}
 }
 
 type DeleteSourceCommand struct {
@@ -28,19 +30,25 @@ func (h *DeleteSourceHandler) Handle(
 	ctx Ctx,
 	cmd *DeleteSourceCommand,
 ) (*DeleteSourceResult, error) {
-	id, err := domain.ParseID(cmd.ID)
-	if err != nil {
+	var r DeleteSourceResult
+
+	if err := h.worker.Work(ctx, func(p DeleteSourceProvider) error {
+		sources := p.SourceRepo()
+
+		id, err := domain.ParseID(cmd.ID)
+		if err != nil {
+			return err
+		}
+
+		source, _ := sources.FindByID(ctx, id)
+		if source == nil {
+			return errors.New("source not found")
+		}
+
+		return sources.Delete(ctx, source.ID)
+	}); err != nil {
 		return nil, err
 	}
 
-	source, _ := h.sources.FindByID(ctx, id)
-	if source == nil {
-		return nil, errors.New("source not found")
-	}
-
-	if err := h.sources.Delete(ctx, source.ID); err != nil {
-		return nil, err
-	}
-
-	return &DeleteSourceResult{}, nil
+	return &r, nil
 }

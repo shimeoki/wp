@@ -24,6 +24,7 @@ func (w *LocalSQLiteWorker) Work(ctx app.Ctx, j app.Job[*Provider]) error {
 		store:      w.store,
 		tags:       sqlite.NewTagRepo(tx),
 		wallpapers: sqlite.NewWallpaperRepo(tx),
+		sources:    sqlite.NewSourceRepo(tx),
 	}); err != nil {
 		return err
 	}

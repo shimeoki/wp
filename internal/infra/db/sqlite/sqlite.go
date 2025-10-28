@@ -25,7 +25,7 @@ type (
 	timestamp = time.Time
 )
 
-//go:embed schema.sql
+//go:embed sql/schema.sql
 var schema string
 
 func Open(ctx Ctx, dsn string) (*sql.DB, error) {

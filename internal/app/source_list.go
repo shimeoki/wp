@@ -1,17 +1,17 @@
 package app
 
-import "github.com/shimeoki/wp/internal/domain"
-
-type ListSourcesHandler struct {
-	sources domain.SourceRepo
+type ListSourcesProvider interface {
+	SourceProvider
 }
 
-func NewListSourcesHandler(
-	sources domain.SourceRepo,
-) *ListSourcesHandler {
-	return &ListSourcesHandler{
-		sources: sources,
-	}
+type ListSourcesWorker Worker[ListSourcesProvider]
+
+type ListSourcesHandler struct {
+	worker ListSourcesWorker
+}
+
+func NewListSourcesHandler(w ListSourcesWorker) *ListSourcesHandler {
+	return &ListSourcesHandler{worker: w}
 }
 
 type ListSourcesQuery struct{}
@@ -28,24 +28,30 @@ func (h *ListSourcesHandler) Handle(
 	ctx Ctx,
 	qry *ListSourcesQuery,
 ) (*ListSourcesResult, error) {
-	it, err := h.sources.All(ctx)
-	if err != nil {
+	var r ListSourcesResult
+
+	if err := h.worker.Work(ctx, func(p ListSourcesProvider) error {
+		it, err := p.SourceRepo().All(ctx)
+		if err != nil {
+			return err
+		}
+
+		for source := range it {
+			r.List = append(r.List, struct {
+				ID   string
+				Name string
+				Link *string
+			}{
+				ID:   source.ID.String(),
+				Name: source.Name.String(),
+				Link: source.Link,
+			})
+		}
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	result := &ListSourcesResult{}
-
-	for source := range it {
-		result.List = append(result.List, struct {
-			ID   string
-			Name string
-			Link *string
-		}{
-			ID:   source.ID.String(),
-			Name: source.Name.String(),
-			Link: source.Link,
-		})
-	}
-
-	return result, nil
+	return &r, nil
 }
