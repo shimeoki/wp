@@ -6,19 +6,19 @@ import (
 	"github.com/shimeoki/wp/internal/domain"
 )
 
-type RemoveSourceHandler struct {
-	wallpapers domain.WallpaperRepo
-	sources    domain.SourceRepo
+type RemoveSourceProvider interface {
+	WallpaperProvider
+	SourceProvider
 }
 
-func NewRemoveSourceHandler(
-	wallpapers domain.WallpaperRepo,
-	sources domain.SourceRepo,
-) *RemoveSourceHandler {
-	return &RemoveSourceHandler{
-		wallpapers: wallpapers,
-		sources:    sources,
-	}
+type RemoveSourceWorker Worker[RemoveSourceProvider]
+
+type RemoveSourceHandler struct {
+	worker RemoveSourceWorker
+}
+
+func NewRemoveSourceHandler(w RemoveSourceWorker) *RemoveSourceHandler {
+	return &RemoveSourceHandler{worker: w}
 }
 
 type RemoveSourceCommand struct {
@@ -32,37 +32,43 @@ func (h *RemoveSourceHandler) Handle(
 	ctx Ctx,
 	cmd *RemoveSourceCommand,
 ) (*RemoveSourceResult, error) {
-	hash, err := domain.ParseHash(cmd.WallpaperHash)
-	if err != nil {
+	var r RemoveSourceResult
+
+	if err := h.worker.Work(ctx, func(p RemoveSourceProvider) error {
+		sources, wallpapers := p.SourceRepo(), p.WallpaperRepo()
+
+		hash, err := domain.ParseHash(cmd.WallpaperHash)
+		if err != nil {
+			return err
+		}
+
+		w, _ := wallpapers.FindByHash(ctx, hash)
+		if w == nil {
+			return errors.New("wallpaper not found")
+		}
+
+		id, err := domain.ParseID(cmd.SourceID)
+		if err != nil {
+			return err
+		}
+
+		source, _ := sources.FindByID(ctx, id)
+		if source == nil {
+			return errors.New("source not found")
+		}
+
+		if _, ok := w.Sources[source.ID]; !ok {
+			return errors.New("source not attached")
+		}
+
+		if err := w.RemoveSource(source.ID); err != nil {
+			return err
+		}
+
+		return wallpapers.Save(ctx, w)
+	}); err != nil {
 		return nil, err
 	}
 
-	w, _ := h.wallpapers.FindByHash(ctx, hash)
-	if w == nil {
-		return nil, errors.New("wallpaper not found")
-	}
-
-	id, err := domain.ParseID(cmd.SourceID)
-	if err != nil {
-		return nil, err
-	}
-
-	source, _ := h.sources.FindByID(ctx, id)
-	if source == nil {
-		return nil, errors.New("source not found")
-	}
-
-	if _, ok := w.Sources[source.ID]; !ok {
-		return nil, errors.New("source not attached")
-	}
-
-	if err := w.RemoveSource(source.ID); err != nil {
-		return nil, err
-	}
-
-	if err := h.wallpapers.Save(ctx, w); err != nil {
-		return nil, err
-	}
-
-	return &RemoveSourceResult{}, nil
+	return &r, nil
 }

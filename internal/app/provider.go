@@ -17,6 +17,11 @@ type TagProvider interface {
 	TagRepo() domain.TagRepo
 }
 
+type SourceProvider interface {
+	Provider
+	SourceRepo() domain.SourceRepo
+}
+
 type StoreProvider interface {
 	Provider
 	Store() domain.Store

@@ -2,16 +2,18 @@ package app
 
 import "github.com/shimeoki/wp/internal/domain"
 
-type CreateSourceHandler struct {
-	sources domain.SourceRepo
+type CreateSourceProvider interface {
+	SourceProvider
 }
 
-func NewCreateSourceHandler(
-	sources domain.SourceRepo,
-) *CreateSourceHandler {
-	return &CreateSourceHandler{
-		sources: sources,
-	}
+type CreateSourceWorker Worker[CreateSourceProvider]
+
+type CreateSourceHandler struct {
+	worker CreateSourceWorker
+}
+
+func NewCreateSourceHandler(w CreateSourceWorker) *CreateSourceHandler {
+	return &CreateSourceHandler{worker: w}
 }
 
 type CreateSourceCommand struct {
@@ -27,19 +29,29 @@ func (h *CreateSourceHandler) Handle(
 	ctx Ctx,
 	cmd *CreateSourceCommand,
 ) (*CreateSourceResult, error) {
-	name, err := domain.ParseName(cmd.Name)
-	if err != nil {
+	var r CreateSourceResult
+
+	if err := h.worker.Work(ctx, func(p CreateSourceProvider) error {
+		name, err := domain.ParseName(cmd.Name)
+		if err != nil {
+			return err
+		}
+
+		source, err := domain.NewSource(name, cmd.Link)
+		if err != nil {
+			return err
+		}
+
+		if err := p.SourceRepo().Save(ctx, source); err != nil {
+			return err
+		}
+
+		r.ID = source.ID.String()
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	source, err := domain.NewSource(name, cmd.Link)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := h.sources.Save(ctx, source); err != nil {
-		return nil, err
-	}
-
-	return &CreateSourceResult{ID: source.ID.String()}, nil
+	return &r, nil
 }
