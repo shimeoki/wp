@@ -81,6 +81,7 @@ func (cli *CLI) command() *cobra.Command {
 	cmd.AddCommand(
 		cli.imageCommand(),
 		cli.tagCommand(),
+		cli.sourceCommand(),
 	)
 
 	return cmd
