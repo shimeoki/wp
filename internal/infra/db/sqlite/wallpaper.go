@@ -2,10 +2,38 @@ package sqlite
 
 import (
 	"database/sql"
-	"iter"
-	"maps"
+	_ "embed"
 
 	"github.com/shimeoki/wp/internal/domain"
+)
+
+var (
+	//go:embed sql/wallpaper_select.sql
+	wallpaperSelectQuery string
+
+	//go:embed sql/wallpaper_count.sql
+	wallpaperCountQuery string
+
+	//go:embed sql/wallpaper_delete.sql
+	wallpaperDeleteQuery string
+
+	//go:embed sql/wallpaper_create.sql
+	wallpaperCreateQuery string
+
+	//go:embed sql/wallpaper_update.sql
+	wallpaperUpdateQuery string
+
+	//go:embed sql/wallpaper_create_tag.sql
+	wallpaperTagCreateQuery string
+
+	//go:embed sql/wallpaper_delete_tag.sql
+	wallpaperTagDeleteQuery string
+
+	//go:embed sql/wallpaper_create_source.sql
+	wallpaperSourceCreateQuery string
+
+	//go:embed sql/wallpaper_delete.sql
+	wallpaperSourceDeleteQuery string
 )
 
 type WallpaperRepo struct {
@@ -38,9 +66,7 @@ type wallpaperTable struct {
 	SourceUpdatedAt *timestamp
 }
 
-func scanWallpaperTable(
-	rows *sql.Rows,
-) (*wallpaperTable, error) {
+func scanWallpaperTable(rows *sql.Rows) (*wallpaperTable, error) {
 	var tbl wallpaperTable
 
 	if err := rows.Scan(
@@ -136,37 +162,6 @@ func (t *wallpaperTable) toTagDomain() (*domain.Tag, error) {
 	}, nil
 }
 
-var wallpaperQuery = `
-	select
-		w.id
-		, w.uuid
-		, w.hash
-		, w.format
-		, w.created_at
-		, w.updated_at
-
-		, t.id
-		, t.uuid
-		, t.name
-		, t.created_at
-		, t.updated_at
-
-		, s.id
-		, s.uuid
-		, s.name
-		, s.link
-		, s.created_at
-		, s.updated_at
-
-	from wallpaper as w
-
-	left join wallpaper_tag as wt on wt.wallpaper_id = w.id
-	left join tag as t on wt.tag_id = t.id
-
-	left join wallpaper_source as ws on ws.wallpaper_id = w.id
-	left join source as s on ws.source_id = s.id
-`
-
 func scanWallpapers(rows *sql.Rows) (map[integer]*domain.Wallpaper, error) {
 	wallpapers := make(map[integer]*domain.Wallpaper)
 	sources := make(map[integer]*domain.Source)
@@ -225,273 +220,3 @@ func scanWallpapers(rows *sql.Rows) (map[integer]*domain.Wallpaper, error) {
 
 	return wallpapers, rows.Err()
 }
-
-// keep-sorted start block=yes newline_separated=yes skip_lines=1
-
-func (r *WallpaperRepo) All(
-	ctx domain.Ctx,
-) (iter.Seq[*domain.Wallpaper], error) {
-	rows, err := r.db.QueryContext(ctx, wallpaperQuery)
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	wallpapers, err := scanWallpapers(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	return maps.Values(wallpapers), rows.Err()
-}
-
-func (r *WallpaperRepo) Count(ctx domain.Ctx) (int, error) {
-	sql := `select count(*) from wallpaper`
-
-	var count int
-	err := r.db.QueryRowContext(ctx, sql).Scan(&count)
-
-	return count, err
-}
-
-func (r *WallpaperRepo) Delete(ctx domain.Ctx, id domain.ID) error {
-	sql := `delete from wallpaper where uuid = ?`
-
-	_, err := r.db.ExecContext(ctx, sql, id.String())
-
-	return err
-}
-
-func (r *WallpaperRepo) FindByID(
-	ctx domain.Ctx,
-	id domain.ID,
-) (*domain.Wallpaper, error) {
-	query := wallpaperQuery + ` where w.uuid = ?`
-
-	rows, err := r.db.QueryContext(ctx, query, id.String())
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	wallpapers, err := scanWallpapers(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, w := range wallpapers {
-		return w, nil
-	}
-
-	return nil, nil
-}
-
-func (r *WallpaperRepo) FindByHash(
-	ctx domain.Ctx,
-	hash domain.Hash,
-) (*domain.Wallpaper, error) {
-	query := wallpaperQuery + ` where w.hash = ?`
-
-	rows, err := r.db.QueryContext(ctx, query, hash.String())
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	wallpapers, err := scanWallpapers(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, w := range wallpapers {
-		return w, nil
-	}
-
-	return nil, nil
-}
-
-func (r *WallpaperRepo) FindByTagID(
-	ctx domain.Ctx,
-	id domain.ID,
-) (iter.Seq[*domain.Wallpaper], error) {
-	query := wallpaperQuery + ` where t.uuid = ?`
-
-	rows, err := r.db.QueryContext(ctx, query, id.String())
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	wallpapers, err := scanWallpapers(rows)
-	if err != nil {
-		return nil, err
-	}
-
-	return maps.Values(wallpapers), nil
-}
-
-func (r *WallpaperRepo) Save(ctx domain.Ctx, w *domain.Wallpaper) error {
-	wallpaper, _ := r.FindByID(ctx, w.ID)
-	if wallpaper == nil {
-		return r.create(ctx, w)
-	} else {
-		return r.update(ctx, w)
-	}
-}
-
-func (r *WallpaperRepo) create(
-	ctx domain.Ctx,
-	w *domain.Wallpaper,
-) error {
-	sql := `
-		insert into wallpaper(
-			uuid
-			, format
-			, hash
-			, created_at
-			, updated_at
-		) values (?, ?, ?, ?, ?)
-	`
-
-	if _, err := r.db.ExecContext(
-		ctx,
-		sql,
-		w.ID.String(),
-		w.Format.String(),
-		w.Hash.String(),
-		w.CreatedAt,
-		w.UpdatedAt,
-	); err != nil {
-		return err
-	}
-
-	return r.updateJoins(ctx, w)
-}
-
-func (r *WallpaperRepo) update(
-	ctx domain.Ctx,
-	w *domain.Wallpaper,
-) error {
-	sql := `
-		update wallpaper set format = ?, hash = ?, updated_at = ? where uuid = ?
-	`
-
-	_, err := r.db.ExecContext(
-		ctx,
-		sql,
-		w.Format.String(),
-		w.Hash.String(),
-		w.UpdatedAt.String(),
-		w.ID.String(),
-	)
-
-	return err
-}
-
-func (r *WallpaperRepo) updateJoins(
-	ctx domain.Ctx,
-	w *domain.Wallpaper,
-) error {
-	now, err := r.FindByID(ctx, w.ID)
-	if err != nil {
-		return err
-	}
-
-	wid := w.ID.String()
-
-	if err := r.updateTags(ctx, wid, now.Tags, w.Tags); err != nil {
-		return err
-	}
-
-	if err := r.updateSources(ctx, wid, now.Sources, w.Sources); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *WallpaperRepo) updateTags(
-	ctx domain.Ctx,
-	wid string,
-	current, target map[domain.ID]*domain.Tag,
-) error {
-	var newTags []domain.ID
-
-	for id := range target {
-		if _, ok := current[id]; ok {
-			delete(current, id)
-		} else {
-			newTags = append(newTags, id)
-		}
-	}
-
-	for _, id := range newTags {
-		sql := `
-			insert into wallpaper_tag(wallpaper_id, tag_id) values (?, ?)
-		`
-
-		_, err := r.db.ExecContext(ctx, sql, wid, id.String())
-		if err != nil {
-			return err
-		}
-	}
-
-	for id := range current {
-		sql := `
-			delete from wallpaper_tag where wallpaper_id = ? and tag_id = ?
-		`
-
-		_, err := r.db.ExecContext(ctx, sql, wid, id.String())
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (r *WallpaperRepo) updateSources(
-	ctx domain.Ctx,
-	wid string,
-	current, target map[domain.ID]*domain.Source,
-) error {
-	var newSources []domain.ID
-
-	for id := range target {
-		if _, ok := current[id]; ok {
-			delete(current, id)
-		} else {
-			newSources = append(newSources, id)
-		}
-	}
-
-	for _, id := range newSources {
-		sql := `
-			insert into wallpaper_source(wallpaper_id, source_id) values (?, ?)
-		`
-
-		_, err := r.db.ExecContext(ctx, sql, wid, id.String())
-		if err != nil {
-			return err
-		}
-	}
-
-	for id := range current {
-		sql := `
-			delete from wallpaper_source where wallpaper_id = ? and source_id = ?
-		`
-
-		_, err := r.db.ExecContext(ctx, sql, wid, id.String())
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// keep-sorted end
