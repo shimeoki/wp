@@ -20,6 +20,10 @@ type Handlers struct {
 	DeleteWallpaper *app.DeleteWallpaperHandler
 	FindWallpaper   *app.FindWallpaperHandler
 	ShowWallpaper   *app.ShowWallpaperHandler
+
+	AddAlias    *app.AddAliasHandler
+	RemoveAlias *app.RemoveAliasHandler
+	ListAliases *app.ListAliasesHandler
 }
 
 // NOTE: it looks very ugly, but i don't think it's possible to DRY.
@@ -46,6 +50,10 @@ func NewHandlers(w app.Worker[*Provider]) *Handlers {
 		DeleteWallpaper: app.NewDeleteWallpaperHandler(deleteWallpaper(w)),
 		FindWallpaper:   app.NewFindWallpaperHandler(findWallpaper(w)),
 		ShowWallpaper:   app.NewShowWallpaperHandler(showWallpaper(w)),
+
+		AddAlias:    app.NewAddAliasHandler(addAlias(w)),
+		RemoveAlias: app.NewRemoveAliasHandler(removeAlias(w)),
+		ListAliases: app.NewListAliasesHandler(listAliases(w)),
 	}
 }
 
@@ -150,6 +158,30 @@ func showWallpaper(
 	w app.Worker[*Provider],
 ) app.WorkerFunc[app.ShowWallpaperProvider] {
 	return func(ctx app.Ctx, j app.Job[app.ShowWallpaperProvider]) error {
+		return w.Work(ctx, func(p *Provider) error { return j(p) })
+	}
+}
+
+func addAlias(
+	w app.Worker[*Provider],
+) app.WorkerFunc[app.AddAliasProvider] {
+	return func(ctx app.Ctx, j app.Job[app.AddAliasProvider]) error {
+		return w.Work(ctx, func(p *Provider) error { return j(p) })
+	}
+}
+
+func removeAlias(
+	w app.Worker[*Provider],
+) app.WorkerFunc[app.RemoveAliasProvider] {
+	return func(ctx app.Ctx, j app.Job[app.RemoveAliasProvider]) error {
+		return w.Work(ctx, func(p *Provider) error { return j(p) })
+	}
+}
+
+func listAliases(
+	w app.Worker[*Provider],
+) app.WorkerFunc[app.ListAliasesProvider] {
+	return func(ctx app.Ctx, j app.Job[app.ListAliasesProvider]) error {
 		return w.Work(ctx, func(p *Provider) error { return j(p) })
 	}
 }
