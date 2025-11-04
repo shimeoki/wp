@@ -7,14 +7,11 @@ import "github.com/shimeoki/wp/internal/domain"
 // to compose a specific provider for an action.
 type Provider any
 
-type WallpaperProvider interface {
-	Provider
-	WallpaperRepo() domain.WallpaperRepo
-}
+// keep-sorted start block=yes newline_separated=yes skip_lines=1
 
-type TagProvider interface {
+type AliasProvider interface {
 	Provider
-	TagRepo() domain.TagRepo
+	AliasRepo() domain.AliasRepo
 }
 
 type SourceProvider interface {
@@ -26,3 +23,15 @@ type StoreProvider interface {
 	Provider
 	Store() domain.Store
 }
+
+type TagProvider interface {
+	Provider
+	TagRepo() domain.TagRepo
+}
+
+type WallpaperProvider interface {
+	Provider
+	WallpaperRepo() domain.WallpaperRepo
+}
+
+// keep-sorted end

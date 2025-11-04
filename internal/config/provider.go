@@ -7,6 +7,7 @@ type Provider struct {
 	tags       domain.TagRepo
 	wallpapers domain.WallpaperRepo
 	sources    domain.SourceRepo
+	aliases    domain.AliasRepo
 }
 
 func (p *Provider) Store() domain.Store {
@@ -23,4 +24,8 @@ func (p *Provider) WallpaperRepo() domain.WallpaperRepo {
 
 func (p *Provider) SourceRepo() domain.SourceRepo {
 	return p.sources
+}
+
+func (p *Provider) AliasRepo() domain.AliasRepo {
+	return p.aliases
 }
