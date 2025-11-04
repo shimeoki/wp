@@ -1,14 +1,10 @@
 package app
 
-import (
-	"context"
-	"errors"
+import "github.com/shimeoki/wp/internal/domain"
+
+type Ctx = domain.Ctx
+
+var (
+	ErrNotFound      = domain.ErrNotFound
+	ErrAlreadyExists = domain.ErrAlreadyExists
 )
-
-type Ctx = context.Context
-
-type Version int
-
-const VERSION Version = 1
-
-var InvalidVersion = errors.New("unexpected version")

@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type CreateTagProvider interface {
 	TagProvider
@@ -40,7 +36,7 @@ func (h *CreateTagHandler) Handle(
 
 		t, _ := p.TagRepo().FindByName(ctx, name)
 		if t != nil {
-			return errors.New("tag already exists")
+			return domain.NewAlreadyExistsError("tag", "name", name.String())
 		}
 
 		tag, err := domain.NewTag(name)

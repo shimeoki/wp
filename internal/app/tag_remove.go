@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type RemoveTagProvider interface {
 	WallpaperProvider
@@ -49,16 +45,12 @@ func (h *RemoveTagHandler) Handle(
 
 		w, _ := wallpapers.FindByHash(ctx, hash)
 		if w == nil {
-			return errors.New("wallpaper not found")
+			return domain.NewNotFoundError("wallpaper", "hash", hash.String())
 		}
 
 		t, _ := tags.FindByName(ctx, name)
 		if t == nil {
-			return errors.New("tag not found")
-		}
-
-		if _, ok := w.Tags[t.ID]; !ok {
-			return errors.New("tag not attached")
+			return domain.NewNotFoundError("tag", "name", name.String())
 		}
 
 		if err := w.RemoveTag(t.ID); err != nil {

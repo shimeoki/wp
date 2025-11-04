@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"iter"
 	"time"
 )
@@ -42,9 +41,5 @@ func (a *Alias) Rename(n Name) error {
 }
 
 func (a *Alias) validate() error {
-	if a.CreatedAt.After(a.UpdatedAt) {
-		return errors.New("created is after updated")
-	}
-
-	return nil
+	return ValidateTimestamps(a.CreatedAt, a.UpdatedAt)
 }

@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type DeleteTagProvider interface {
 	TagProvider
@@ -40,7 +36,7 @@ func (h *DeleteTagHandler) Handle(
 
 		t, _ := p.TagRepo().FindByName(ctx, name)
 		if t == nil {
-			return errors.New("tag not found")
+			return domain.NewNotFoundError("tag", "name", name.String())
 		}
 
 		return p.TagRepo().Delete(ctx, t.ID)

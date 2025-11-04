@@ -1,7 +1,6 @@
 package app
 
 import (
-	"errors"
 	"io"
 
 	"github.com/shimeoki/wp/internal/domain"
@@ -45,7 +44,7 @@ func (h *ShowWallpaperHandler) Handle(
 
 		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
 		if wall == nil {
-			return errors.New("wallpaper not found")
+			return domain.NewNotFoundError("wallpaper", "hash", hash.String())
 		}
 
 		img, err := p.Store().Get(ctx, hash)

@@ -1,6 +1,9 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Status string
 
@@ -10,4 +13,11 @@ const (
 	SKIPPED Status = "skipped"
 )
 
-var InvalidStatus = errors.New("invalid status")
+var (
+	ErrInvalidStatus = errors.New("invalid status")
+)
+
+func NewInvalidStatusError(value string) error {
+	return fmt.Errorf("'%s' is an %w",
+		value, ErrInvalidStatus)
+}
