@@ -9,6 +9,9 @@ import (
 var (
 	//go:embed sql/alias_select.sql
 	aliasSelectQuery string
+
+	//go:embed sql/alias_count.sql
+	aliasCountQuery string
 )
 
 type AliasRepo struct {
