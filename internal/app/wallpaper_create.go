@@ -1,7 +1,6 @@
 package app
 
 import (
-	"errors"
 	"io"
 
 	"github.com/shimeoki/wp/internal/domain"
@@ -40,13 +39,16 @@ func (h *CreateWallpaperHandler) Handle(
 	var r CreateWallpaperResult
 
 	if err := h.worker.Work(ctx, func(p CreateWallpaperProvider) error {
-		hash, err := p.Store().Create(ctx, cmd.Image)
+		store, wallpapers := p.Store(), p.WallpaperRepo()
+
+		hash, err := store.Create(ctx, cmd.Image)
 		if err != nil {
 			return err
 		}
 
-		if wall, _ := p.WallpaperRepo().FindByHash(ctx, hash); wall != nil {
-			return errors.New("wallpaper already exists")
+		if wall, _ := wallpapers.FindByHash(ctx, hash); wall != nil {
+			return domain.NewAlreadyExistsError(
+				"wallpaper", "hash", hash.String())
 		}
 
 		f, err := domain.ParseFormat(cmd.Format)
@@ -59,7 +61,7 @@ func (h *CreateWallpaperHandler) Handle(
 			return err
 		}
 
-		if err := p.WallpaperRepo().Save(ctx, wall); err != nil {
+		if err := wallpapers.Save(ctx, wall); err != nil {
 			return err
 		}
 

@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type DeleteSourceProvider interface {
 	SourceProvider
@@ -42,7 +38,7 @@ func (h *DeleteSourceHandler) Handle(
 
 		source, _ := sources.FindByID(ctx, id)
 		if source == nil {
-			return errors.New("source not found")
+			return domain.NewNotFoundError("source", "id", id.String())
 		}
 
 		return sources.Delete(ctx, source.ID)

@@ -1,9 +1,6 @@
 package domain
 
-import (
-	"errors"
-	"time"
-)
+import "time"
 
 type SourceRepo interface {
 	Repo[*Source]
@@ -46,9 +43,5 @@ func (s *Source) UpdateLink(link *string) error {
 }
 
 func (s *Source) validate() error {
-	if s.CreatedAt.After(s.UpdatedAt) {
-		return errors.New("created is after updated")
-	}
-
-	return nil
+	return ValidateTimestamps(s.CreatedAt, s.UpdatedAt)
 }

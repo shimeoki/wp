@@ -1,9 +1,6 @@
 package domain
 
-import (
-	"errors"
-	"time"
-)
+import "time"
 
 type TagRepo interface {
 	Repo[*Tag]
@@ -39,9 +36,5 @@ func (t *Tag) Rename(n Name) error {
 }
 
 func (t *Tag) validate() error {
-	if t.CreatedAt.After(t.UpdatedAt) {
-		return errors.New("created is after updated")
-	}
-
-	return nil
+	return ValidateTimestamps(t.CreatedAt, t.UpdatedAt)
 }

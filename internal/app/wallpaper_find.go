@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type FindWallpaperProvider interface {
 	WallpaperProvider
@@ -42,7 +38,7 @@ func (h *FindWallpaperHandler) Handle(
 
 		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
 		if wall == nil {
-			return errors.New("wallpaper not found")
+			return domain.NewNotFoundError("wallpaper", "hash", hash.String())
 		}
 
 		r.Format = wall.Format.String()

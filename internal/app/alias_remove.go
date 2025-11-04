@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type RemoveAliasProvider interface {
 	AliasProvider
@@ -44,7 +40,7 @@ func (h *RemoveAliasHandler) Handle(
 
 		w, _ := wallpapers.FindByHash(ctx, hash)
 		if w == nil {
-			return errors.New("wallpaper not found")
+			return domain.NewNotFoundError("wallpaper", "hash", hash.String())
 		}
 
 		name, err := domain.ParseName(cmd.AliasName)
@@ -66,7 +62,7 @@ func (h *RemoveAliasHandler) Handle(
 			}
 		}
 
-		return errors.New("alias not found")
+		return domain.NewNotFoundError("alias", "name", name.String())
 	}); err != nil {
 		return nil, err
 	}

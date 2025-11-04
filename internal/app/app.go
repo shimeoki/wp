@@ -1,5 +1,10 @@
 package app
 
-import "context"
+import "github.com/shimeoki/wp/internal/domain"
 
-type Ctx = context.Context
+type Ctx = domain.Ctx
+
+var (
+	ErrNotFound      = domain.ErrNotFound
+	ErrAlreadyExists = domain.ErrAlreadyExists
+)

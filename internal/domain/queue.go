@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"iter"
 	"time"
 )
@@ -51,16 +50,14 @@ func (q *Queue) UpdatePriority(priority int) error {
 }
 
 func (q *Queue) validate() error {
-	if q.CreatedAt.After(q.UpdatedAt) {
-		return errors.New("created is after updated")
+	if err := ValidateTimestamps(q.CreatedAt, q.UpdatedAt); err != nil {
+		return err
 	}
 
 	switch q.Status {
-	case QUEUED:
-	case USED:
-	case SKIPPED:
+	case QUEUED, USED, SKIPPED:
 		return nil
 	}
 
-	return ErrInvalidStatus
+	return NewInvalidStatusError(string(q.Status))
 }

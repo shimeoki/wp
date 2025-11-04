@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type RemoveSourceProvider interface {
 	WallpaperProvider
@@ -44,7 +40,7 @@ func (h *RemoveSourceHandler) Handle(
 
 		w, _ := wallpapers.FindByHash(ctx, hash)
 		if w == nil {
-			return errors.New("wallpaper not found")
+			return domain.NewNotFoundError("wallpaper", "hash", hash.String())
 		}
 
 		id, err := domain.ParseID(cmd.SourceID)
@@ -54,11 +50,7 @@ func (h *RemoveSourceHandler) Handle(
 
 		source, _ := sources.FindByID(ctx, id)
 		if source == nil {
-			return errors.New("source not found")
-		}
-
-		if _, ok := w.Sources[source.ID]; !ok {
-			return errors.New("source not attached")
+			return domain.NewNotFoundError("source", "id", id.String())
 		}
 
 		if err := w.RemoveSource(source.ID); err != nil {

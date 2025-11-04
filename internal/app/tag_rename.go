@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type RenameTagProvider interface {
 	WallpaperProvider
@@ -44,7 +40,7 @@ func (h *RenameTagHandler) Handle(
 
 		tag, _ := tags.FindByName(ctx, before)
 		if tag == nil {
-			return errors.New("tag not found")
+			return domain.NewNotFoundError("tag", "name", before.String())
 		}
 
 		after, err := domain.ParseName(cmd.After)

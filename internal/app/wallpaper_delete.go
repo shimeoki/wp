@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type DeleteWallpaperProvider interface {
 	StoreProvider
@@ -43,7 +39,7 @@ func (h *DeleteWallpaperHandler) Handle(
 
 		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
 		if wall == nil {
-			return errors.New("wallpaper not found")
+			return domain.NewNotFoundError("wallpaper", "hash", hash.String())
 		}
 
 		if err := p.WallpaperRepo().Delete(ctx, wall.ID); err != nil {

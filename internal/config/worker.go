@@ -13,6 +13,8 @@ type LocalSQLiteWorker struct {
 	store *store.LocalStore
 }
 
+// FIXME: make transactions for store
+
 func (w *LocalSQLiteWorker) Work(ctx app.Ctx, j app.Job[*Provider]) error {
 	tx, err := w.db.BeginTx(ctx, nil)
 	if err != nil {

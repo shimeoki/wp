@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"iter"
 	"time"
 )
@@ -60,7 +59,7 @@ func (w *Wallpaper) AddSource(s *Source) error {
 
 func (w *Wallpaper) RemoveSource(id ID) error {
 	if _, ok := w.Sources[id]; !ok {
-		return errors.New("source not found")
+		return NewInvalidRelationError("source", "id", id.String(), "not found")
 	}
 
 	delete(w.Sources, id)
@@ -77,7 +76,7 @@ func (w *Wallpaper) AddTag(t *Tag) error {
 
 func (w *Wallpaper) RemoveTag(id ID) error {
 	if _, ok := w.Tags[id]; !ok {
-		return errors.New("tag not found")
+		return NewInvalidRelationError("tag", "id", id.String(), "not found")
 	}
 
 	delete(w.Tags, id)
@@ -87,13 +86,12 @@ func (w *Wallpaper) RemoveTag(id ID) error {
 }
 
 func (w *Wallpaper) validate() error {
-	if w.CreatedAt.After(w.UpdatedAt) {
-		return errors.New("created is after updated")
+	if err := ValidateTimestamps(w.CreatedAt, w.UpdatedAt); err != nil {
+		return err
 	}
 
 	switch w.Format {
-	case JPEG:
-	case PNG:
+	case JPEG, PNG:
 		return nil
 	}
 

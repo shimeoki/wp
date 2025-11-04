@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -20,14 +21,18 @@ var (
 	ErrInvalidFormat = errors.New("invalid format")
 )
 
+func NewInvalidFormatError(value string) error {
+	return fmt.Errorf("'%s' is an %w",
+		value, ErrInvalidFormat)
+}
+
 func ParseFormat(extension string) (Format, error) {
 	switch strings.ToLower(extension) {
-	case "jpeg":
-	case "jpg":
+	case "jpg", "jpeg":
 		return JPEG, nil
 	case "png":
 		return PNG, nil
 	}
 
-	return "", ErrInvalidFormat
+	return "", NewInvalidFormatError(extension)
 }

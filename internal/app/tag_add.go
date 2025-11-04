@@ -1,10 +1,6 @@
 package app
 
-import (
-	"errors"
-
-	"github.com/shimeoki/wp/internal/domain"
-)
+import "github.com/shimeoki/wp/internal/domain"
 
 type AddTagProvider interface {
 	WallpaperProvider
@@ -47,17 +43,13 @@ func (h *AddTagHandler) Handle(
 
 		wall, _ := p.WallpaperRepo().FindByHash(ctx, hash)
 		if wall == nil {
-			return errors.New("wallpaper not found")
+			return domain.NewNotFoundError("wallpaper", "hash", hash.String())
 		}
 
 		tag, _ := p.TagRepo().FindByName(ctx, name)
 		if tag == nil {
 			// automatically create tag?
-			return errors.New("tag not found")
-		}
-
-		if _, ok := wall.Tags[tag.ID]; ok {
-			return errors.New("tag already attached")
+			return domain.NewNotFoundError("tag", "name", name.String())
 		}
 
 		if err := wall.AddTag(tag); err != nil {

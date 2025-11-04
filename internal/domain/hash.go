@@ -21,6 +21,21 @@ var (
 	ErrInvalidHash   = errors.New("invalid hash value")
 )
 
+func NewInvalidAlgoError(algo string) error {
+	return fmt.Errorf("'%s' is an %w",
+		algo, ErrInvalidAlgo)
+}
+
+func NewInvalidDigestError(algo, digest, regex string) error {
+	return fmt.Errorf("%w: expected %s for %s, got '%s'",
+		ErrInvalidDigest, regex, algo, digest)
+}
+
+func NewInvalidHashError(hash string) error {
+	return fmt.Errorf("%w: expected '<algo>-<digest>', got '%s'",
+		ErrInvalidHash, hash)
+}
+
 type Algo string
 
 const (
@@ -36,7 +51,7 @@ func ParseAlgo(name string) (Algo, error) {
 		return MD5, nil
 	}
 
-	return "", ErrInvalidAlgo
+	return "", NewInvalidAlgoError(name)
 }
 
 type Hash struct {
@@ -57,7 +72,7 @@ func MakeHash(a Algo, digest string) (Hash, error) {
 func ParseHash(value string) (Hash, error) {
 	parts := strings.Split(strings.ToLower(value), "-")
 	if len(parts) != 2 {
-		return Hash{}, ErrInvalidHash
+		return Hash{}, NewInvalidHashError(value)
 	}
 
 	a, err := ParseAlgo(parts[0])
@@ -76,30 +91,26 @@ func (h Hash) validate() error {
 		return h.validateMD5()
 	}
 
-	return ErrInvalidAlgo
+	return NewInvalidAlgoError(string(h.Algo))
 }
 
 func (h Hash) validateSHA256() error {
-	if len(h.Digest) != 64 {
-		return ErrInvalidDigest
-	}
+	re := "^[a-fA-F0-9]{64}$"
 
-	match, err := regexp.MatchString("^[a-fA-F0-9]{64}$", h.Digest)
+	match, err := regexp.MatchString(re, h.Digest)
 	if err != nil || !match {
-		return ErrInvalidDigest
+		return NewInvalidDigestError(string(h.Algo), h.Digest, re)
 	}
 
 	return nil
 }
 
 func (h Hash) validateMD5() error {
-	if len(h.Digest) != 32 {
-		return ErrInvalidDigest
-	}
+	re := "^[a-fA-F0-9]{32}$"
 
-	match, err := regexp.MatchString("^[a-fA-F0-9]{32}$", h.Digest)
+	match, err := regexp.MatchString(re, h.Digest)
 	if err != nil || !match {
-		return ErrInvalidDigest
+		return NewInvalidDigestError(string(h.Algo), h.Digest, re)
 	}
 
 	return nil
