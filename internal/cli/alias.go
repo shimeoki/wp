@@ -9,6 +9,8 @@ func (cli *CLI) aliasCommand() *cobra.Command {
 
 	cmd.AddCommand(
 		cli.aliasListCommand(),
+		cli.aliasAddCommand(),
+		cli.aliasRemoveCommand(),
 	)
 
 	return cmd
