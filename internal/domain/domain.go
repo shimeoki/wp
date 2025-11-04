@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"iter"
 )
 
@@ -15,3 +16,7 @@ type Repo[E any] interface {
 	All(Ctx) (iter.Seq[E], error)
 	Count(Ctx) (int, error)
 }
+
+var (
+	NotFound error = errors.New("not found")
+)
