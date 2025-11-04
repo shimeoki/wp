@@ -12,6 +12,9 @@ var (
 
 	//go:embed sql/alias_count.sql
 	aliasCountQuery string
+
+	//go:embed sql/alias_delete.sql
+	aliasDeleteQuery string
 )
 
 type AliasRepo struct {
