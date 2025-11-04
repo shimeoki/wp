@@ -18,5 +18,7 @@ type Repo[E any] interface {
 }
 
 var (
-	NotFound error = errors.New("not found")
+	ErrNotFound          = errors.New("not found")
+	ErrInvalidRelation   = errors.New("invalid relation")
+	ErrInvalidTimestamps = errors.New("invalid timestamps")
 )

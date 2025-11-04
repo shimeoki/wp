@@ -16,9 +16,9 @@ type Store interface {
 }
 
 var (
-	InvalidDigest = errors.New("invalid hash digest")
-	InvalidAlgo   = errors.New("invalid hash algorithm")
-	InvalidHash   = errors.New("invalid hash value")
+	ErrInvalidDigest = errors.New("invalid hash digest")
+	ErrInvalidAlgo   = errors.New("invalid hash algorithm")
+	ErrInvalidHash   = errors.New("invalid hash value")
 )
 
 type Algo string
@@ -36,7 +36,7 @@ func ParseAlgo(name string) (Algo, error) {
 		return MD5, nil
 	}
 
-	return "", InvalidAlgo
+	return "", ErrInvalidAlgo
 }
 
 type Hash struct {
@@ -57,7 +57,7 @@ func MakeHash(a Algo, digest string) (Hash, error) {
 func ParseHash(value string) (Hash, error) {
 	parts := strings.Split(strings.ToLower(value), "-")
 	if len(parts) != 2 {
-		return Hash{}, InvalidHash
+		return Hash{}, ErrInvalidHash
 	}
 
 	a, err := ParseAlgo(parts[0])
@@ -76,17 +76,17 @@ func (h Hash) validate() error {
 		return h.validateMD5()
 	}
 
-	return InvalidAlgo
+	return ErrInvalidAlgo
 }
 
 func (h Hash) validateSHA256() error {
 	if len(h.Digest) != 64 {
-		return InvalidDigest
+		return ErrInvalidDigest
 	}
 
 	match, err := regexp.MatchString("^[a-fA-F0-9]{64}$", h.Digest)
 	if err != nil || !match {
-		return InvalidDigest
+		return ErrInvalidDigest
 	}
 
 	return nil
@@ -94,12 +94,12 @@ func (h Hash) validateSHA256() error {
 
 func (h Hash) validateMD5() error {
 	if len(h.Digest) != 32 {
-		return InvalidDigest
+		return ErrInvalidDigest
 	}
 
 	match, err := regexp.MatchString("^[a-fA-F0-9]{32}$", h.Digest)
 	if err != nil || !match {
-		return InvalidDigest
+		return ErrInvalidDigest
 	}
 
 	return nil

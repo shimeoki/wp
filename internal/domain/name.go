@@ -8,7 +8,9 @@ func (n Name) String() string {
 	return string(n)
 }
 
-var EmptyName = errors.New("name is empty")
+var (
+	ErrEmptyName = errors.New("name is empty")
+)
 
 func ParseName(value string) (Name, error) {
 	name := Name(value)
@@ -22,7 +24,7 @@ func ParseName(value string) (Name, error) {
 
 func (n Name) validate() error {
 	if len(n) == 0 {
-		return EmptyName
+		return ErrEmptyName
 	}
 
 	return nil

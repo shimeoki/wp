@@ -62,5 +62,5 @@ func (q *Queue) validate() error {
 		return nil
 	}
 
-	return InvalidStatus
+	return ErrInvalidStatus
 }

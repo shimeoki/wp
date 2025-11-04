@@ -10,4 +10,6 @@ const (
 	SKIPPED Status = "skipped"
 )
 
-var InvalidStatus = errors.New("invalid status")
+var (
+	ErrInvalidStatus = errors.New("invalid status")
+)

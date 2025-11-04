@@ -97,5 +97,5 @@ func (w *Wallpaper) validate() error {
 		return nil
 	}
 
-	return InvalidFormat
+	return ErrInvalidFormat
 }

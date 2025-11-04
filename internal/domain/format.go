@@ -16,7 +16,9 @@ const (
 	PNG  Format = "png"
 )
 
-var InvalidFormat = errors.New("invalid format")
+var (
+	ErrInvalidFormat = errors.New("invalid format")
+)
 
 func ParseFormat(extension string) (Format, error) {
 	switch strings.ToLower(extension) {
@@ -27,5 +29,5 @@ func ParseFormat(extension string) (Format, error) {
 		return PNG, nil
 	}
 
-	return "", InvalidFormat
+	return "", ErrInvalidFormat
 }
