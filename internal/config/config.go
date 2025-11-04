@@ -17,6 +17,10 @@ type Config struct {
 	Store struct {
 		Path string
 	}
+
+	Log struct {
+		Path string
+	}
 }
 
 func New() *Config {
@@ -43,6 +47,7 @@ func New() *Config {
 
 	v.SetDefault("db.data-source-name", path.Join(dir, "db.sqlite"))
 	v.SetDefault("store.path", path.Join(dir, "store"))
+	v.SetDefault("log.path", path.Join(dir, "wp.log"))
 
 	cfg := &Config{v: v}
 	cfg.load() // defaults with no filesystem access
@@ -53,6 +58,7 @@ func New() *Config {
 func (c *Config) load() {
 	c.DB.DataSourceName = c.v.GetString("db.data-source-name")
 	c.Store.Path = c.v.GetString("store.path")
+	c.Log.Path = c.v.GetString("log.path")
 }
 
 func (c *Config) Load(file string) error {
