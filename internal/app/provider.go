@@ -26,3 +26,8 @@ type StoreProvider interface {
 	Provider
 	Store() domain.Store
 }
+
+type AliasProvider interface {
+	Provider
+	AliasRepo() domain.AliasRepo
+}
