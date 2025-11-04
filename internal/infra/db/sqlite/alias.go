@@ -1,6 +1,15 @@
 package sqlite
 
-import "github.com/shimeoki/wp/internal/domain"
+import (
+	_ "embed"
+
+	"github.com/shimeoki/wp/internal/domain"
+)
+
+var (
+	//go:embed sql/alias_select.sql
+	aliasSelectQuery string
+)
 
 type AliasRepo struct {
 	db DB
