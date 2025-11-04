@@ -31,7 +31,7 @@ type Handlers struct {
 // errors in the function body, because it doesn't know will the *Provider
 // satisfy the specific provider or not
 
-func NewHandlers(w app.Worker[*Provider]) *Handlers {
+func NewHandlers(w app.Worker[*Provider], l app.Logger) *Handlers {
 	return &Handlers{
 		AddSource:    app.NewAddSourceHandler(addSource(w)),
 		CreateSource: app.NewCreateSourceHandler(createSource(w)),
@@ -51,7 +51,7 @@ func NewHandlers(w app.Worker[*Provider]) *Handlers {
 		FindWallpaper:   app.NewFindWallpaperHandler(findWallpaper(w)),
 		ShowWallpaper:   app.NewShowWallpaperHandler(showWallpaper(w)),
 
-		AddAlias:    app.NewAddAliasHandler(addAlias(w)),
+		AddAlias:    app.NewAddAliasHandler(addAlias(w), l),
 		RemoveAlias: app.NewRemoveAliasHandler(removeAlias(w)),
 		ListAliases: app.NewListAliasesHandler(listAliases(w)),
 	}

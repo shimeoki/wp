@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/shimeoki/wp/internal/infra/db/sqlite"
 	"github.com/shimeoki/wp/internal/infra/store"
@@ -29,7 +30,7 @@ func (a *App) Open(ctx context.Context) error {
 	}
 
 	a.worker = &LocalSQLiteWorker{db: db, store: store}
-	a.handlers = NewHandlers(a.worker)
+	a.handlers = NewHandlers(a.worker, slog.With("layer", "app"))
 	return nil
 }
 
