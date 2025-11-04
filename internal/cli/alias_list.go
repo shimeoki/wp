@@ -17,7 +17,7 @@ func (cli *CLI) aliasListCommand() *cobra.Command {
 
 			res, err := h.Handle(cmd.Context(), &app.ListAliasesQuery{})
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			fmt.Println(strings.Join(res.Aliases, "\n"))

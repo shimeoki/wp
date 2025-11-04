@@ -16,7 +16,7 @@ func (cli *CLI) tagAddCommand() *cobra.Command {
 				WallpaperHash: args[0],
 				TagName:       args[1],
 			}); err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}

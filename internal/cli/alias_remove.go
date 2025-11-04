@@ -16,7 +16,7 @@ func (cli *CLI) aliasRemoveCommand() *cobra.Command {
 				WallpaperHash: args[0],
 				AliasName:     args[1],
 			}); err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}

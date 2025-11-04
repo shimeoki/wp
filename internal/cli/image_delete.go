@@ -15,7 +15,7 @@ func (cli *CLI) imageDeleteCommand() *cobra.Command {
 			if _, err := h.Handle(cmd.Context(), &app.DeleteWallpaperCommand{
 				Hash: args[0],
 			}); err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}

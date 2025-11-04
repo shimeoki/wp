@@ -17,7 +17,7 @@ func (cli *CLI) sourceListCommand() *cobra.Command {
 
 			res, err := h.Handle(cmd.Context(), &app.ListSourcesQuery{})
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			var lines []string

@@ -16,7 +16,7 @@ func (cli *CLI) tagRenameCommand() *cobra.Command {
 				Before: args[0],
 				After:  args[1],
 			}); err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}

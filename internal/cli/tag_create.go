@@ -17,7 +17,7 @@ func (cli *CLI) tagCreateCommand() *cobra.Command {
 			})
 
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}

@@ -18,7 +18,7 @@ func (cli *CLI) imageCreateCommand() *cobra.Command {
 
 			img, err := os.Open(args[0])
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			defer img.Close()
@@ -28,7 +28,7 @@ func (cli *CLI) imageCreateCommand() *cobra.Command {
 			})
 
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			fmt.Println(res.Hash)

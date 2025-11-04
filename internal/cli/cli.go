@@ -27,12 +27,17 @@ func New(app *config.App) *CLI {
 
 func (cli *CLI) Execute(ctx context.Context) {
 	if err := cli.cmd.ExecuteContext(ctx); err != nil {
-		fatal(err)
+		cli.fatal(err)
 	}
 }
 
-func fatal(err error) {
-	fmt.Fprintln(os.Stderr, err)
+func (cli *CLI) fatal(err error) {
+	if logger := cli.app.Logger(); logger != nil {
+		logger.Error(err.Error())
+		fmt.Fprintln(os.Stderr, "error:", err)
+	}
+
+	cli.app.Close()
 	os.Exit(1)
 }
 
@@ -49,7 +54,7 @@ func (cli *CLI) command() *cobra.Command {
 			cli.cfg.Load(cli.cfgPath) // TODO: error handling
 
 			if err := cli.app.Open(cmd.Context()); err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			cli.handlers = cli.app.Handlers()
