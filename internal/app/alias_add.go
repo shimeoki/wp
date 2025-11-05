@@ -58,6 +58,7 @@ func (h *AddAliasHandler) Handle(
 		Info(h.logger, ctx, "saving alias", "entity", a)
 		return aliases.Save(ctx, a)
 	}); err != nil {
+		Error(h.logger, ctx, "failed to add alias", "error", err)
 		return nil, err
 	}
 

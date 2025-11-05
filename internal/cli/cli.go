@@ -32,12 +32,8 @@ func (cli *CLI) Execute(ctx context.Context) {
 }
 
 func (cli *CLI) fatal(err error) {
-	if logger := cli.app.Logger(); logger != nil {
-		logger.Error(err.Error())
-		fmt.Fprintln(os.Stderr, "error:", err)
-	}
-
 	cli.app.Close()
+	fmt.Fprintln(os.Stderr, "error:", err)
 	os.Exit(1)
 }
 

@@ -42,15 +42,13 @@ func (a *App) Open(ctx context.Context) error {
 		a.logger = slog.New(slog.NewTextHandler(a.output, nil))
 	}
 
-	a.logger = a.logger.With("layer", "app")
-
 	store, err := store.NewLocalStore(a.cfg.Store.Path, store.SHA256Hasher())
 	if err != nil {
 		return err
 	}
 
 	a.worker = &LocalSQLiteWorker{db: db, store: store}
-	a.handlers = NewHandlers(a.worker, a.logger)
+	a.handlers = NewHandlers(a.worker, a.logger.With("layer", "app"))
 	return nil
 }
 
