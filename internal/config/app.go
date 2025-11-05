@@ -2,6 +2,9 @@ package config
 
 import (
 	"context"
+	"io"
+	"log/slog"
+	"os"
 
 	"github.com/shimeoki/wp/internal/infra/db/sqlite"
 	"github.com/shimeoki/wp/internal/infra/store"
@@ -11,6 +14,9 @@ type App struct {
 	cfg      *Config
 	worker   *LocalSQLiteWorker
 	handlers *Handlers
+
+	logger *slog.Logger
+	output io.WriteCloser
 }
 
 func NewApp(cfg *Config) *App {
@@ -23,13 +29,26 @@ func (a *App) Open(ctx context.Context) error {
 		return err
 	}
 
+	if a.cfg.Log.Path == "" {
+		a.logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
+	} else {
+		a.output, err = os.OpenFile(a.cfg.Log.Path,
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+		if err != nil {
+			return err
+		}
+
+		a.logger = slog.New(slog.NewTextHandler(a.output, nil))
+	}
+
 	store, err := store.NewLocalStore(a.cfg.Store.Path, store.SHA256Hasher())
 	if err != nil {
 		return err
 	}
 
 	a.worker = &LocalSQLiteWorker{db: db, store: store}
-	a.handlers = NewHandlers(a.worker)
+	a.handlers = NewHandlers(a.worker, a.logger.With("layer", "app"))
 	return nil
 }
 
@@ -38,8 +57,13 @@ func (a *App) Close() error {
 		return nil
 	}
 
+	if a.output != nil {
+		a.output.Close()
+	}
+
 	err := a.worker.Close()
 
+	a.logger = nil
 	a.worker = nil
 	a.handlers = nil
 
@@ -56,4 +80,8 @@ func (a *App) Handlers() *Handlers {
 
 func (a *App) Config() *Config {
 	return a.cfg
+}
+
+func (a *App) Logger() *slog.Logger {
+	return a.logger
 }

@@ -17,7 +17,7 @@ func (cli *CLI) tagListCommand() *cobra.Command {
 
 			res, err := h.Handle(cmd.Context(), &app.ListTagsQuery{})
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			fmt.Println(strings.Join(res.Names, "\n"))

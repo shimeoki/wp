@@ -10,10 +10,11 @@ type DeleteTagWorker Worker[DeleteTagProvider]
 
 type DeleteTagHandler struct {
 	worker DeleteTagWorker
+	logger Logger
 }
 
-func NewDeleteTagHandler(w DeleteTagWorker) *DeleteTagHandler {
-	return &DeleteTagHandler{worker: w}
+func NewDeleteTagHandler(w DeleteTagWorker, l Logger) *DeleteTagHandler {
+	return &DeleteTagHandler{worker: w, logger: l}
 }
 
 type DeleteTagCommand struct {
@@ -28,6 +29,7 @@ func (h *DeleteTagHandler) Handle(
 ) (*DeleteTagResult, error) {
 	var r DeleteTagResult
 
+	Act(h.logger, ctx, "deleting tag", cmd)
 	if err := h.worker.Work(ctx, func(p DeleteTagProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
@@ -41,6 +43,7 @@ func (h *DeleteTagHandler) Handle(
 
 		return p.TagRepo().Delete(ctx, t.ID)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to delete tag", err)
 		return nil, err
 	}
 

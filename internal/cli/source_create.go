@@ -25,7 +25,7 @@ func (cli *CLI) sourceCreateCommand() *cobra.Command {
 			})
 
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			fmt.Println(r.ID)

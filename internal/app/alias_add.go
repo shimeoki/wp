@@ -11,10 +11,11 @@ type AddAliasWorker Worker[AddAliasProvider]
 
 type AddAliasHandler struct {
 	worker AddAliasWorker
+	logger Logger
 }
 
-func NewAddAliasHandler(w AddAliasWorker) *AddAliasHandler {
-	return &AddAliasHandler{worker: w}
+func NewAddAliasHandler(w AddAliasWorker, l Logger) *AddAliasHandler {
+	return &AddAliasHandler{worker: w, logger: l}
 }
 
 type AddAliasCommand struct {
@@ -30,6 +31,7 @@ func (h *AddAliasHandler) Handle(
 ) (*AddAliasResult, error) {
 	var r AddAliasResult
 
+	Act(h.logger, ctx, "adding alias", cmd)
 	if err := h.worker.Work(ctx, func(p AddAliasProvider) error {
 		aliases, wallpapers := p.AliasRepo(), p.WallpaperRepo()
 
@@ -55,6 +57,7 @@ func (h *AddAliasHandler) Handle(
 
 		return aliases.Save(ctx, a)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to add alias", err)
 		return nil, err
 	}
 

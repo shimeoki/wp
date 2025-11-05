@@ -11,10 +11,11 @@ type AddTagWorker Worker[AddTagProvider]
 
 type AddTagHandler struct {
 	worker AddTagWorker
+	logger Logger
 }
 
-func NewAddTagHandler(w AddTagWorker) *AddTagHandler {
-	return &AddTagHandler{worker: w}
+func NewAddTagHandler(w AddTagWorker, l Logger) *AddTagHandler {
+	return &AddTagHandler{worker: w, logger: l}
 }
 
 type AddTagCommand struct {
@@ -30,6 +31,7 @@ func (h *AddTagHandler) Handle(
 ) (*AddTagResult, error) {
 	var r AddTagResult
 
+	Act(h.logger, ctx, "adding tag", cmd)
 	if err := h.worker.Work(ctx, func(p AddTagProvider) error {
 		hash, err := domain.ParseHash(cmd.WallpaperHash)
 		if err != nil {
@@ -58,6 +60,7 @@ func (h *AddTagHandler) Handle(
 
 		return p.WallpaperRepo().Save(ctx, wall)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to add tag", err)
 		return nil, err
 	}
 

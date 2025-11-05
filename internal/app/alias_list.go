@@ -11,10 +11,11 @@ type ListAliasesWorker Worker[ListAliasesProvider]
 
 type ListAliasesHandler struct {
 	worker ListAliasesWorker
+	logger Logger
 }
 
-func NewListAliasesHandler(w ListAliasesWorker) *ListAliasesHandler {
-	return &ListAliasesHandler{worker: w}
+func NewListAliasesHandler(w ListAliasesWorker, l Logger) *ListAliasesHandler {
+	return &ListAliasesHandler{worker: w, logger: l}
 }
 
 type ListAliasesQuery struct{}
@@ -29,6 +30,7 @@ func (h *ListAliasesHandler) Handle(
 ) (*ListAliasesResult, error) {
 	var r ListAliasesResult
 
+	Act(h.logger, ctx, "listing aliases", qry)
 	if err := h.worker.Work(ctx, func(p ListAliasesProvider) error {
 		it, err := p.AliasRepo().All(ctx)
 		if err != nil {
@@ -49,6 +51,7 @@ func (h *ListAliasesHandler) Handle(
 
 		return nil
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to list aliases", err)
 		return nil, err
 	}
 

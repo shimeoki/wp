@@ -8,10 +8,11 @@ type ListSourcesWorker Worker[ListSourcesProvider]
 
 type ListSourcesHandler struct {
 	worker ListSourcesWorker
+	logger Logger
 }
 
-func NewListSourcesHandler(w ListSourcesWorker) *ListSourcesHandler {
-	return &ListSourcesHandler{worker: w}
+func NewListSourcesHandler(w ListSourcesWorker, l Logger) *ListSourcesHandler {
+	return &ListSourcesHandler{worker: w, logger: l}
 }
 
 type ListSourcesQuery struct{}
@@ -30,6 +31,7 @@ func (h *ListSourcesHandler) Handle(
 ) (*ListSourcesResult, error) {
 	var r ListSourcesResult
 
+	Act(h.logger, ctx, "listing sources", qry)
 	if err := h.worker.Work(ctx, func(p ListSourcesProvider) error {
 		it, err := p.SourceRepo().All(ctx)
 		if err != nil {
@@ -50,6 +52,7 @@ func (h *ListSourcesHandler) Handle(
 
 		return nil
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to list sources", err)
 		return nil, err
 	}
 

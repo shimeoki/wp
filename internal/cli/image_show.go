@@ -20,12 +20,12 @@ func (cli *CLI) imageShowCommand() *cobra.Command {
 			})
 
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 
 			defer res.Image.Close()
 			if _, err := io.Copy(os.Stdout, res.Image); err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}

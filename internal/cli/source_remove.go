@@ -16,7 +16,7 @@ func (cli *CLI) sourceRemoveCommand() *cobra.Command {
 				WallpaperHash: args[0],
 				SourceID:      args[1],
 			}); err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}

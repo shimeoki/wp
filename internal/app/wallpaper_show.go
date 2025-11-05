@@ -15,10 +15,14 @@ type ShowWallpaperWorker Worker[ShowWallpaperProvider]
 
 type ShowWallpaperHandler struct {
 	worker ShowWallpaperWorker
+	logger Logger
 }
 
-func NewShowWallpaperHandler(w ShowWallpaperWorker) *ShowWallpaperHandler {
-	return &ShowWallpaperHandler{worker: w}
+func NewShowWallpaperHandler(
+	w ShowWallpaperWorker,
+	l Logger,
+) *ShowWallpaperHandler {
+	return &ShowWallpaperHandler{worker: w, logger: l}
 }
 
 type ShowWallpaperQuery struct {
@@ -36,6 +40,7 @@ func (h *ShowWallpaperHandler) Handle(
 ) (*ShowWallpaperResult, error) {
 	var r ShowWallpaperResult
 
+	Act(h.logger, ctx, "showing wallpaper", qry)
 	if err := h.worker.Work(ctx, func(p ShowWallpaperProvider) error {
 		hash, err := domain.ParseHash(qry.Hash)
 		if err != nil {
@@ -57,6 +62,7 @@ func (h *ShowWallpaperHandler) Handle(
 
 		return nil
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to show wallpaper", err)
 		return nil, err
 	}
 

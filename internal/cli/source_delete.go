@@ -17,7 +17,7 @@ func (cli *CLI) sourceDeleteCommand() *cobra.Command {
 			})
 
 			if err != nil {
-				fatal(err)
+				cli.fatal(err)
 			}
 		},
 	}
