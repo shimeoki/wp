@@ -11,10 +11,11 @@ type RemoveTagWorker Worker[RemoveTagProvider]
 
 type RemoveTagHandler struct {
 	worker RemoveTagWorker
+	logger Logger
 }
 
-func NewRemoveTagHandler(w RemoveTagWorker) *RemoveTagHandler {
-	return &RemoveTagHandler{worker: w}
+func NewRemoveTagHandler(w RemoveTagWorker, l Logger) *RemoveTagHandler {
+	return &RemoveTagHandler{worker: w, logger: l}
 }
 
 type RemoveTagCommand struct {
@@ -30,6 +31,7 @@ func (h *RemoveTagHandler) Handle(
 ) (*RemoveTagResult, error) {
 	var r RemoveTagResult
 
+	Act(h.logger, ctx, "removing tag", cmd)
 	if err := h.worker.Work(ctx, func(p RemoveTagProvider) error {
 		tags, wallpapers := p.TagRepo(), p.WallpaperRepo()
 
@@ -59,6 +61,7 @@ func (h *RemoveTagHandler) Handle(
 
 		return wallpapers.Save(ctx, w)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to remove tag", err)
 		return nil, err
 	}
 

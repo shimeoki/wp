@@ -10,10 +10,14 @@ type CreateSourceWorker Worker[CreateSourceProvider]
 
 type CreateSourceHandler struct {
 	worker CreateSourceWorker
+	logger Logger
 }
 
-func NewCreateSourceHandler(w CreateSourceWorker) *CreateSourceHandler {
-	return &CreateSourceHandler{worker: w}
+func NewCreateSourceHandler(
+	w CreateSourceWorker,
+	l Logger,
+) *CreateSourceHandler {
+	return &CreateSourceHandler{worker: w, logger: l}
 }
 
 type CreateSourceCommand struct {
@@ -31,6 +35,7 @@ func (h *CreateSourceHandler) Handle(
 ) (*CreateSourceResult, error) {
 	var r CreateSourceResult
 
+	Act(h.logger, ctx, "creating source", cmd)
 	if err := h.worker.Work(ctx, func(p CreateSourceProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
@@ -50,6 +55,7 @@ func (h *CreateSourceHandler) Handle(
 
 		return nil
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to create source", err)
 		return nil, err
 	}
 

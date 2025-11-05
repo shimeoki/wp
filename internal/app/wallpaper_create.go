@@ -15,12 +15,14 @@ type CreateWallpaperWorker Worker[CreateWallpaperProvider]
 
 type CreateWallpaperHandler struct {
 	worker CreateWallpaperWorker
+	logger Logger
 }
 
 func NewCreateWallpaperHandler(
 	w CreateWallpaperWorker,
+	l Logger,
 ) *CreateWallpaperHandler {
-	return &CreateWallpaperHandler{worker: w}
+	return &CreateWallpaperHandler{worker: w, logger: l}
 }
 
 type CreateWallpaperCommand struct {
@@ -38,6 +40,7 @@ func (h *CreateWallpaperHandler) Handle(
 ) (*CreateWallpaperResult, error) {
 	var r CreateWallpaperResult
 
+	Act(h.logger, ctx, "creating wallpaper", cmd)
 	if err := h.worker.Work(ctx, func(p CreateWallpaperProvider) error {
 		store, wallpapers := p.Store(), p.WallpaperRepo()
 
@@ -69,6 +72,7 @@ func (h *CreateWallpaperHandler) Handle(
 
 		return nil
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to create wallpaper", err)
 		return nil, err
 	}
 

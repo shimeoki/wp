@@ -33,27 +33,27 @@ type Handlers struct {
 
 func NewHandlers(w app.Worker[*Provider], l app.Logger) *Handlers {
 	return &Handlers{
-		AddSource:    app.NewAddSourceHandler(addSource(w)),
-		CreateSource: app.NewCreateSourceHandler(createSource(w)),
-		DeleteSource: app.NewDeleteSourceHandler(deleteSource(w)),
-		ListSources:  app.NewListSourcesHandler(listSources(w)),
-		RemoveSource: app.NewRemoveSourceHandler(removeSource(w)),
+		AddSource:    app.NewAddSourceHandler(addSource(w), l),
+		CreateSource: app.NewCreateSourceHandler(createSource(w), l),
+		DeleteSource: app.NewDeleteSourceHandler(deleteSource(w), l),
+		ListSources:  app.NewListSourcesHandler(listSources(w), l),
+		RemoveSource: app.NewRemoveSourceHandler(removeSource(w), l),
 
-		AddTag:    app.NewAddTagHandler(addTag(w)),
-		CreateTag: app.NewCreateTagHandler(createTag(w)),
-		DeleteTag: app.NewDeleteTagHandler(deleteTag(w)),
-		ListTags:  app.NewListTagsHandler(listTags(w)),
-		RemoveTag: app.NewRemoveTagHandler(removeTag(w)),
-		RenameTag: app.NewRenameTagHandler(renameTag(w)),
+		AddTag:    app.NewAddTagHandler(addTag(w), l),
+		CreateTag: app.NewCreateTagHandler(createTag(w), l),
+		DeleteTag: app.NewDeleteTagHandler(deleteTag(w), l),
+		ListTags:  app.NewListTagsHandler(listTags(w), l),
+		RemoveTag: app.NewRemoveTagHandler(removeTag(w), l),
+		RenameTag: app.NewRenameTagHandler(renameTag(w), l),
 
-		CreateWallpaper: app.NewCreateWallpaperHandler(createWallpaper(w)),
-		DeleteWallpaper: app.NewDeleteWallpaperHandler(deleteWallpaper(w)),
-		FindWallpaper:   app.NewFindWallpaperHandler(findWallpaper(w)),
-		ShowWallpaper:   app.NewShowWallpaperHandler(showWallpaper(w)),
+		CreateWallpaper: app.NewCreateWallpaperHandler(createWallpaper(w), l),
+		DeleteWallpaper: app.NewDeleteWallpaperHandler(deleteWallpaper(w), l),
+		FindWallpaper:   app.NewFindWallpaperHandler(findWallpaper(w), l),
+		ShowWallpaper:   app.NewShowWallpaperHandler(showWallpaper(w), l),
 
 		AddAlias:    app.NewAddAliasHandler(addAlias(w), l),
-		RemoveAlias: app.NewRemoveAliasHandler(removeAlias(w)),
-		ListAliases: app.NewListAliasesHandler(listAliases(w)),
+		RemoveAlias: app.NewRemoveAliasHandler(removeAlias(w), l),
+		ListAliases: app.NewListAliasesHandler(listAliases(w), l),
 	}
 }
 

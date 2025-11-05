@@ -11,10 +11,11 @@ type AddSourceWorker Worker[AddSourceProvider]
 
 type AddSourceHandler struct {
 	worker AddSourceWorker
+	logger Logger
 }
 
-func NewAddSourceHandler(w AddSourceWorker) *AddSourceHandler {
-	return &AddSourceHandler{worker: w}
+func NewAddSourceHandler(w AddSourceWorker, l Logger) *AddSourceHandler {
+	return &AddSourceHandler{worker: w, logger: l}
 }
 
 type AddSourceCommand struct {
@@ -30,6 +31,7 @@ func (h *AddSourceHandler) Handle(
 ) (*AddSourceResult, error) {
 	var r AddSourceResult
 
+	Act(h.logger, ctx, "adding source", cmd)
 	if err := h.worker.Work(ctx, func(p AddSourceProvider) error {
 		sources, wallpapers := p.SourceRepo(), p.WallpaperRepo()
 
@@ -59,6 +61,7 @@ func (h *AddSourceHandler) Handle(
 
 		return wallpapers.Save(ctx, w)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to add source", err)
 		return nil, err
 	}
 

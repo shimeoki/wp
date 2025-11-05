@@ -10,10 +10,11 @@ type CreateTagWorker Worker[CreateTagProvider]
 
 type CreateTagHandler struct {
 	worker CreateTagWorker
+	logger Logger
 }
 
-func NewCreateTagHandler(w CreateTagWorker) *CreateTagHandler {
-	return &CreateTagHandler{worker: w}
+func NewCreateTagHandler(w CreateTagWorker, l Logger) *CreateTagHandler {
+	return &CreateTagHandler{worker: w, logger: l}
 }
 
 type CreateTagCommand struct {
@@ -28,6 +29,7 @@ func (h *CreateTagHandler) Handle(
 ) (*CreateTagResult, error) {
 	var r CreateTagResult
 
+	Act(h.logger, ctx, "creating tag", cmd)
 	if err := h.worker.Work(ctx, func(p CreateTagProvider) error {
 		name, err := domain.ParseName(cmd.Name)
 		if err != nil {
@@ -46,6 +48,7 @@ func (h *CreateTagHandler) Handle(
 
 		return p.TagRepo().Save(ctx, tag)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to create tag", err)
 		return nil, err
 	}
 

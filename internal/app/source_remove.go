@@ -11,10 +11,14 @@ type RemoveSourceWorker Worker[RemoveSourceProvider]
 
 type RemoveSourceHandler struct {
 	worker RemoveSourceWorker
+	logger Logger
 }
 
-func NewRemoveSourceHandler(w RemoveSourceWorker) *RemoveSourceHandler {
-	return &RemoveSourceHandler{worker: w}
+func NewRemoveSourceHandler(
+	w RemoveSourceWorker,
+	l Logger,
+) *RemoveSourceHandler {
+	return &RemoveSourceHandler{worker: w, logger: l}
 }
 
 type RemoveSourceCommand struct {
@@ -30,6 +34,7 @@ func (h *RemoveSourceHandler) Handle(
 ) (*RemoveSourceResult, error) {
 	var r RemoveSourceResult
 
+	Act(h.logger, ctx, "removing source", cmd)
 	if err := h.worker.Work(ctx, func(p RemoveSourceProvider) error {
 		sources, wallpapers := p.SourceRepo(), p.WallpaperRepo()
 
@@ -59,6 +64,7 @@ func (h *RemoveSourceHandler) Handle(
 
 		return wallpapers.Save(ctx, w)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to remove source", err)
 		return nil, err
 	}
 

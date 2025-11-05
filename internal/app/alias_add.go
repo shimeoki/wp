@@ -31,8 +31,8 @@ func (h *AddAliasHandler) Handle(
 ) (*AddAliasResult, error) {
 	var r AddAliasResult
 
+	Act(h.logger, ctx, "adding alias", cmd)
 	if err := h.worker.Work(ctx, func(p AddAliasProvider) error {
-		Info(h.logger, ctx, "adding alias", "command", cmd)
 		aliases, wallpapers := p.AliasRepo(), p.WallpaperRepo()
 
 		hash, err := domain.ParseHash(cmd.WallpaperHash)
@@ -55,10 +55,9 @@ func (h *AddAliasHandler) Handle(
 			return err
 		}
 
-		Info(h.logger, ctx, "saving alias", "entity", a)
 		return aliases.Save(ctx, a)
 	}); err != nil {
-		Error(h.logger, ctx, "failed to add alias", "error", err)
+		Fail(h.logger, ctx, "failed to add alias", err)
 		return nil, err
 	}
 

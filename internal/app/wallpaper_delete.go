@@ -11,12 +11,14 @@ type DeleteWallpaperWorker Worker[DeleteWallpaperProvider]
 
 type DeleteWallpaperHandler struct {
 	worker DeleteWallpaperWorker
+	logger Logger
 }
 
 func NewDeleteWallpaperHandler(
 	w DeleteWallpaperWorker,
+	l Logger,
 ) *DeleteWallpaperHandler {
-	return &DeleteWallpaperHandler{worker: w}
+	return &DeleteWallpaperHandler{worker: w, logger: l}
 }
 
 type DeleteWallpaperCommand struct {
@@ -31,6 +33,7 @@ func (h *DeleteWallpaperHandler) Handle(
 ) (*DeleteWallpaperResult, error) {
 	var r DeleteWallpaperResult
 
+	Act(h.logger, ctx, "deleting wallpaper", cmd)
 	if err := h.worker.Work(ctx, func(p DeleteWallpaperProvider) error {
 		hash, err := domain.ParseHash(cmd.Hash)
 		if err != nil {
@@ -48,6 +51,7 @@ func (h *DeleteWallpaperHandler) Handle(
 
 		return p.Store().Delete(ctx, hash)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to delete wallpaper", err)
 		return nil, err
 	}
 

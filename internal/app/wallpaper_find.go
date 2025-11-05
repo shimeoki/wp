@@ -10,10 +10,14 @@ type FindWallpaperWorker Worker[FindWallpaperProvider]
 
 type FindWallpaperHandler struct {
 	worker FindWallpaperWorker
+	logger Logger
 }
 
-func NewFindWallpaperHandler(w FindWallpaperWorker) *FindWallpaperHandler {
-	return &FindWallpaperHandler{worker: w}
+func NewFindWallpaperHandler(
+	w FindWallpaperWorker,
+	l Logger,
+) *FindWallpaperHandler {
+	return &FindWallpaperHandler{worker: w, logger: l}
 }
 
 type FindWallpaperQuery struct {
@@ -30,6 +34,7 @@ func (h *FindWallpaperHandler) Handle(
 ) (*FindWallpaperResult, error) {
 	var r FindWallpaperResult
 
+	Act(h.logger, ctx, "finding wallpaper", qry)
 	if err := h.worker.Work(ctx, func(p FindWallpaperProvider) error {
 		hash, err := domain.ParseHash(qry.Hash)
 		if err != nil {
@@ -45,6 +50,7 @@ func (h *FindWallpaperHandler) Handle(
 
 		return nil
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to find wallpaper", err)
 		return nil, err
 	}
 

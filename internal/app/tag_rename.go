@@ -11,10 +11,11 @@ type RenameTagWorker Worker[RenameTagProvider]
 
 type RenameTagHandler struct {
 	worker RenameTagWorker
+	logger Logger
 }
 
-func NewRenameTagHandler(w RenameTagWorker) *RenameTagHandler {
-	return &RenameTagHandler{worker: w}
+func NewRenameTagHandler(w RenameTagWorker, l Logger) *RenameTagHandler {
+	return &RenameTagHandler{worker: w, logger: l}
 }
 
 type RenameTagCommand struct {
@@ -24,12 +25,15 @@ type RenameTagCommand struct {
 
 type RenameTagResult struct{}
 
+// TODO: refactor, split into small functions
+
 func (h *RenameTagHandler) Handle(
 	ctx Ctx,
 	cmd *RenameTagCommand,
 ) (*RenameTagResult, error) {
 	var r RenameTagResult
 
+	Act(h.logger, ctx, "renaming tag", cmd)
 	if err := h.worker.Work(ctx, func(p RenameTagProvider) error {
 		wallpapers, tags := p.WallpaperRepo(), p.TagRepo()
 
@@ -79,6 +83,7 @@ func (h *RenameTagHandler) Handle(
 
 		return tags.Save(ctx, tag)
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to rename tag", err)
 		return nil, err
 	}
 

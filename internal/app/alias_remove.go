@@ -11,10 +11,11 @@ type RemoveAliasWorker Worker[RemoveAliasProvider]
 
 type RemoveAliasHandler struct {
 	worker RemoveAliasWorker
+	logger Logger
 }
 
-func NewRemoveAliasHandler(w RemoveAliasWorker) *RemoveAliasHandler {
-	return &RemoveAliasHandler{worker: w}
+func NewRemoveAliasHandler(w RemoveAliasWorker, l Logger) *RemoveAliasHandler {
+	return &RemoveAliasHandler{worker: w, logger: l}
 }
 
 type RemoveAliasCommand struct {
@@ -30,6 +31,7 @@ func (h *RemoveAliasHandler) Handle(
 ) (*RemoveAliasResult, error) {
 	var r RemoveAliasResult
 
+	Act(h.logger, ctx, "removing alias", cmd)
 	if err := h.worker.Work(ctx, func(p RemoveAliasProvider) error {
 		aliases, wallpapers := p.AliasRepo(), p.WallpaperRepo()
 
@@ -64,6 +66,7 @@ func (h *RemoveAliasHandler) Handle(
 
 		return domain.NewNotFoundError("alias", "name", name.String())
 	}); err != nil {
+		Fail(h.logger, ctx, "failed to remove alias", err)
 		return nil, err
 	}
 
