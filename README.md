@@ -2,6 +2,11 @@
 
 Manage your wallpapers within a hashed store.
 
+## Disclaimer
+
+The code in this project is really bad, and I rewrote it a few times in private.
+I hope that in the future that project is going to be reborn in a greater form.
+
 ## Prerequisites
 
 - [Go](https://go.dev/) 1.24+
@@ -155,3 +160,8 @@ The package is exposed, so if you need to build the project, you can use either
 ```sh
 nix build .
 ```
+
+## License
+
+Unless otherwise noted, the source files are distributed under the
+[BSD-3-Clause license](./LICENSE).
